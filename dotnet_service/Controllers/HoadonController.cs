@@ -14,7 +14,7 @@ namespace dotnet_service.Controllers
         {
             try
             {
-                var data = db.Hoadons.ToList();
+                var data = "Hello";
                 return Ok(data);
             }
             catch (Exception ex)
