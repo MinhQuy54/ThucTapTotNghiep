@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  django:
+    build: ./django_service
+    container_name: django_service
+    ports:
+      - "8000:8000"
+
+  dotnet:
+    build: ./dotnet_service
+    container_name: dotnet_service
+    ports:
+      - "5212:5212"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - django
+      - dotnet
