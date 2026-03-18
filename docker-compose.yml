@@ -3,8 +3,14 @@ services:
   django:
     build: ./django_service
     container_name: django_service
+    env_file:
+      - ./django_service/.env #
     ports:
       - "8000:8000"
+    volumes:
+      - ./django_service:/app
+    depends_on:
+      - postgres
 
   dotnet:
     build: ./dotnet_service
@@ -22,3 +28,18 @@ services:
     depends_on:
       - django
       - dotnet
+  
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: django_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 542004
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
