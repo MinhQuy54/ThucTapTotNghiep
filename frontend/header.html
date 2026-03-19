@@ -1,0 +1,105 @@
+<div class="top-bar py-2 border-bottom d-none d-lg-block">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="contact-info d-flex gap-4">
+            <span><i class="fa-solid fa-location-dot text-success me-1"></i> Co Co, Tien Giang</span>
+            <span><i class="fa-solid fa-envelope text-success me-1"></i> ngominhquy15@gmail.com</span>
+        </div>
+        <div class="social-links d-flex gap-3">
+            <a href="https://www.facebook.com/nmq54/"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/mqn.054/"><i class="fa-brands fa-instagram"></i></a>
+            <a href="https://github.com/MinhQuy54"><i class="fa-brands fa-github"></i></a>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg sticky-top bg-white py-3">
+    <div class="container">
+        <a href="index.html" class="navbar-brand fw-bold d-flex align-items-center fs-3">
+            <img src="https://cdn-icons-png.flaticon.com/512/188/188333.png" alt="logo" width="35" class="me-2">
+            Veggie
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mx-auto gap-lg-4 fw-semibold">
+                <li class="nav-item"><a href="index.html" class="nav-link text-dark">Trang chủ</a></li>
+                <li class="nav-item"><a href="about.html" class="nav-link text-dark">Về chúng tôi</a></li>
+                <li class="nav-item"><a href="detail.html" class="nav-link text-dark">Cửa hàng</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link text-dark">Liên hệ</a></li>
+            </ul>
+
+            <div class="nav-right d-flex align-items-center gap-3">
+                <a href="#" class="btn btn-veggie px-4 py-2 fw-bold text-white d-none d-sm-block">NHẬN BÁO GIÁ</a>
+                <div class="icons d-flex gap-3 ms-2">
+                    <div class="container-fluid">
+                        <form class="d-flex" role="search" id="search-form">
+                            <input class="form-control me-2" type="search" placeholder="Tìm kiếm..." aria-label="Search"
+                                id="search-input" />
+                            <button class="btn-veggie text-white" type="submit">Search</button>
+                        </form>
+                    </div>
+                    <div class="custom-dropdown">
+                        <a href="account.html" id="person-link" class="text-dark text-decoration-none">
+                            <span class="material-symbols-outlined cursor-pointer">person</span>
+                        </a>
+
+                        <ul class="custom-dropdown-menu">
+                            <li><a href="login.html" id="auth-status-text">Login</a></li>
+                        </ul>
+                    </div>
+                    <div class="position-relative" data-bs-toggle="offcanvas" data-bs-target="#miniCart"
+                        style="cursor: pointer;">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        <span class="cart-badge"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="miniCart">
+
+    <div class="offcanvas-header border-bottom py-4">
+        <h5 class="fw-bold ">Giỏ Hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        <div id="mini-cart-list" class="cart-items"></div>
+    </div>
+
+    <div class="offcanvas-footer p-4 border-top">
+        <div class="d-flex justify-content-between mb-4">
+            <span class="fw-bold">Subtotal:</span>
+            <span class="fw-bold text-veggie" id="mini-cart-subtotal">$0.00</span>
+        </div>
+        <div class="row g-2 mb-3">
+            <div class="col-6"><a href="cart.html"
+                    class="btn btn-veggie-mini-cart w-100 py-3 fw-bold small text-uppercase">View Cart</a></div>
+            <div class="col-6"><a href="checkout.html"
+                    class="btn btn-dark-cart w-100 py-3 fw-bold small text-uppercase">Checkout</a></div>
+        </div>
+    </div>
+</div>
+
+<template id="mini-cart-template">
+    <div class="cart-item d-flex align-items-center py-3 border-bottom position-relative">
+        <button class="remove-item-btn" data-id="">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="item-img border rounded">
+            <img src="" alt="product" class="img-fluid mini-cart-img">
+        </div>
+        <div class="item-info ms-3">
+            <h6 class="fw-bold text-dark mini-cart-name"></h6>
+            <span class="text-muted">
+                <span class="mini-cart-quantity"></span> x
+                <span class="fw-semibold mini-cart-price"></span>
+            </span>
+        </div>
+    </div>
+</template>

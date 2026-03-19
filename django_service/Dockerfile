@@ -1,8 +1,11 @@
 FROM python:3.10
 
 WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
 
-RUN pip install -r requirements.txt
-
-CMD ["sh", "-c", "sleep 5 && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]
+# Chờ DB khởi động lâu hơn một chút vì là lần đầu tạo
+CMD ["sh", "-c", "sleep 15 && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

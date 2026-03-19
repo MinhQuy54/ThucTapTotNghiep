@@ -1,16 +1,15 @@
-
 services:
   django:
     build: ./django_service
     container_name: django_service
     env_file:
-      - ./django_service/.env #
+      - ./django_service/.env 
     ports:
       - "8000:8000"
     volumes:
       - ./django_service:/app
     depends_on:
-      - postgres
+      - mysql_db
 
   dotnet:
     build: ./dotnet_service
@@ -24,22 +23,24 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      # Mount file config chuẩn vào thư mục conf.d
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount thư mục chứa code HTML/JS của bạn vào đây
+      - ./frontend:/usr/share/nginx/html:ro
     depends_on:
       - django
       - dotnet
-  
-  postgres:
-    image: postgres:17
-    container_name: postgres_db
+
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
     environment:
-      POSTGRES_DB: django_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 542004
+      MYSQL_DATABASE: django_db
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     ports:
-      - "5434:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  postgres_data:
+  mysql_data:
