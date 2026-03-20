@@ -49,20 +49,6 @@ body {
     color: var(--primary-green) !important;
 }
 
-.cart-badge {
-    position: absolute;
-    top: -5px;
-    right: -10px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 /* HERO SECTION */
 .hero-section {
@@ -70,12 +56,6 @@ body {
     display: flex;
     align-items: center;
     background-color: var(--bg-light);
-}
-
-.hero-content h1 {
-    font-size: 4.5rem;
-    line-height: 1.1;
-    color: var(--text-dark);
 }
 
 /* XỬ LÝ ANIMATION (CHỐNG NHÁY) */
@@ -739,4 +719,41 @@ body {
 /* Hiệu ứng ẩn/hiện */
 .d-none {
     display: none !important;
+}
+
+
+/* 1. Ép hiển thị tiêu đề (Message) */
+.ant-notification-notice-message {
+    color: #1a2b23 !important;
+    /* Dùng đúng biến --text-dark của Quy */
+    font-weight: 700 !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* 2. Ép hiển thị nội dung mô tả (Description) */
+.ant-notification-notice-description {
+    color: #666 !important;
+    display: block !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+}
+
+/* 3. Đảm bảo icon thành công có màu xanh lá của Veggie */
+.ant-notification-notice-icon-success {
+    color: #89b500 !important;
+    /* Màu --primary-green của Quy */
+}
+
+/* 4. Tăng z-index để không bị các thành phần khác đè lên */
+.ant-notification {
+    z-index: 99999 !important;
+}
+
+/* 5. Fix lỗi khung thông báo bị hẹp hoặc mất padding */
+.ant-notification-notice {
+    padding: 16px 24px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }

@@ -5,6 +5,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     const password = document.getElementById("password").value;
 
     try {
+        const hideLoading = antd.message.loading('Đang xử lý đăng ký...',);
         const response = await fetch(`/api/login/`, {
             method: "POST",
             headers: {
@@ -17,9 +18,10 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         });
 
         const data = await response.json();
+        hideLoading();
 
         if (!response.ok) {
-            alert(data.non_field_error?.[0] || data.detail || "Đăng nhập thất bại");
+            antd.message.error("Đăng nhập thất bại! Hãy kiểm tra lại thông tin");
             return;
         }
 
@@ -28,12 +30,20 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         localStorage.setItem("username", data.username);
         localStorage.setItem("email", data.email);
 
-        alert("Đăng nhập thành công 🎉");
+        antd.notification.success({
+            message: 'Đăng nhập thành công ',
+            description: 'Chào mừng bạn đến với Veggie!',
+            placement: 'topRight',
+            duration: 4
+        });
 
-        window.location.href = "index.html";
+        setTimeout(() => {
+            window.location.href = "index.html";
+        }, 2000);
+
 
     } catch (error) {
-        console.error(error);
-        alert("Lỗi kết nối server");
+        hideLoading();
+        antd.message.error("Lỗi kết nối server!");
     }
 })
