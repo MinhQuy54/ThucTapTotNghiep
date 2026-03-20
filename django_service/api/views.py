@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
+import uuid, time
 
 class LoginView(APIView):
     def post(self, request):
@@ -68,3 +68,54 @@ class RegisterView(APIView):
         return Response({
             "message": "Đăng ký thành công 🎉"
         }, status=status.HTTP_201_CREATED)
+
+class RequestResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        email = request.data.get('email')
+
+        if not email:
+            return Response({"error": "Vui lòng nhập email"}, status=400)
+        
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            return Response({"error": "Email không tồn tại"}, status=400)
+        
+        token = str(uuid.uuid4())
+        user.reset_token = token
+        user.reset_token_created = int(time.time())
+        user.save()
+
+        reset_link = f"http://localhost:8080/resetpass.html?token={token}"
+        return Response({
+            "message": "Link reset password",
+            "reset_link": reset_link
+        })
+    
+class ResetPasswordView(APIView):
+    def post(self, request):
+        serializer = PasswordFieldSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        token = request.data.get('token')
+        password = serializer.validated_data.get('password')
+        confirm = request.data.get("confirm_password")
+
+        if not token or not password or not confirm:
+            return Response({"error": "Thiếu dữ liệu"}, status=400)
+        
+        if password != confirm:
+            return Response({"error": "Mật khẩu không khớp"}, status=400)
+        
+        user = User.objects.filter(reset_token=token).first()
+
+        if not user:
+            return Response({"error": "Token không hợp lệ"}, status=400)
+        
+        user.set_password(password)
+        user.reset_token = None
+        user.reset_token_created = None
+        user.save()
+        return Response({"message": "Reset password thành công"})
+

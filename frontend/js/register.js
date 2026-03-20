@@ -8,7 +8,6 @@ document.getElementById("registerForm").addEventListener("submit", async functio
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
 
-    // Sử dụng antd.message thay vì alert
     if (password.length < 6) {
         antd.message.error("Mật khẩu phải có ít nhất 6 ký tự!");
         return;
