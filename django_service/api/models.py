@@ -78,7 +78,6 @@ class Payment(models.Model):
     paid_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-# --- 5. Interactions & Notifications ---
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.IntegerField()

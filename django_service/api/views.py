@@ -119,3 +119,55 @@ class ResetPasswordView(APIView):
         user.save()
         return Response({"message": "Reset password thành công"})
 
+
+class UserList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        serializers = UserSerializer(request.user)
+
+        if serializers:
+            return Response(serializers.data, status=status.HTTP_200_OK)
+
+
+class UserDetail(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request):
+        user = request.user
+
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+
+        if any([current_password, new_password, confirm_password]):
+
+            password_serializer = ChangePasswordSerializer(data=request.data)
+
+            if not password_serializer.is_valid():
+                return Response(
+                    password_serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            validated = password_serializer.validated_data
+            current_password = validated['current_password']
+            new_password = validated['new_password']
+
+            if not user.check_password(current_password):
+                return Response(
+                    {"error": "Mật khẩu hiện tại không chính xác"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.set_password(new_password)
+            user.save()
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Cập nhật thành công",
+                "user": serializer.data
+            }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

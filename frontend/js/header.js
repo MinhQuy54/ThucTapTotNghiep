@@ -19,7 +19,6 @@ function updateHoverMenu() {
         authText.href = "javascript:void(0)";
         authText.classList.add("text-danger");
 
-        // QUAN TRỌNG: Xóa mọi sự kiện click cũ trước khi gán mới
         authText.onclick = null;
 
         authText.addEventListener('click', function (e) {
