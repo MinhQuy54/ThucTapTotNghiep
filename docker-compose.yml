@@ -1,21 +1,26 @@
+
 services:
   django:
     build: ./django_service
     container_name: django_service
     env_file:
       - ./django_service/.env 
-    ports:
-      - "8000:8000"
     volumes:
       - ./django_service:/app
     depends_on:
       - mysql_db
+    networks:
+      - veggie_net
 
   dotnet:
     build: ./dotnet_service
     container_name: dotnet_service
     ports:
       - "7132:7132"
+    depends_on:
+      - mysql_db
+    networks:
+      - veggie_net
 
   nginx:
     image: nginx:latest
@@ -30,17 +35,27 @@ services:
     depends_on:
       - django
       - dotnet
+    networks:
+      - veggie_net
 
   mysql_db:
     image: mysql:8.0
     container_name: mysql_db
     environment:
-      MYSQL_DATABASE: django_db
+      MYSQL_DATABASE: veggie_db
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - veggie_net
+
+
+
+networks:
+  veggie_net:
+    driver: bridge
 
 volumes:
   mysql_data:
