@@ -46,7 +46,7 @@ document.getElementById("registerForm").addEventListener("submit", async functio
         // THÔNG BÁO THÀNH CÔNG KIỂU ANT DESIGN
         antd.notification.success({
             message: 'Đăng ký thành công ',
-            description: 'Chào mừng bạn đến với Veggie!',
+            description: 'Vui lòng kiểm tra Email của bạn để kích hoạt tài khoản trước khi đăng nhập.',
             placement: 'topRight',
             duration: 6
         });
