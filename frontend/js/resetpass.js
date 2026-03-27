@@ -19,22 +19,15 @@ if (requestForm) {
             const data = await res.json();
             hideLoading();
 
-            if (res.ok && data.reset_link) {
+            if (res.ok) {
                 antd.notification.success({
                     message: 'Yêu cầu được chấp thuận',
-                    description: React.createElement('div', null,
-                        'Vui lòng kiểm tra email hoặc bấm vào đây: ',
-                        React.createElement('a', {
-                            href: data.reset_link,
-                            target: '_blank',
-                            style: { color: '#89b500', fontWeight: 'bold' }
-                        }, 'Đặt lại mật khẩu')
-                    ),
+                    description: 'Vui lòng kiểm tra email để thay đổi mật khẩu ',
                     placement: 'topRight',
                     duration: 10
                 });
             } else {
-                antd.message.error(data.detail || "Email không tồn tại!");
+                antd.message.error(data.error || "Email không tồn tại!");
             }
         } catch (error) {
             hideLoading();

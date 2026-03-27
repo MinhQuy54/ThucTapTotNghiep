@@ -89,7 +89,7 @@ class RegisterView(APIView):
         user.save()
         
         return Response({
-            "message": "Đăng ký thành công 🎉"
+            "message": "Đăng ký thành công"
         }, status=status.HTTP_201_CREATED)
         
 
@@ -130,10 +130,17 @@ class RequestResetPasswordView(APIView):
         user.save()
 
         reset_link = f"http://localhost:8080/resetpass.html?token={token}"
-        return Response({
-            "message": "Link reset password",
-            "reset_link": reset_link
-        })
+
+        send_mail(
+            subject="Reset mật khẩu Veggie",
+            message=f"Nhấn vào link để đặt lại mật khẩu:\n{reset_link}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email]
+        )
+        return Response(
+            {"message": "Đã gửi email reset mật khẩu"},
+            status=status.HTTP_200_OK
+        )
     
 class ResetPasswordView(APIView):
     def post(self, request):
