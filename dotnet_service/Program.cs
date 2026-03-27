@@ -10,9 +10,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()   // Cho phép mọi nguồn (bao gồm cổng 5500 của bạn)
-              .AllowAnyMethod()   // Cho phép mọi phương thức (GET, POST...)
-              .AllowAnyHeader();  // Cho phép mọi Header
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
