@@ -3,7 +3,27 @@ document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
     updateAccount();
     loadAddress();
+    loadOrder();
 });
+
+function renderStatus(status) {
+    switch (status) {
+        case 1:
+            return '<span class="badge-waiting">Chờ xác nhận</span>';
+        case 2:
+            return '<span class="badge-payment">Đã xác nhận</span>';
+        case 3:
+            return '<span class="badge bg-info">Đang giao</span>';
+        case 4:
+            return '<span class="badge bg-success">Đã giao</span>';
+        case 5:
+            return '<span class="badge bg-danger">Đã hủy</span>';
+        case 6:
+            return '<span class="badge bg-secondary">Hoàn trả</span>';
+        default:
+            return '<span class="badge bg-dark">Không xác định</span>';
+    }
+}
 const saveAddressBtn = document.getElementById('save-address-btn');
 saveAddressBtn.addEventListener("click", addAddress);
 
@@ -325,4 +345,55 @@ async function updateAddress(id) {
     } catch (error) {
         console.error(error);
     }
+}
+
+
+async function loadOrder() {
+    const token = localStorage.getItem("access_token");
+    const orderTable = document.getElementById('order-table');
+    orderTable.innerHTML = '';
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const res = await fetch('/api/order/', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    });
+
+    const data = await res.json();
+    if (!data || data.length === 0) {
+        OrderTable.innerHTML =
+            `<tr>
+                 <td colspan="4" class="py-4 text-muted" id="order-table">Bạn chưa có đơn hàng nào.</td>
+             </tr>`;
+    }
+    data.forEach(order => {
+        const tr = document.createElement('tr');
+        const price = parseFloat(order.total_price);
+        const status = renderStatus(order.status)
+        tr.innerHTML = `
+                <td>#${order.id}</td>
+                <td>${new Date(order.created_at).toLocaleString("vi-VN")}</td>
+                <td>${status}</td>
+                <td class="fw-bold">${price.toLocaleString('vi-VN')}đ</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-danger border-0" href='orderdetail.html?id=${order.id}'>
+                    Xem chi tiết
+                </a></td>
+                `;
+        orderTable.appendChild(tr);
+    })
+}
+
+async function loadDetailOrder() {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
 }

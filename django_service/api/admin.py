@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Sum
-from .models import Order, Product, User, Contact, Category, Role
+from .models import *
 
 # api/admin.py
 from django.db.models import Count, Sum # Đảm bảo có Count ở đây
@@ -9,7 +9,7 @@ class VeggieAdminSite(admin.AdminSite):
     def index(self, request, extra_context=None):
         extra_context = extra_context or {}
         
-        # 1. Lấy các thông số tổng quan (Quy đã viết)
+        # 1. Lấy các thông số tổng quan
         extra_context['total_orders'] = Order.objects.count()
         revenue = Order.objects.filter(status=1).aggregate(Sum('total_price'))['total_price__sum']
         extra_context['total_revenue'] = revenue if revenue else 0
@@ -27,4 +27,4 @@ class VeggieAdminSite(admin.AdminSite):
 admin.site = VeggieAdminSite()
 
 # Register các model còn lại như bình thường
-admin.site.register([Role, User, Product, Category, Order, Contact])
+admin.site.register([Role, User, Product,ProductImage, Category, Order, OrderItem, Contact])

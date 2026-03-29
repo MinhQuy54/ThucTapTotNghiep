@@ -264,3 +264,41 @@ class ShippingAddressDetail(APIView):
             serializer.save(user=request.user)
             return Response(serializer.data)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+class OrderList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        order = Order.objects.filter(user=request.user)
+        serializers = OrderSerializer(order, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+    
+
+class OrderDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk, user=request.user)
+            serializer = OrderDetailSerializer(order)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Order.DoesNotExist:
+            return Response({"error": "Đơn hàng không tồn tại"}, status=status.HTTP_404_NOT_FOUND)
+    
+    def post(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk,user=request.user)
+
+            if order.status not in [1,2]:
+                return Response({"error": "Không thể hủy đơn"}, status=400)
+            
+            for item in order.items.all():
+                product = item.product
+                product.stock += item.quantity
+                product.save()
+            order.status = 5
+            order.save()
+            return Response({"message": "Đã hủy đơn"})
+        except Order.DoesNotExist:
+            return Response({"error": "Không tìm thấy đơn"}, status=404)
+

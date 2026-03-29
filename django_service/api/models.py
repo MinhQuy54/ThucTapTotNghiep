@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 # --- 1. Roles & Permissions ---
 class Role(models.Model):
     name = models.CharField(max_length=100)
@@ -9,14 +10,24 @@ class Role(models.Model):
     def __str__(self):
         return self.name
 
+
 class Permission(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 
 class RolePermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"{self.role.name} - {self.permission.name}"
+
+
+# --- 2. User ---
 class User(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
@@ -24,14 +35,15 @@ class User(AbstractUser):
     google_id = models.CharField(max_length=255, blank=True, null=True)
     activation_token = models.CharField(max_length=255, blank=True, null=True)
     reset_token = models.CharField(max_length=255, blank=True, null=True)
-    
-    role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True)
 
+    role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True)
     email = models.EmailField(unique=True)
 
     def __str__(self):
-        return self.username
-    
+        return f"{self.username} ({self.email})"
+
+
+# --- 3. Shipping Address ---
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
@@ -43,12 +55,16 @@ class ShippingAddress(models.Model):
 
     def save(self, *args, **kwargs):
         if self.default:
-            ShippingAddress.objects.filter(user=self.user, default=True
-            ).exclude(pk=self.pk
-            ).update(default=False)
-        super(ShippingAddress, self).save(*args, **kwargs)
+            ShippingAddress.objects.filter(user=self.user, default=True)\
+                .exclude(pk=self.pk)\
+                .update(default=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.city}"
 
 
+# --- 4. Category & Product ---
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
@@ -56,8 +72,10 @@ class Category(models.Model):
     image = models.ImageField(upload_to='categories/')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     name = models.CharField(max_length=400)
@@ -72,22 +90,38 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (Stock: {self.stock})"
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    def __str__(self):
-        return self.product.name
 
+    def __str__(self):
+        return f"Image of {self.product.name}"
+
+
+# --- 5. Order ---
 class Order(models.Model):
+    STATUS_CHOICES = [
+        (1, "Chờ xác nhận"),
+        (2, "Đã xác nhận"),
+        (3, "Đang giao"),
+        (4, "Đã giao"),
+        (5, "Đã hủy"),
+        (6, "Hoàn trả"),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.IntegerField(default=0)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.user.email} - {self.get_status_display()}"
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
@@ -95,12 +129,20 @@ class OrderItem(models.Model):
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=12, decimal_places=2)
 
+    def __str__(self):
+        return f"{self.product.name} x{self.quantity} (Order #{self.order.id})"
+
+
 class OrderStatusHistory(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.IntegerField()
     changed_at = models.DateTimeField(auto_now_add=True)
     note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Order #{self.order.id} - Status {self.status}"
+
 
 class Payment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -111,11 +153,19 @@ class Payment(models.Model):
     paid_at = models.DateTimeField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-# --- 5. Interactions & Notifications ---
+    def __str__(self):
+        return f"Payment Order #{self.order.id} - {self.amount}"
+
+
+# --- 6. Cart / Review / Wishlist ---
 class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} x{self.quantity}"
+
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -124,10 +174,18 @@ class Review(models.Model):
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name} ({self.rating}⭐)"
+
+
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+
 
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -136,9 +194,16 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user.username} - {self.type}"
+
+
 class Contact(models.Model):
     full_name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15)
     email = models.EmailField()
     message = models.TextField()
     is_reply = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.email}"

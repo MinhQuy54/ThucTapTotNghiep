@@ -11,4 +11,7 @@ urlpatterns = [
     path('user/update/', UserDetail.as_view()),
     path('address/', ShippingAddressList.as_view()),
     path('address/<int:pk>/', ShippingAddressDetail.as_view()),
+    path('order/', OrderList.as_view()),
+    path('order/detail/<int:pk>/', OrderDetailView.as_view()),
+    path('order/detail/cancel/<int:pk>/', OrderDetailView.as_view()),
 ]

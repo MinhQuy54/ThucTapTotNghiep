@@ -87,3 +87,47 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
         model = ShippingAddress
         fields = '__all__'
         read_only_fields = ['user']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'shipping_address', 'total_price', 'status', 'created_at']
+        read_only_fields = ['total_price', 'status']
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    category_name = serializers.ReadOnlyField(source='category.name')
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'price', 'image', 'category_name']
+
+    def get_image(self, obj):
+        first_image = obj.images.first()
+        if first_image:
+            return first_image.image.url
+        return None
+    
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductDetailSerializer(read_only=True)
+    subtotal = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product', 'quantity', 'price', 'subtotal']
+
+    def get_subtotal(self, obj):
+        return obj.quantity * obj.price
+    
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    shipping_address = ShippingAddressSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'total_price', 'status', 
+            'created_at', 'shipping_address', 'items']
