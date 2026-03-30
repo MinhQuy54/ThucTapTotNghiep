@@ -1,0 +1,631 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Trang chủ</a>
+    &rsaquo;
+    <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo;
+    {{ opts.verbose_name_plural|capfirst }}
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --contact-green: #1f8f63;
+        --contact-green-soft: #f3f4f6;
+        --contact-gold: #f2c35b;
+        --contact-ink: #1d2a33;
+        --contact-muted: #6e7c87;
+        --contact-line: #d7e4dc;
+        --contact-bg: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+    }
+
+    .contact-admin-page {
+        color: var(--contact-ink);
+    }
+
+    .contact-admin-page .page-header {
+        margin-bottom: 24px;
+    }
+
+    .contact-admin-page .page-header h1 {
+        margin-bottom: 8px;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .contact-admin-page .page-header p {
+        max-width: 820px;
+        margin: 0;
+        color: var(--contact-muted);
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .contact-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .contact-stat {
+        background: var(--contact-bg);
+        border: 1px solid var(--contact-line);
+        border-radius: 20px;
+        padding: 18px 20px;
+        box-shadow: 0 16px 30px rgba(24, 67, 50, 0.06);
+    }
+
+    .contact-stat .label {
+        display: block;
+        font-size: 12px;
+        color: var(--contact-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+    }
+
+    .contact-stat .value {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .contact-shell {
+        display: grid;
+        grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+        min-height: 720px;
+        background: #fff;
+        border: 1px solid var(--contact-line);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 24px 50px rgba(24, 67, 50, 0.08);
+    }
+
+    .contact-sidebar {
+        background: linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+        border-right: 1px solid var(--contact-line);
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+    }
+
+    .sidebar-header {
+        padding: 24px 24px 18px;
+        border-bottom: 1px solid var(--contact-line);
+    }
+
+    .sidebar-header h2 {
+        margin: 0 0 8px;
+        font-size: 21px;
+        font-weight: 700;
+    }
+
+    .sidebar-header p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--contact-muted);
+        line-height: 1.5;
+    }
+
+    .contact-list {
+        padding: 14px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .contact-item {
+        display: block;
+        padding: 16px;
+        border-radius: 18px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        background: rgba(255, 255, 255, 0.74);
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .contact-item:hover {
+        transform: translateY(-1px);
+        border-color: rgba(31, 143, 99, 0.25);
+        box-shadow: 0 12px 26px rgba(31, 143, 99, 0.12);
+        color: inherit;
+    }
+
+    .contact-item.active {
+        background: #fff;
+        border-color: rgba(31, 143, 99, 0.35);
+        box-shadow: 0 16px 28px rgba(31, 143, 99, 0.12);
+    }
+
+    .contact-item-top,
+    .contact-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .contact-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        flex-shrink: 0;
+    }
+
+    .status-dot.pending {
+        background: #ef4444;
+    }
+
+    .status-dot.answered {
+        background: var(--contact-green);
+    }
+
+    .contact-time {
+        color: var(--contact-muted);
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .contact-email {
+        margin: 10px 0 8px;
+        color: var(--contact-muted);
+        font-size: 13px;
+    }
+
+    .contact-preview {
+        margin: 0;
+        color: #4c5b66;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .contact-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .contact-status-badge.pending {
+        background: rgba(242, 195, 91, 0.18);
+        color: #9a6a00;
+    }
+
+    .contact-status-badge.answered {
+        background: rgba(31, 143, 99, 0.12);
+        color: var(--contact-green);
+    }
+
+    .contact-main {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+    }
+
+    .contact-main-inner {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        height: 100%;
+    }
+
+    .message-row {
+        padding: 14px 18px;
+        border-radius: 16px;
+        border: 1px solid var(--contact-line);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .message-row.success {
+        background: #effaf5;
+        color: #15543b;
+    }
+
+    .message-row.error {
+        background: #fff3f2;
+        color: #9b2c2c;
+    }
+
+    .message-row.warning {
+        background: #fff8ea;
+        color: #8a6511;
+    }
+
+    .contact-empty {
+        display: grid;
+        place-items: center;
+        min-height: 420px;
+        border: 1px dashed var(--contact-line);
+        border-radius: 22px;
+        background: linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+        text-align: center;
+        padding: 36px;
+    }
+
+    .contact-empty h3 {
+        margin-bottom: 8px;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .contact-empty p {
+        margin: 0;
+        max-width: 480px;
+        color: var(--contact-muted);
+        line-height: 1.7;
+    }
+
+    .contact-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--contact-line);
+    }
+
+    .contact-detail-header h2 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .contact-detail-subtitle {
+        color: var(--contact-muted);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .contact-detail-subtitle a {
+        color: var(--contact-green);
+        text-decoration: none;
+    }
+
+    .contact-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .contact-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--contact-green-soft);
+        border: 1px solid rgba(31, 143, 99, 0.12);
+        font-size: 13px;
+        color: #254537;
+    }
+
+    .contact-panels {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .contact-panel {
+        border: 1px solid var(--contact-line);
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .contact-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        background: linear-gradient(180deg, #fafafa 0%, #f3f4f6 100%);
+        border-bottom: 1px solid var(--contact-line);
+    }
+
+    .contact-panel-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .contact-panel-header span {
+        font-size: 12px;
+        color: var(--contact-muted);
+    }
+
+    .contact-panel-body {
+        padding: 18px;
+        font-size: 15px;
+        line-height: 1.75;
+        color: #24343d;
+    }
+
+    .contact-panel-body p {
+        margin: 0;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        min-height: 220px;
+        resize: vertical;
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid #c4d7cb;
+        background: #fdfefd;
+        font-size: 15px;
+        line-height: 1.65;
+        box-sizing: border-box;
+    }
+
+    .reply-form textarea:focus {
+        border-color: rgba(31, 143, 99, 0.45);
+        box-shadow: 0 0 0 4px rgba(31, 143, 99, 0.12);
+        outline: none;
+    }
+
+    .reply-errors {
+        margin-top: 10px;
+        color: #b42318;
+        font-size: 13px;
+    }
+
+    .reply-actions {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .reply-actions p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--contact-muted);
+    }
+
+    .reply-submit {
+        border: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1f8f63 0%, #176d4b 100%);
+        color: #fff;
+        padding: 12px 18px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: transform 0.16s ease, box-shadow 0.16s ease;
+    }
+
+    .reply-submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 24px rgba(23, 109, 75, 0.24);
+    }
+
+    .reply-submit:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    @media (max-width: 1180px) {
+        .contact-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-sidebar {
+            min-height: auto;
+            border-right: 0;
+            border-bottom: 1px solid var(--contact-line);
+        }
+    }
+
+    @media (max-width: 767px) {
+        .contact-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .contact-main-inner,
+        .sidebar-header {
+            padding: 20px;
+        }
+
+        .contact-list {
+            padding: 10px;
+        }
+
+        .contact-detail-header {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="contact-admin-page">
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <p>{{ subtitle }}</p>
+    </div>
+
+    <div class="contact-stats">
+        <div class="contact-stat">
+            <span class="label">Tổng liên hệ</span>
+            <span class="value">{{ total_contacts }}</span>
+        </div>
+        <div class="contact-stat">
+            <span class="label">Chờ phản hồi</span>
+            <span class="value">{{ pending_contacts }}</span>
+        </div>
+        <div class="contact-stat">
+            <span class="label">Đã phản hồi</span>
+            <span class="value">{{ answered_contacts }}</span>
+        </div>
+    </div>
+
+    <div class="contact-shell">
+        <aside class="contact-sidebar">
+            <div class="sidebar-header">
+                <h2>Liên hệ khách hàng</h2>
+                <p>Chọn một liên hệ ở bên dưới để xem chi tiết và gửi phản hồi trực tiếp tới email của khách hàng.</p>
+            </div>
+
+            <div class="contact-list">
+                {% for contact in contacts %}
+                <a class="contact-item{% if selected_contact and selected_contact.pk == contact.pk %} active{% endif %}"
+                    href="?contact={{ contact.pk }}">
+                    <div class="contact-item-top">
+                        <div class="contact-name">
+                            <span
+                                class="status-dot {% if contact.is_reply %}answered{% else %}pending{% endif %}"></span>
+                            <span>{{ contact.full_name }}</span>
+                        </div>
+                        <span class="contact-time">{{ contact.created_at|date:"H:i d/m/Y" }}</span>
+                    </div>
+
+                    <div class="contact-email">{{ contact.email }}</div>
+
+                    <p class="contact-preview">{{ contact.message|truncatechars:100 }}</p>
+
+                    <div class="contact-meta" style="margin-top: 12px;">
+                        <span
+                            class="contact-status-badge {% if contact.is_reply %}answered{% else %}pending{% endif %}">
+                            {% if contact.is_reply %}Đã phản hồi{% else %}Chờ phản hồi{% endif %}
+                        </span>
+                        <span class="contact-time">{{ contact.phone_number }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="contact-empty">
+                    <div>
+                        <h3>Chưa có liên hệ nào</h3>
+                        <p>Khi khách hàng gửi form liên hệ từ website, yêu cầu sẽ xuất hiện ở đây để bạn xử lý.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <section class="contact-main">
+            <div class="contact-main-inner">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="message-row {{ message.tags|default:'info' }}">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+
+                {% if not email_ready %}
+                <div class="message-row warning">
+                    Hệ thống chưa thấy cấu hình email gửi. Hãy kiểm tra biến môi trường `EMAIL_HOST_USER` và
+                    `EMAIL_HOST_PASSWORD`
+                    trước khi gửi phản hồi để mail đi được tới khách hàng.
+                </div>
+                {% endif %}
+
+                {% if selected_contact %}
+                <div class="contact-detail-header">
+                    <div>
+                        <h2>{{ selected_contact.full_name }}</h2>
+                        <div class="contact-detail-subtitle">
+                            <a href="mailto:{{ selected_contact.email }}">{{ selected_contact.email }}</a>
+                            <span> · {{ selected_contact.phone_number }}</span>
+                            <span> · {{ selected_contact.created_at|date:"H:i d/m/Y" }}</span>
+                        </div>
+                    </div>
+                    <span
+                        class="contact-status-badge {% if selected_contact.is_reply %}answered{% else %}pending{% endif %}">
+                        {% if selected_contact.is_reply %}Đã phản hồi{% else %}Chờ phản hồi{% endif %}
+                    </span>
+                </div>
+
+                <div class="contact-chip-row">
+                    <span class="contact-chip">Khách hàng: {{ selected_contact.full_name }}</span>
+                    <span class="contact-chip">Email nhận phản hồi: {{ selected_contact.email }}</span>
+                    <span class="contact-chip">Số điện thoại: {{ selected_contact.phone_number }}</span>
+                </div>
+
+                <div class="contact-panels">
+                    <div class="contact-panel">
+                        <div class="contact-panel-header">
+                            <h3>Nội dung khách hàng gửi</h3>
+                            <span>{{ selected_contact.created_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="contact-panel-body">
+                            <p>{{ selected_contact.message|linebreaksbr }}</p>
+                        </div>
+                    </div>
+
+                    {% if selected_contact.reply_content %}
+                    <div class="contact-panel">
+                        <div class="contact-panel-header">
+                            <h3>Phản hồi gần nhất</h3>
+                            <span>Email đã được đánh dấu là đã trả lời</span>
+                        </div>
+                        <div class="contact-panel-body">
+                            <p>{{ selected_contact.reply_content|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="contact-panel">
+                        <div class="contact-panel-header">
+                            <h3>Soạn phản hồi</h3>
+                            <span>Mail sẽ gửi trực tiếp tới {{ selected_contact.email }}</span>
+                        </div>
+                        <div class="contact-panel-body">
+                            <form method="post" class="reply-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="contact_id" value="{{ selected_contact.pk }}">
+                                {{ reply_form.reply_content }}
+
+                                {% if reply_form.reply_content.errors %}
+                                <div class="reply-errors">
+                                    {{ reply_form.reply_content.errors }}
+                                </div>
+                                {% endif %}
+
+                                <div class="reply-actions">
+                                    <p>Sau khi gửi thành công, nội dung phản hồi sẽ được lưu lại ngay trong admin.</p>
+                                    {% if not selected_contact.is_reply %}
+                                    <button type="submit" class="reply-submit" {% if not email_ready %}disabled{% endif %}>
+                                        Gửi phản hồi
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="contact-empty">
+                    <div>
+                        <h3>Chọn một liên hệ để bắt đầu</h3>
+                        <p>Danh sách liên hệ ở bên trái sẽ giúp bạn mở từng yêu cầu của khách hàng và phản hồi qua email
+                            ngay trong admin.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

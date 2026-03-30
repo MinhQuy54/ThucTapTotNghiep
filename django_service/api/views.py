@@ -12,8 +12,8 @@ import uuid, time
 
 
 from django.conf import settings
-from django.shortcuts import redirect
-
+from django.shortcuts import redirect, get_object_or_404, render
+from django.contrib import messages
 
 class LoginView(APIView):
     def post(self, request):
@@ -302,3 +302,59 @@ class OrderDetailView(APIView):
         except Order.DoesNotExist:
             return Response({"error": "Không tìm thấy đơn"}, status=404)
 
+
+class ContactList(APIView):
+
+    def post(self, request):
+        serializers = ContactSerializer(data=request.data)
+
+        if serializers.is_valid():
+            contact = serializers.save()
+
+            admins = User.objects.filter(is_staff = True)
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    type="CONTACT",
+                    message=f"Liên hệ mới từ {contact.full_name}"
+                )
+            return Response({
+                "message": "Gửi liên hệ thành công"
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializers.errors, status=400)
+
+def admin_contact_view(request):
+    contacts = Contact.objects.all().order_by('-created_at')
+    selected_contact = None
+
+    contact_id = request.GET.get('id')
+    if contact_id:
+        selected_contact = get_object_or_404(Contact, id=contact_id)
+
+    if request.method == "POST":
+        contact_id = request.POST.get('contact_id')
+        reply_content = request.POST.get('reply_content')
+
+        contact = get_object_or_404(Contact, id=contact_id)
+
+        send_mail(
+            subject="Phản hồi từ Veggie Shop",
+            message=reply_content,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[contact.email],
+            fail_silently=False,
+        )
+
+        contact.reply_content = reply_content
+        contact.is_reply = True
+        contact.save()
+
+        messages.success(request, "Đã gửi phản hồi thành công!")
+
+        return redirect(f"/admin/contacts?id={contact.id}")
+
+    return render(request, "admin/contact.html", {
+        "contacts": contacts,
+        "selected_contact": selected_contact
+    })
+    

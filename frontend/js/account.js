@@ -2,6 +2,7 @@ let editingAddressId = null;
 document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
     updateAccount();
+    updatePassword();
     loadAddress();
     loadOrder();
 });
@@ -9,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function renderStatus(status) {
     switch (status) {
         case 1:
-            return '<span class="badge-waiting">Chờ xác nhận</span>';
+            return '<span class="badge bg-warning text-dark">Chờ xác nhận</span>';
         case 2:
             return '<span class="badge-payment">Đã xác nhận</span>';
         case 3:
@@ -75,15 +76,6 @@ function updateAccount() {
             email: document.getElementById('email').value
         };
 
-        const currentPassword = document.getElementById('current-password').value;
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-
-        if (currentPassword || newPassword || confirmPassword) {
-            updateData.current_password = currentPassword;
-            updateData.new_password = newPassword;
-            updateData.confirm_password = confirmPassword;
-        }
 
         try {
             const res = await fetch('/api/user/update/', {
@@ -106,6 +98,63 @@ function updateAccount() {
                 });
 
                 loadUserProfile();
+
+            } else {
+                antd.notification.error({
+                    message: 'Lỗi',
+                    description: data.error || JSON.stringify(data),
+                    placement: 'topRight',
+                    duration: 4
+                });
+            }
+
+        } catch (err) {
+            console.error(err);
+            antd.notification.error({
+                message: 'Lỗi hệ thống',
+                description: 'Không thể kết nối server',
+                placement: 'topRight'
+            });
+        }
+    });
+}
+
+
+function updatePassword() {
+    const token = localStorage.getItem("access_token");
+    const updateForm = document.getElementById('change-password-form');
+
+    if (!token || !updateForm) return;
+
+    updateForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const updateData = {
+            current_password: document.getElementById('current-password').value,
+            new_password: document.getElementById('new-password').value,
+            confirm_password: document.getElementById('confirm-password').value
+        };
+
+        try {
+            const res = await fetch('/api/user/update/', {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                antd.notification.success({
+                    message: 'Cập nhật thành công',
+                    description: 'Thông tin tài khoản đã được thay đổi',
+                    placement: 'topRight',
+                    duration: 3
+                });
+
 
                 document.getElementById('current-password').value = "";
                 document.getElementById('new-password').value = "";
@@ -366,7 +415,7 @@ async function loadOrder() {
 
     const data = await res.json();
     if (!data || data.length === 0) {
-        OrderTable.innerHTML =
+        orderTable.innerHTML =
             `<tr>
                  <td colspan="4" class="py-4 text-muted" id="order-table">Bạn chưa có đơn hàng nào.</td>
              </tr>`;

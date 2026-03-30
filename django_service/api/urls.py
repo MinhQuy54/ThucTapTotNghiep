@@ -14,4 +14,5 @@ urlpatterns = [
     path('order/', OrderList.as_view()),
     path('order/detail/<int:pk>/', OrderDetailView.as_view()),
     path('order/detail/cancel/<int:pk>/', OrderDetailView.as_view()),
+    path('contact/', ContactList.as_view()),
 ]

@@ -140,42 +140,34 @@
         <section class="py-5">
             <div class="container">
                 <div class="contact-form-container border">
-                    <h3 class="form-title">Get a Queue</h3>
-                    <form action="#">
+                    <h3 class="form-title">Liên Hệ</h3>
+                    <form id="contact-form">
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Enter your name">
+                                    <input type="text" class="form-control" placeholder="Nhập vào họ tên"
+                                        id="contact-fullname">
                                     <span class="input-group-text"><i class="fa-solid fa-user"></i></span>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="input-group">
-                                    <input type="email" class="form-control" placeholder="Enter email address">
+                                    <input type="email" class="form-control" placeholder="Nhập vào email"
+                                        id="contact-email">
                                     <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="input-group">
-                                    <select class="form-select border-end-0"
-                                        style="font-size: 14px; color: #6c757d; padding: 12px;">
-                                        <option selected disabled>Select Service Type</option>
-                                        <option value="1">Mua hàng</option>
-                                        <option value="2">Hợp tác kinh doanh</option>
-                                        <option value="3">Khiếu nại</option>
-                                    </select>
-                                    <span class="input-group-text"><i class="fa-solid fa-arrow-down"></i></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Enter phone number">
+                                    <input type="text" class="form-control" placeholder="Nhập vào số điện thoại"
+                                        id="contact-phone">
                                     <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="input-group">
-                                    <textarea class="form-control" rows="4" placeholder="Enter message"></textarea>
+                                    <textarea class="form-control" rows="4"
+                                        placeholder="Nhập vào nội dung muốn liên hệ..." id="contact-message"></textarea>
                                     <span class="input-group-text align-items-start pt-2"><i
                                             class="fa-solid fa-pencil"></i></span>
                                 </div>
@@ -196,8 +188,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./js/header.js"></script>
     <script src="./js/footer.js"></script>
-
-
+    <script src="./js/contact.js"></script>
 </body>
 
 </html>

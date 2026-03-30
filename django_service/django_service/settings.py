@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import importlib.util
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -34,8 +35,12 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
-    'jazzmin',
+OPTIONAL_INSTALLED_APPS = []
+if importlib.util.find_spec("jazzmin") is not None:
+    OPTIONAL_INSTALLED_APPS.append("jazzmin")
+
+
+INSTALLED_APPS = OPTIONAL_INSTALLED_APPS + [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -163,7 +168,6 @@ JAZZMIN_SETTINGS = {
         "api.Review": "fas fa-comments",
         "api.Contact": "fas fa-envelope",
     },
-    # Màu sắc chủ đạo (Xanh lá cây cho Veggie)
     "theme": "flatly",
     "dark_mode_theme": None,
 }
@@ -173,7 +177,7 @@ JAZZMIN_UI_CONFIG = {
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
-    "brand_colour": "navbar-success", # Màu xanh lá
+    "brand_colour": "navbar-success",  
     "accent": "accent-success",
     "navbar": "navbar-success navbar-dark",
     "no_navbar_border": False,

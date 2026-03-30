@@ -131,3 +131,9 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'total_price', 'status', 
             'created_at', 'shipping_address', 'items']
+
+
+class ContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ["full_name", "phone_number", "email", "message"]
