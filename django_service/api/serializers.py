@@ -1,7 +1,6 @@
 from .models import *
 from rest_framework import serializers
 import re
-from django.contrib.auth.hashers import make_password
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(write_only=True)
@@ -82,3 +81,9 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data['new_password'] == data['current_password']:
             raise serializers.ValidationError("Mat khau moi khong duoc giong mat khau cu")
         return data
+    
+class ShippingAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingAddress
+        fields = '__all__'
+        read_only_fields = ['user']

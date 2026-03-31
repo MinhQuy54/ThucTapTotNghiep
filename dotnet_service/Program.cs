@@ -1,4 +1,8 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using dotnet_service.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+
+var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. PHẦN ĐĂNG KÝ DỊCH VỤ (SERVICES) ---
 builder.Services.AddControllers();

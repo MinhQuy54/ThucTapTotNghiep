@@ -8,5 +8,6 @@
         public decimal? MinPrice { get; set; }
         public decimal? MaxPrice { get; set; }
         public string? Ordering { get; set; }
+        public string? Stock { get; set; }
     }
 }

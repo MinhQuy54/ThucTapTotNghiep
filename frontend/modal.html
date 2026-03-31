@@ -1,0 +1,134 @@
+<!-- modal xem nhanh product -->
+<div class="modal fade" id="quickViewDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-lg">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-4 z-3 shadow-none"
+                data-bs-dismiss="modal" aria-label="Close"></button>
+
+            <div class="modal-body p-0">
+                <div class="container-fluid">
+                    <div class="row g-0">
+                        <div class="col-md-5 d-flex align-items-center justify-content-center p-4">
+                            <div class="product-image-wrapper w-100 text-center">
+                                <img id="modal-product-img" src="" alt="Product" class="img-fluid object-fit-contain"
+                                    style="max-height: 380px;">
+                            </div>
+                        </div>
+
+                        <div class="col-md-7 p-4 p-lg-5 d-flex flex-column justify-content-center">
+                            <div class="product-info-content">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-success fw-bold text-uppercase small ls-wide"
+                                        id="modal-category-name" style="letter-spacing: 1px;">
+                                        Trái cây
+                                    </span>
+                                    <span class="stock-status fw-bold"><i class="fas fa-check-circle me-1"></i>
+                                        Còn
+                                        hàng</span>
+                                </div>
+
+                                <h2 id="modal-product-name" class="fw-bold mb-3 text-dark h1">Vegetables Juices
+                                </h2>
+
+                                <div class="mb-4">
+                                    <span id="modal-product-price" class="h2 fw-bold text-success mb-0">0đ</span>
+                                </div>
+
+                                <p id="modal-product-desc" class="text-muted mb-4 lh-base" style="font-size: 0.95rem;">
+                                    Nước ép rau củ nguyên chất, giàu vitamin và khoáng chất giúp thanh lọc cơ
+                                    thể,
+                                    giữ dáng và làm đẹp da mỗi ngày.
+                                </p>
+
+                                <div class="action-wrapper d-flex flex-wrap align-items-center gap-3 pt-2">
+                                    <div
+                                        class="qty-container d-flex align-items-center border border-2 bg-white shadow-sm">
+                                        <button class="btn btn-link text-decoration-none text-dark px-3"
+                                            onclick="changeQty(-1)">
+                                            <i class="fas fa-minus fa-xs"></i>
+                                        </button>
+                                        <input type="number" id="qty-input" value="1" min="1"
+                                            class="form-control border-0 text-center fw-bold bg-transparent p-0"
+                                            style="width: 45px; font-size: 1.1rem;">
+                                        <button class="btn btn-link text-decoration-none text-dark px-3"
+                                            onclick="changeQty(1)">
+                                            <i class="fas fa-plus fa-xs"></i>
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        class="btn btn-add-to-cart text-white px-5 py-3 fw-bold flex-grow-1 text-uppercase"
+                                        onclick="addToCart()">
+                                        <i class="fas fa-shopping-basket me-2"></i> Thêm vào giỏ
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- modal success add to cart  -->
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="flex-shrink-0 bg-light rounded p-2" style="width: 100px;">
+                        <img id="success-product-img" src="" class="img-fluid" alt="product">
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0" id="success-product-name">Product Name</h5>
+                            <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="text-success d-flex align-items-center gap-2 mb-4">
+                            <i class="fa-solid fa-circle-check fs-5"></i>
+                            <span class="fw-semibold">Successfully added to your Cart</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="cart.html" class="btn btn-veggie flex-grow-1 text-white fw-bold py-2">View Cart</a>
+                            <a href="checkout.html" class="btn btn-dark flex-grow-1 fw-bold py-2">Checkout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- modal success add to wish list  -->
+
+<div class="modal fade" id="successModalWishList" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="flex-shrink-0 bg-light rounded p-2" style="width: 100px;">
+                        <img id="success-wish-product-img" src="" class="img-fluid" alt="product">
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0" id="success-wish-product-name">Product Name</h5>
+                            <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="text-success d-flex align-items-center gap-2 mb-4">
+                            <i class="fa-solid fa-circle-check fs-5"></i>
+                            <span class="fw-semibold">Successfully added to your Wish List</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="" class="btn btn-veggie flex-grow-1 text-white fw-bold py-2">View Wish List</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

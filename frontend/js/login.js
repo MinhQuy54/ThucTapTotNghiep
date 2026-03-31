@@ -47,3 +47,18 @@ document.getElementById("loginForm").addEventListener("submit", async function (
         antd.message.error("Lỗi kết nối server!");
     }
 })
+
+window.onload = function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activatedStatus = urlParams.get('activated');
+
+    if (activatedStatus === 'success') {
+        antd.notification.success({
+            message: 'Kích hoạt thành công!',
+            description: 'Tài khoản của bạn đã sẵn sàng. Hãy đăng nhập ngay!',
+            placement: 'topRight'
+        });
+    } else if (activatedStatus === 'error') {
+        antd.message.error('Link kích hoạt không hợp lệ hoặc đã hết hạn.');
+    }
+};

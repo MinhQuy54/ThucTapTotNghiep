@@ -1,12 +1,19 @@
 from .models import *
 from .serializers import *
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
+from django.http import Http404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 import uuid, time
+
+
+from django.conf import settings
+from django.shortcuts import redirect
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -41,6 +48,8 @@ class LoginView(APIView):
             "email": user.email,
         }, status=status.HTTP_200_OK)
     
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -57,17 +66,50 @@ class RegisterView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        activation_token = str(uuid.uuid4())
+
+        activation_link = f'http://localhost:8080/api/activate/{activation_token}/'
+
+        send_mail(
+            subject="Kích hoạt tài khoản Veggie",
+            message=f"Nhấn vào link để kích hoạt tài khoản:\n{activation_link}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[data['email']],
+            fail_silently=False
+        )
         user = User.objects.create_user(
             username=data['username'],
             email=data['email'],
             password=data['password'],
             first_name=data.get('firstname', ''), 
             last_name=data.get('lastname', ''),   
+            is_active= False
         )
+        user.activation_token = activation_token
+        user.save()
         
         return Response({
             "message": "Đăng ký thành công 🎉"
         }, status=status.HTTP_201_CREATED)
+        
+
+
+class ActivateAccountView(APIView):
+    def get(self, request, token):
+        user = User.objects.filter(activation_token=token).first()
+
+        if not user:
+            return redirect(
+                "http://localhost:8080/login.html?activated=error"
+            )
+
+        user.is_active = True
+        user.activation_token = None
+        user.save()
+
+        return redirect(
+            "http://localhost:8080/login.html?activated=success"
+        )
 
 class RequestResetPasswordView(APIView):
     permission_classes = [AllowAny]
@@ -171,3 +213,47 @@ class UserDetail(APIView):
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ShippingAddressList(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        address = ShippingAddress.objects.filter(user=request.user)
+        serializers = ShippingAddressSerializer(address, many=True)
+        return Response(serializers.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        serializers = ShippingAddressSerializer(data=request.data)
+
+        if serializers.is_valid():
+            serializers.save(user=request.user)
+            return Response(serializers.data, status=status.HTTP_200_OK)   
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class ShippingAddressDetail(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_obj(self, pk):
+        try:
+            return ShippingAddress.objects.get(pk=pk)
+        except ShippingAddress.DoesNotExist:
+            raise Http404()
+        
+    def get(self, request, pk):
+        address = self.get_obj(pk)
+        serializer = ShippingAddressSerializer(address)
+        return Response(serializer.data)
+    
+    def delete(self, request, pk):
+        address = self.get_obj(pk)
+        address.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    def put(self, request, pk):
+        address = self.get_obj(pk)
+        serializer = ShippingAddressSerializer(address, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)

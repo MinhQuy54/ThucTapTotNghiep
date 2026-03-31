@@ -154,10 +154,23 @@
 
                             <div class="filter-group mb-4">
                                 <h6 class="fw-bold">Availability</h6>
-                                <div class="form-check"><input class="form-check-input" type="checkbox"
-                                        id="stock1"><label class="form-check-label" for="stock1">In Stock</label></div>
-                                <div class="form-check"><input class="form-check-input" type="checkbox"
-                                        id="stock2"><label class="form-check-label" for="stock2">Out of Stock</label>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="stockStatus" id="stockAll"
+                                        value="all" checked>
+                                    <label class="form-check-label" for="stockAll">All (Tất cả)</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="stockStatus" id="stock1"
+                                        value="inStock">
+                                    <label class="form-check-label" for="stock1">In Stock</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="stockStatus" id="stock2"
+                                        value="outOfStock">
+                                    <label class="form-check-label" for="stock2">Out of Stock</label>
                                 </div>
                             </div>
 

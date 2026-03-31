@@ -1,0 +1,105 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+<style>
+    .tile-stats {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+        background: #fff;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .tile-stats .count {
+        font-size: 30px;
+        font-weight: bold;
+        color: #26B99A;
+    }
+
+    .tile-stats h3 {
+        font-size: 15px;
+        color: #73879C;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3 col-sm-6">
+        <div class="tile-stats">
+            <div class="count">{{ total_orders }}</div>
+            <h3>Total Orders</h3>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="tile-stats">
+            <div class="count">{{ total_revenue|floatformat:0 }}</div>
+            <h3>Revenue (VNĐ)</h3>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="tile-stats">
+            <div class="count">{{ low_stock }}</div>
+            <h3>Low Stock Items</h3>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="tile-stats">
+            <div class="count">{{ new_contacts }}</div>
+            <h3>New Messages</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Network Activities (Product Distribution)</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="mainChart" style="height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+// Dán đè đoạn này vào file index.html của Quy
+const labels = {{ cat_labels|safe|default:"[]" }};
+const dataPoints = {{ cat_data|safe|default:"[]" }};
+
+    // Kiểm tra log (F12) xem nó có ra mảng [ ] không
+    console.log("Labels:", labels);
+    console.log("Data:", dataPoints);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const canvas = document.getElementById('mainChart');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Số lượng sản phẩm',
+                        data: dataPoints,
+                        backgroundColor: '#26B99A',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+{{ block.super }}
+{% endblock %}

@@ -1,7 +1,11 @@
+let editingAddressId = null;
 document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
     updateAccount();
+    loadAddress();
 });
+const saveAddressBtn = document.getElementById('save-address-btn');
+saveAddressBtn.addEventListener("click", addAddress);
 
 async function loadUserProfile() {
     const token = localStorage.getItem("access_token");
@@ -107,8 +111,218 @@ function updateAccount() {
     });
 }
 
-function handleLogout() {
-    const logoutLink = document.getElementById("logout-link");
+async function loadAddress() {
+    const addressTable = document.getElementById("address-table-body");
+    const token = localStorage.getItem("access_token");
+    addressTable.innerHTML = "";
+    if (!token) {
+        window.location.href = 'login.html';
+    }
 
+    const res = await fetch('/api/address/', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
 
+    if (!res.ok) {
+        antd.notification.error({
+            message: 'Lỗi',
+            placement: 'topRight',
+            duration: 4
+        });
+    }
+
+    const data = await res.json();
+
+    data.forEach(addr => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${addr.full_name}</td>
+            <td>${addr.address}</td>
+            <td>${addr.city}</td>
+            <td>${addr.phone}</td>
+            <td>${addr.default ? '<span class="badge bg-success" style="font-size: 0.7rem;">MẶC ĐỊNH</span>' : ''}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteAddress(${addr.id})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning border-0" onclick="updateAddress(${addr.id})">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+            </td>
+        `;
+        addressTable.appendChild(tr);
+    })
+
+}
+
+function openAddModal() {
+    editingAddressId = null;
+
+    document.getElementById('addr-name').value = "";
+    document.getElementById('addr-phone').value = "";
+    document.getElementById('addr-city').value = "";
+    document.getElementById('addr-detail').value = "";
+    document.getElementById('addr-default').checked = false;
+}
+async function addAddress() {
+    const payload = {
+        full_name: document.getElementById('addr-name').value.trim(),
+        phone: document.getElementById('addr-phone').value.trim(),
+        city: document.getElementById('addr-city').value.trim(),
+        address: document.getElementById('addr-detail').value.trim(),
+        default: document.getElementById('addr-default').checked
+    };
+
+    if (!payload.full_name || !payload.phone || !payload.address) {
+        antd.notification.warning({
+            message: 'Thiếu thông tin',
+            description: 'Vui lòng nhập đầy đủ thông tin'
+        });
+        return;
+    }
+
+    const token = localStorage.getItem("access_token");
+
+    try {
+        let url = '/api/address/';
+        let method = "POST";
+
+        if (editingAddressId) {
+            url = `/api/address/${editingAddressId}/`;
+            method = "PUT";
+        }
+
+        const res = await fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            antd.notification.success({
+                message: 'Thành công',
+                description: editingAddressId ? 'Cập nhật địa chỉ thành công' : 'Thêm địa chỉ thành công'
+            });
+
+            const modalEl = document.getElementById('addressModal');
+            let modal = bootstrap.Modal.getInstance(modalEl);
+
+            if (!modal) {
+                modal = new bootstrap.Modal(modalEl);
+            }
+
+            modal.hide();
+            editingAddressId = null;
+
+            document.getElementById('addr-name').value = "";
+            document.getElementById('addr-phone').value = "";
+            document.getElementById('addr-city').value = "";
+            document.getElementById('addr-detail').value = "";
+            document.getElementById('addr-default').checked = false;
+
+            loadAddress();
+
+        } else {
+            antd.notification.error({
+                message: 'Lỗi',
+                description: data.error || JSON.stringify(data)
+            });
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+async function deleteAddress(id) {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    antd.Modal.confirm({
+        title: 'Xác nhận xóa',
+        content: 'Bạn có chắc chắn muốn xóa địa chỉ này không? Hành động này không thể hoàn tác.',
+        okText: 'Xóa ngay',
+        okType: 'danger',
+        cancelText: 'Hủy bỏ',
+        async onOk() {
+            try {
+                const res = await fetch(`/api/address/${id}/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (res.ok) {
+                    antd.notification.success({
+                        message: 'Thành công',
+                        description: 'Địa chỉ đã được xóa',
+                        placement: 'topRight',
+                        duration: 3
+                    });
+                    loadAddress();
+                } else {
+                    const err = await res.json();
+                    antd.notification.error({
+                        message: 'Lỗi',
+                        description: err.error || "Không thể xóa địa chỉ",
+                        placement: 'topRight'
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+                antd.notification.error({
+                    message: 'Lỗi hệ thống',
+                    description: 'Không thể kết nối server'
+                });
+            }
+        }
+    });
+}
+
+async function updateAddress(id) {
+    const token = localStorage.getItem("access_token");
+    editingAddressId = id;
+
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/address/${id}/`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const addr = await res.json();
+
+        document.getElementById('addr-name').value = addr.full_name;
+        document.getElementById('addr-phone').value = addr.phone;
+        document.getElementById('addr-city').value = addr.city;
+        document.getElementById('addr-detail').value = addr.address;
+        document.getElementById('addr-default').checked = addr.default;
+
+        // mở modal
+        const modalEl = document.getElementById('addressModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+
+    } catch (error) {
+        console.error(error);
+    }
 }
