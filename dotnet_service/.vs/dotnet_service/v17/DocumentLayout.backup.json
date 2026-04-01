@@ -1,18 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\",
+  "WorkspaceRootPath": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hpeko\\thuctaptotnghiep\\dotnet_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\mymodels\\productfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\productfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\data\\veggiecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:data\\veggiecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hpeko\\thuctaptotnghiep\\dotnet_service\\controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\hoadoncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hpeko\\thuctaptotnghiep\\dotnet_service\\models\\hoadoncontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:models\\hoadoncontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,42 +42,64 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "ProductFilter.cs",
+              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\ProductFilter.cs",
+              "RelativeDocumentMoniker": "MyModels\\ProductFilter.cs",
+              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\ProductFilter.cs",
+              "RelativeToolTip": "MyModels\\ProductFilter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T07:17:07.419Z",
+              "WhenOpened": "2026-03-29T05:22:13.583Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAAABQAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-28T12:16:51.467Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "VeggieContext.cs",
+              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\VeggieContext.cs",
+              "RelativeDocumentMoniker": "Data\\VeggieContext.cs",
+              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\VeggieContext.cs",
+              "RelativeToolTip": "Data\\VeggieContext.cs",
+              "ViewState": "AgIAACMAAAAAAAAAAAAxwCwAAACaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-28T12:16:06.176Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "productController.cs",
+              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "RelativeDocumentMoniker": "Controllers\\productController.cs",
+              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "RelativeToolTip": "Controllers\\productController.cs",
+              "ViewState": "AgIAAGEAAAAAAAAAAAAAAHwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-28T12:11:16.619Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "HoadonController.cs",
-              "DocumentMoniker": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Controllers\\HoadonController.cs",
-              "RelativeDocumentMoniker": "Controllers\\HoadonController.cs",
-              "ToolTip": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Controllers\\HoadonController.cs",
-              "RelativeToolTip": "Controllers\\HoadonController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAvAAAAAAAAAA==",
+              "Title": "categoryController.cs",
+              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\categoryController.cs",
+              "RelativeDocumentMoniker": "Controllers\\categoryController.cs",
+              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\categoryController.cs",
+              "RelativeToolTip": "Controllers\\categoryController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABgAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T07:05:59.941Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "hoadonContext.cs",
-              "DocumentMoniker": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Models\\hoadonContext.cs",
-              "RelativeDocumentMoniker": "Models\\hoadonContext.cs",
-              "ToolTip": "D:\\HPEKO\\ThucTapTotNghiep\\dotnet_service\\Models\\hoadonContext.cs",
-              "RelativeToolTip": "Models\\hoadonContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-17T07:05:17.301Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-27T13:18:35.999Z"
             }
           ]
         }

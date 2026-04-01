@@ -1,3 +1,4 @@
+
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
@@ -8,35 +9,28 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
-
 from .models import Category, Contact, Order, OrderItem, Product, ProductImage, Role, User
 
 
 class VeggieAdminSite(admin.AdminSite):
     def index(self, request, extra_context=None):
+        
         extra_context = extra_context or {}
-        extra_context["total_orders"] = Order.objects.count()
 
+        extra_context["total_orders"] = Order.objects.count()
         revenue = Order.objects.filter(status=1).aggregate(Sum("total_price"))["total_price__sum"]
         extra_context["total_revenue"] = revenue if revenue else 0
-        
-        # extra_context = extra_context or {}
+        extra_context["low_stock"] = Product.objects.filter(stock__lt=10).count()
+        extra_context["new_contacts"] = Contact.objects.filter(is_reply=False).count()
 
-        # extra_context["total_orders"] = Order.objects.count()
-        # revenue = Order.objects.filter(status=1).aggregate(Sum("total_price"))["total_price__sum"]
-        # extra_context["total_revenue"] = revenue if revenue else 0
-        # extra_context["low_stock"] = Product.objects.filter(stock__lt=10).count()
-        # extra_context["new_contacts"] = Contact.objects.filter(is_reply=False).count()
+        categories = Category.objects.annotate(product_count=Count("product"))
+        extra_context["cat_labels"] = [str(category.name) for category in categories]
+        extra_context["cat_data"] = [int(category.product_count) for category in categories]
 
-        # categories = Category.objects.annotate(product_count=Count("product"))
-        # extra_context["cat_labels"] = [str(category.name) for category in categories]
-        # extra_context["cat_data"] = [int(category.product_count) for category in categories]
-
-        # return super().index(request, extra_context)
+        return super().index(request, extra_context)
 
 
 admin.site = VeggieAdminSite()
-
 
 class ContactReplyForm(forms.Form):
     reply_content = forms.CharField(
