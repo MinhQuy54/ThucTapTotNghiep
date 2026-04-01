@@ -136,9 +136,11 @@ STATIC_URL = 'static/'
 AUTH_USER_MODEL = 'api.User'
 
 SIMPLE_JWT = {
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": os.environ.get("JWT_SECRET"),
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    'AUTH_HEADER_TYPES': ('Bearer',),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 # REST Framework

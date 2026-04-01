@@ -15,18 +15,24 @@ from .models import Category, Contact, Order, OrderItem, Product, ProductImage, 
 class VeggieAdminSite(admin.AdminSite):
     def index(self, request, extra_context=None):
         extra_context = extra_context or {}
-
         extra_context["total_orders"] = Order.objects.count()
+
         revenue = Order.objects.filter(status=1).aggregate(Sum("total_price"))["total_price__sum"]
         extra_context["total_revenue"] = revenue if revenue else 0
-        extra_context["low_stock"] = Product.objects.filter(stock__lt=10).count()
-        extra_context["new_contacts"] = Contact.objects.filter(is_reply=False).count()
+        
+        # extra_context = extra_context or {}
 
-        categories = Category.objects.annotate(product_count=Count("product"))
-        extra_context["cat_labels"] = [str(category.name) for category in categories]
-        extra_context["cat_data"] = [int(category.product_count) for category in categories]
+        # extra_context["total_orders"] = Order.objects.count()
+        # revenue = Order.objects.filter(status=1).aggregate(Sum("total_price"))["total_price__sum"]
+        # extra_context["total_revenue"] = revenue if revenue else 0
+        # extra_context["low_stock"] = Product.objects.filter(stock__lt=10).count()
+        # extra_context["new_contacts"] = Contact.objects.filter(is_reply=False).count()
 
-        return super().index(request, extra_context)
+        # categories = Category.objects.annotate(product_count=Count("product"))
+        # extra_context["cat_labels"] = [str(category.name) for category in categories]
+        # extra_context["cat_data"] = [int(category.product_count) for category in categories]
+
+        # return super().index(request, extra_context)
 
 
 admin.site = VeggieAdminSite()
