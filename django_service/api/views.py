@@ -6,9 +6,10 @@ from django.http import Http404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import APIView
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 import uuid, time
+import requests
 
 
 from django.conf import settings
@@ -358,3 +359,60 @@ def admin_contact_view(request):
         "selected_contact": selected_contact
     })
     
+
+class GHNProxyBase(APIView):
+    permission_classes = [IsAuthenticated]
+    ghn_headers = {
+        "Token": settings.GHN_TOKEN,
+        "Content-Type": "application/json",
+    }
+
+    if settings.GHN_SHOP_ID:
+        ghn_headers["ShopId"] = str(settings.GHN_SHOP_ID)
+
+    def request_ghn(self, method, endpoint, payload=None):
+        url = f"{settings.GHN_API_URL}{endpoint}"
+
+        try:
+            response = requests.request(
+                method=method,
+                url=url,
+                headers=self.ghn_headers,
+                json=payload,
+                timeout=15,
+            )
+            data = response.json()
+        except requests.RequestException as exc:
+            return Response(
+                {"message": f"Không kết nối được GHN: {exc}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except ValueError:
+            return Response(
+                {"message": "GHN trả về dữ liệu không hợp lệ."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        return Response(data, status=response.status_code)
+
+class GetProvincesView(GHNProxyBase):
+    def get(self, request):
+        return self.request_ghn("GET", "province")
+
+class GetDistrictsView(GHNProxyBase):
+    def post(self, request):
+        province_id = request.data.get('province_id')
+        if not province_id:
+            return Response({"message": "Thiếu province_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = {"province_id": int(province_id)}
+        return self.request_ghn("POST", "district", payload)
+
+class GetWardsView(GHNProxyBase):
+    def post(self, request):
+        district_id = request.data.get('district_id')
+        if not district_id:
+            return Response({"message": "Thiếu district_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = {"district_id": int(district_id)}
+        return self.request_ghn("POST", "ward", payload)

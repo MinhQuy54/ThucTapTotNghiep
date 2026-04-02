@@ -74,8 +74,8 @@ async function loadDetailOrder() {
         if (data.shipping_address) {
             const addr = data.shipping_address;
             document.getElementById('username-order').innerHTML = `<span class="info-label">Người nhận:</span> ${addr.full_name}`;
-            document.getElementById('address-order').innerHTML = `<span class="info-label">Địa chỉ:</span> ${addr.address}`;
-            document.getElementById('city-order').innerHTML = `<span class="info-label">Thành phố:</span> ${addr.city}`;
+            document.getElementById('address-order').innerHTML = `<span class="info-label">Địa chỉ:</span> ${addr.address || ""}`;
+            document.getElementById('city-order').innerHTML = `<span class="info-label">Khu vực:</span> ${addr.city || ""}`;
             document.getElementById('phone-order').innerHTML = `<span class="info-label">Số điện thoại:</span> ${addr.phone}`;
         }
 

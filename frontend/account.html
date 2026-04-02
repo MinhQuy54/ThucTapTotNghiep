@@ -196,7 +196,7 @@
                                             <tr>
                                                 <th>Người nhận</th>
                                                 <th>Địa chỉ</th>
-                                                <th>Thành Phố</th>
+                                                <th>Khu vực</th>
                                                 <th>Điện thoại</th>
                                                 <th>Mặc định</th>
                                                 <th>Hành động</th>
@@ -300,8 +300,31 @@
                             <input type="text" class="form-control" id="addr-phone" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Thành phố</label>
-                            <input type="text" class="form-control" id="addr-city" required>
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label">Tỉnh / Thành phố</label>
+                                    <select class="form-select" id="addr-province">
+                                        <option value="">Chọn tỉnh / thành phố</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Quận / Huyện</label>
+                                    <select class="form-select" id="addr-district" disabled>
+                                        <option value="">Chọn quận / huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phường / Xã</label>
+                                    <select class="form-select" id="addr-ward" disabled>
+                                        <option value="">Chọn phường / xã</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-text">
+                                        Chọn lần lượt tỉnh / thành phố, quận / huyện, rồi đến phường / xã.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Địa chỉ chi tiết</label>

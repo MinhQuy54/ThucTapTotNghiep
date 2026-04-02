@@ -1,5 +1,12 @@
 let editingAddressId = null;
+const ghnLocationCache = {
+    provinces: [],
+    districts: new Map(),
+    wards: new Map()
+};
+
 document.addEventListener("DOMContentLoaded", () => {
+    initAddressForm();
     loadUserProfile();
     updateAccount();
     updatePassword();
@@ -25,8 +32,219 @@ function renderStatus(status) {
             return '<span class="badge bg-dark">Không xác định</span>';
     }
 }
-const saveAddressBtn = document.getElementById('save-address-btn');
-saveAddressBtn.addEventListener("click", addAddress);
+
+async function fetchGHNData(endpoint, method = "GET", body = null) {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+        window.location.href = "login.html";
+        throw new Error("Thiếu access token");
+    }
+
+    const options = {
+        method: method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    };
+    if (body) options.body = JSON.stringify(body);
+
+    const res = await fetch(`/api/${endpoint}`, options);
+    const data = await res.json();
+
+    if (!res.ok || (data.code && String(data.code) !== "200")) {
+        throw new Error(data.message || "Không tải được dữ liệu địa chỉ");
+    }
+
+    return data;
+}
+
+function getAddressElements() {
+    return {
+        provinceSelect: document.getElementById('addr-province'),
+        districtSelect: document.getElementById('addr-district'),
+        wardSelect: document.getElementById('addr-ward'),
+        saveAddressBtn: document.getElementById('save-address-btn')
+    };
+}
+
+function renderSelectOptions(select, items, valueKey, labelKey, placeholder) {
+    select.innerHTML = `<option value="">${placeholder}</option>` +
+        items.map(item => `<option value="${item[valueKey]}">${item[labelKey]}</option>`).join('');
+}
+
+function resetDistrictSelect() {
+    const { districtSelect } = getAddressElements();
+    districtSelect.disabled = true;
+    renderSelectOptions(districtSelect, [], "DistrictID", "DistrictName", "Chọn quận / huyện");
+    resetWardSelect();
+}
+
+function resetWardSelect() {
+    const { wardSelect } = getAddressElements();
+    wardSelect.disabled = true;
+    renderSelectOptions(wardSelect, [], "WardCode", "WardName", "Chọn phường / xã");
+}
+
+async function loadGHNProvinces(selectedProvinceId = "") {
+    const provinceSelect = document.getElementById('addr-province');
+
+    if (ghnLocationCache.provinces.length === 0) {
+        const result = await fetchGHNData("ghn/provinces/");
+        ghnLocationCache.provinces = Array.isArray(result.data) ? result.data : [];
+    }
+
+    renderSelectOptions(
+        provinceSelect,
+        ghnLocationCache.provinces,
+        "ProvinceID",
+        "ProvinceName",
+        "Chọn tỉnh / thành phố"
+    );
+
+    if (selectedProvinceId) {
+        provinceSelect.value = String(selectedProvinceId);
+    }
+}
+
+async function loadGHNDistricts(provinceId, selectedDistrictId = "") {
+    const { districtSelect } = getAddressElements();
+
+    if (!provinceId) {
+        resetDistrictSelect();
+        return;
+    }
+
+    const cacheKey = String(provinceId);
+    if (!ghnLocationCache.districts.has(cacheKey)) {
+        const result = await fetchGHNData("ghn/districts/", "POST", { province_id: Number(provinceId) });
+        ghnLocationCache.districts.set(cacheKey, Array.isArray(result.data) ? result.data : []);
+    }
+
+    districtSelect.disabled = false;
+    renderSelectOptions(
+        districtSelect,
+        ghnLocationCache.districts.get(cacheKey) || [],
+        "DistrictID",
+        "DistrictName",
+        "Chọn quận / huyện"
+    );
+
+    if (selectedDistrictId) {
+        districtSelect.value = String(selectedDistrictId);
+    }
+}
+
+async function loadGHNWards(districtId, selectedWardCode = "") {
+    const { wardSelect } = getAddressElements();
+
+    if (!districtId) {
+        resetWardSelect();
+        return;
+    }
+
+    const cacheKey = String(districtId);
+    if (!ghnLocationCache.wards.has(cacheKey)) {
+        const result = await fetchGHNData("ghn/wards/", "POST", { district_id: Number(districtId) });
+        ghnLocationCache.wards.set(cacheKey, Array.isArray(result.data) ? result.data : []);
+    }
+
+    wardSelect.disabled = false;
+    renderSelectOptions(
+        wardSelect,
+        ghnLocationCache.wards.get(cacheKey) || [],
+        "WardCode",
+        "WardName",
+        "Chọn phường / xã"
+    );
+
+    if (selectedWardCode) {
+        wardSelect.value = String(selectedWardCode);
+    }
+}
+
+function getSelectedProvince() {
+    const { provinceSelect } = getAddressElements();
+    return ghnLocationCache.provinces.find(
+        province => String(province.ProvinceID) === String(provinceSelect.value)
+    ) || null;
+}
+
+function getSelectedDistrict() {
+    const { provinceSelect, districtSelect } = getAddressElements();
+    const districts = ghnLocationCache.districts.get(String(provinceSelect.value)) || [];
+    return districts.find(
+        district => String(district.DistrictID) === String(districtSelect.value)
+    ) || null;
+}
+
+function getSelectedWard() {
+    const { districtSelect, wardSelect } = getAddressElements();
+    const wards = ghnLocationCache.wards.get(String(districtSelect.value)) || [];
+    return wards.find(
+        ward => String(ward.WardCode) === String(wardSelect.value)
+    ) || null;
+}
+
+function buildLocationText() {
+    const selectedProvince = getSelectedProvince();
+    const selectedDistrict = getSelectedDistrict();
+    const selectedWard = getSelectedWard();
+
+    return [selectedWard?.WardName, selectedDistrict?.DistrictName, selectedProvince?.ProvinceName]
+        .filter(Boolean)
+        .join(", ");
+}
+
+function resetAddressForm() {
+    document.getElementById('addr-name').value = "";
+    document.getElementById('addr-phone').value = "";
+    document.getElementById('addr-detail').value = "";
+    document.getElementById('addr-default').checked = false;
+    document.getElementById('addr-province').value = "";
+    resetDistrictSelect();
+}
+
+function initAddressForm() {
+    const { provinceSelect, districtSelect, saveAddressBtn } = getAddressElements();
+
+    if (!provinceSelect || !districtSelect || !saveAddressBtn) {
+        return;
+    }
+
+    provinceSelect.addEventListener('change', async (e) => {
+        try {
+            resetDistrictSelect();
+            await loadGHNDistricts(e.target.value);
+        } catch (error) {
+            console.error(error);
+            antd.notification.error({
+                message: 'Lỗi',
+                description: error.message
+            });
+        }
+    });
+
+    districtSelect.addEventListener('change', async (e) => {
+        try {
+            resetWardSelect();
+            await loadGHNWards(e.target.value);
+        } catch (error) {
+            console.error(error);
+            antd.notification.error({
+                message: 'Lỗi',
+                description: error.message
+            });
+        }
+    });
+
+    saveAddressBtn.addEventListener("click", addAddress);
+
+    loadGHNProvinces().catch(error => {
+        console.error(error);
+    });
+}
 
 async function loadUserProfile() {
     const token = localStorage.getItem("access_token");
@@ -186,62 +404,85 @@ async function loadAddress() {
     addressTable.innerHTML = "";
     if (!token) {
         window.location.href = 'login.html';
+        return;
     }
 
-    const res = await fetch('/api/address/', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
+    try {
+        const res = await fetch('/api/address/', {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
 
-    if (!res.ok) {
+        if (!res.ok) {
+            throw new Error("Không thể tải địa chỉ giao hàng");
+        }
+
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            addressTable.innerHTML = `
+                <tr>
+                    <td colspan="6" class="py-4 text-muted">Bạn chưa có địa chỉ giao hàng nào.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        data.forEach(addr => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${addr.full_name}</td>
+                <td>${addr.address || ""}</td>
+                <td>${addr.city || ""}</td>
+                <td>${addr.phone}</td>
+                <td>${addr.default ? '<span class="badge bg-success" style="font-size: 0.7rem;">MẶC ĐỊNH</span>' : ''}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteAddress(${addr.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning border-0" onclick="updateAddress(${addr.id})">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                </td>
+            `;
+            addressTable.appendChild(tr);
+        });
+    } catch (error) {
+        console.error(error);
         antd.notification.error({
             message: 'Lỗi',
+            description: error.message,
             placement: 'topRight',
             duration: 4
         });
     }
-
-    const data = await res.json();
-
-    data.forEach(addr => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${addr.full_name}</td>
-            <td>${addr.address}</td>
-            <td>${addr.city}</td>
-            <td>${addr.phone}</td>
-            <td>${addr.default ? '<span class="badge bg-success" style="font-size: 0.7rem;">MẶC ĐỊNH</span>' : ''}</td>
-            <td>
-                <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteAddress(${addr.id})">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning border-0" onclick="updateAddress(${addr.id})">
-                    <i class="fa-solid fa-pen"></i>
-                </button>
-            </td>
-        `;
-        addressTable.appendChild(tr);
-    })
-
 }
 
-function openAddModal() {
+async function openAddModal() {
     editingAddressId = null;
-
-    document.getElementById('addr-name').value = "";
-    document.getElementById('addr-phone').value = "";
-    document.getElementById('addr-city').value = "";
-    document.getElementById('addr-detail').value = "";
-    document.getElementById('addr-default').checked = false;
+    resetAddressForm();
+    try {
+        await loadGHNProvinces();
+    } catch (error) {
+        console.error(error);
+    }
 }
+
 async function addAddress() {
+    const selectedProvince = getSelectedProvince();
+    const selectedDistrict = getSelectedDistrict();
+    const selectedWard = getSelectedWard();
+
     const payload = {
         full_name: document.getElementById('addr-name').value.trim(),
         phone: document.getElementById('addr-phone').value.trim(),
-        city: document.getElementById('addr-city').value.trim(),
         address: document.getElementById('addr-detail').value.trim(),
+        city: buildLocationText(),
+        province_id: selectedProvince ? selectedProvince.ProvinceID : null,
+        district_id: selectedDistrict ? selectedDistrict.DistrictID : null,
+        ward_code: selectedWard ? selectedWard.WardCode : null,
         default: document.getElementById('addr-default').checked
     };
 
@@ -249,6 +490,14 @@ async function addAddress() {
         antd.notification.warning({
             message: 'Thiếu thông tin',
             description: 'Vui lòng nhập đầy đủ thông tin'
+        });
+        return;
+    }
+
+    if (!payload.province_id || !payload.district_id || !payload.ward_code) {
+        antd.notification.warning({
+            message: 'Thiếu khu vực',
+            description: 'Vui lòng chọn đầy đủ tỉnh/thành phố, quận/huyện và phường/xã.'
         });
         return;
     }
@@ -290,12 +539,7 @@ async function addAddress() {
 
             modal.hide();
             editingAddressId = null;
-
-            document.getElementById('addr-name').value = "";
-            document.getElementById('addr-phone').value = "";
-            document.getElementById('addr-city').value = "";
-            document.getElementById('addr-detail').value = "";
-            document.getElementById('addr-default').checked = false;
+            resetAddressForm();
 
             loadAddress();
 
@@ -308,6 +552,10 @@ async function addAddress() {
 
     } catch (err) {
         console.error(err);
+        antd.notification.error({
+            message: 'Lỗi hệ thống',
+            description: 'Không thể lưu địa chỉ giao hàng'
+        });
     }
 }
 
@@ -378,13 +626,27 @@ async function updateAddress(id) {
             }
         });
 
+        if (!res.ok) {
+            throw new Error("Không thể lấy thông tin địa chỉ");
+        }
+
         const addr = await res.json();
+
+        resetAddressForm();
+        await loadGHNProvinces(addr.province_id);
 
         document.getElementById('addr-name').value = addr.full_name;
         document.getElementById('addr-phone').value = addr.phone;
-        document.getElementById('addr-city').value = addr.city;
         document.getElementById('addr-detail').value = addr.address;
         document.getElementById('addr-default').checked = addr.default;
+
+        if (addr.province_id) {
+            await loadGHNDistricts(addr.province_id, addr.district_id);
+        }
+
+        if (addr.district_id) {
+            await loadGHNWards(addr.district_id, addr.ward_code);
+        }
 
         // mở modal
         const modalEl = document.getElementById('addressModal');
@@ -393,6 +655,10 @@ async function updateAddress(id) {
 
     } catch (error) {
         console.error(error);
+        antd.notification.error({
+            message: 'Lỗi',
+            description: error.message
+        });
     }
 }
 

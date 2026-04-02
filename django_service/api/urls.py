@@ -15,4 +15,7 @@ urlpatterns = [
     path('order/detail/<int:pk>/', OrderDetailView.as_view()),
     path('order/detail/cancel/<int:pk>/', OrderDetailView.as_view()),
     path('contact/', ContactList.as_view()),
+    path('ghn/provinces/', GetProvincesView.as_view()),
+    path('ghn/districts/', GetDistrictsView.as_view()),
+    path('ghn/wards/', GetWardsView.as_view()),
 ]

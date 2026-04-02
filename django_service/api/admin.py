@@ -1,3 +1,5 @@
+import json
+from datetime import timedelta
 
 from django import forms
 from django.conf import settings
@@ -5,16 +7,18 @@ from django.contrib import admin, messages
 from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Sum
+from django.db.models.functions import TruncDate
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils import timezone
 from .models import Category, Contact, Order, OrderItem, Product, ProductImage, Role, User
 
 
 class VeggieAdminSite(admin.AdminSite):
     def index(self, request, extra_context=None):
-        
+
         extra_context = extra_context or {}
 
         extra_context["total_orders"] = Order.objects.count()
@@ -22,10 +26,27 @@ class VeggieAdminSite(admin.AdminSite):
         extra_context["total_revenue"] = revenue if revenue else 0
         extra_context["low_stock"] = Product.objects.filter(stock__lt=10).count()
         extra_context["new_contacts"] = Contact.objects.filter(is_reply=False).count()
+        today = timezone.localdate()
+        start_date = today - timedelta(days=6)
+        daily_orders = (
+            Order.objects.filter(created_at__date__gte=start_date, created_at__date__lte=today)
+            .annotate(order_date=TruncDate("created_at"))
+            .values("order_date")
+            .annotate(order_count=Count("id"))
+            .order_by("order_date")
+        )
+        daily_orders_map = {
+            item["order_date"]: int(item["order_count"]) for item in daily_orders
+        }
+        trend_dates = [start_date + timedelta(days=offset) for offset in range(7)]
+        extra_context["trend_labels"] = json.dumps(
+            [chart_date.strftime("%d/%m") for chart_date in trend_dates],
+            ensure_ascii=False,
+        )
+        extra_context["trend_data"] = json.dumps(
+            [daily_orders_map.get(chart_date, 0) for chart_date in trend_dates]
+        )
 
-        categories = Category.objects.annotate(product_count=Count("product"))
-        extra_context["cat_labels"] = [str(category.name) for category in categories]
-        extra_context["cat_data"] = [int(category.product_count) for category in categories]
 
         return super().index(request, extra_context)
 

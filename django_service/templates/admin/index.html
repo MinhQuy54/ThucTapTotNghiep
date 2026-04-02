@@ -54,7 +54,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Network Activities (Product Distribution)</h3>
+                <h3 class="card-title">Xu hướng đơn hàng 7 ngày gần nhất</h3>
             </div>
             <div class="card-body">
                 <canvas id="mainChart" style="height: 300px;"></canvas>
@@ -65,35 +65,42 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
-// Dán đè đoạn này vào file index.html của Quy
-const labels = {{ cat_labels|safe|default:"[]" }};
-const dataPoints = {{ cat_data|safe|default:"[]" }};
-
-    // Kiểm tra log (F12) xem nó có ra mảng [ ] không
-    console.log("Labels:", labels);
-    console.log("Data:", dataPoints);
+    const trendLabels = {{ trend_labels|default:"[]"|safe }};
+    const trendData = {{ trend_data|default:"[]"|safe }};
 
     document.addEventListener('DOMContentLoaded', function () {
         const canvas = document.getElementById('mainChart');
         if (canvas) {
             const ctx = canvas.getContext('2d');
             new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
-                    labels: labels,
+                    labels: trendLabels,
                     datasets: [{
-                        label: 'Số lượng sản phẩm',
-                        data: dataPoints,
-                        backgroundColor: '#26B99A',
-                        borderWidth: 1
+                        label: 'Số đơn hàng',
+                        data: trendData,
+                        borderColor: '#26B99A',
+                        backgroundColor: 'rgba(38, 185, 154, 0.18)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#26B99A',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
                     }
                 }
             });
