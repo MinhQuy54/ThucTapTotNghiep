@@ -1,9 +1,4 @@
 let editingAddressId = null;
-const ghnLocationCache = {
-    provinces: [],
-    districts: new Map(),
-    wards: new Map()
-};
 
 document.addEventListener("DOMContentLoaded", () => {
     initAddressForm();
@@ -40,7 +35,6 @@ async function fetchGHNData(endpoint, method = "GET", body = null) {
         window.location.href = "login.html";
         throw new Error("Thiếu access token");
     }
-
     const options = {
         method: method,
         headers: {
@@ -65,8 +59,8 @@ function getAddressElements() {
         provinceSelect: document.getElementById('addr-province'),
         districtSelect: document.getElementById('addr-district'),
         wardSelect: document.getElementById('addr-ward'),
-        saveAddressBtn: document.getElementById('save-address-btn')
-    };
+        saveAddressBtn: document.getElementById('save-address-btn'),
+    }
 }
 
 function renderSelectOptions(select, items, valueKey, labelKey, placeholder) {
@@ -89,15 +83,12 @@ function resetWardSelect() {
 
 async function loadGHNProvinces(selectedProvinceId = "") {
     const provinceSelect = document.getElementById('addr-province');
-
-    if (ghnLocationCache.provinces.length === 0) {
-        const result = await fetchGHNData("ghn/provinces/");
-        ghnLocationCache.provinces = Array.isArray(result.data) ? result.data : [];
-    }
+    const result = await fetchGHNData("ghn/provinces/");
+    const provinces = Array.isArray(result.data) ? result.data : [];
 
     renderSelectOptions(
         provinceSelect,
-        ghnLocationCache.provinces,
+        provinces,
         "ProvinceID",
         "ProvinceName",
         "Chọn tỉnh / thành phố"
@@ -116,16 +107,13 @@ async function loadGHNDistricts(provinceId, selectedDistrictId = "") {
         return;
     }
 
-    const cacheKey = String(provinceId);
-    if (!ghnLocationCache.districts.has(cacheKey)) {
-        const result = await fetchGHNData("ghn/districts/", "POST", { province_id: Number(provinceId) });
-        ghnLocationCache.districts.set(cacheKey, Array.isArray(result.data) ? result.data : []);
-    }
+    const result = await fetchGHNData("ghn/districts/", "POST", { province_id: Number(provinceId) });
+    const districts = Array.isArray(result.data) ? result.data : [];
 
     districtSelect.disabled = false;
     renderSelectOptions(
         districtSelect,
-        ghnLocationCache.districts.get(cacheKey) || [],
+        districts,
         "DistrictID",
         "DistrictName",
         "Chọn quận / huyện"
@@ -144,16 +132,13 @@ async function loadGHNWards(districtId, selectedWardCode = "") {
         return;
     }
 
-    const cacheKey = String(districtId);
-    if (!ghnLocationCache.wards.has(cacheKey)) {
-        const result = await fetchGHNData("ghn/wards/", "POST", { district_id: Number(districtId) });
-        ghnLocationCache.wards.set(cacheKey, Array.isArray(result.data) ? result.data : []);
-    }
+    const result = await fetchGHNData("ghn/wards/", "POST", { district_id: Number(districtId) });
+    const wards = Array.isArray(result.data) ? result.data : [];
 
     wardSelect.disabled = false;
     renderSelectOptions(
         wardSelect,
-        ghnLocationCache.wards.get(cacheKey) || [],
+        wards,
         "WardCode",
         "WardName",
         "Chọn phường / xã"
@@ -166,25 +151,38 @@ async function loadGHNWards(districtId, selectedWardCode = "") {
 
 function getSelectedProvince() {
     const { provinceSelect } = getAddressElements();
-    return ghnLocationCache.provinces.find(
-        province => String(province.ProvinceID) === String(provinceSelect.value)
-    ) || null;
+    if (!provinceSelect.value || provinceSelect.selectedIndex < 1) {
+        return null;
+    }
+
+    return {
+        ProvinceID: provinceSelect.value,
+        ProvinceName: provinceSelect.options[provinceSelect.selectedIndex].text
+    };
 }
 
 function getSelectedDistrict() {
-    const { provinceSelect, districtSelect } = getAddressElements();
-    const districts = ghnLocationCache.districts.get(String(provinceSelect.value)) || [];
-    return districts.find(
-        district => String(district.DistrictID) === String(districtSelect.value)
-    ) || null;
+    const { districtSelect } = getAddressElements();
+    if (!districtSelect.value || districtSelect.selectedIndex < 1) {
+        return null;
+    }
+
+    return {
+        DistrictID: districtSelect.value,
+        DistrictName: districtSelect.options[districtSelect.selectedIndex].text
+    };
 }
 
 function getSelectedWard() {
-    const { districtSelect, wardSelect } = getAddressElements();
-    const wards = ghnLocationCache.wards.get(String(districtSelect.value)) || [];
-    return wards.find(
-        ward => String(ward.WardCode) === String(wardSelect.value)
-    ) || null;
+    const { wardSelect } = getAddressElements();
+    if (!wardSelect.value || wardSelect.selectedIndex < 1) {
+        return null;
+    }
+
+    return {
+        WardCode: wardSelect.value,
+        WardName: wardSelect.options[wardSelect.selectedIndex].text
+    };
 }
 
 function buildLocationText() {
@@ -240,10 +238,6 @@ function initAddressForm() {
     });
 
     saveAddressBtn.addEventListener("click", addAddress);
-
-    loadGHNProvinces().catch(error => {
-        console.error(error);
-    });
 }
 
 async function loadUserProfile() {

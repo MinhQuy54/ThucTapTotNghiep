@@ -1,60 +1,70 @@
-
-    services:
-      django:   
-        build: ./django_service
-        container_name: django_service
-        restart: on-failure
-        env_file:
-          - ./django_service/.env 
-        volumes:
-          - ./django_service:/app
-        depends_on:
-          - mysql_db
-        networks:
-          - veggie_net
-
-      dotnet:
-        build: ./dotnet_service
-        container_name: dotnet_service
-        restart: on-failure
-        depends_on:
-          - mysql_db
-        networks:
-          - veggie_net
-
-      nginx:
-        image: nginx:latest
-        container_name: nginx_gateway
-        ports:
-          - "8080:80"
-        volumes:
-          # Mount file config chuẩn vào thư mục conf.d
-          - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-          # Mount thư mục chứa code HTML/JS của bạn vào đây
-          - ./frontend:/usr/share/nginx/html:ro
-        depends_on:
-          - django
-          - dotnet
-        networks:
-          - veggie_net
-
-      mysql_db:
-        image: mysql:8.0
-        container_name: mysql_db
-        restart: always
-        environment:
-          MYSQL_DATABASE: veggie_db
-          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-        ports:
-          - "3306:3306"
-        volumes:
-          - mysql_data:/var/lib/mysql
-        networks:
-          - veggie_net
-
-    networks:
-      veggie_net:
-        driver: bridge
-
+services:
+  django:
+    build: ./django_service
+    container_name: django_service
+    restart: on-failure
+    env_file:
+      - ./django_service/.env
+    environment:
+      REDIS_URL: redis://redis:6379/1
     volumes:
-      mysql_data:
+      - ./django_service:/app
+    depends_on:
+      - mysql_db
+      - redis
+    networks:
+      - veggie_net
+
+  dotnet:
+    build: ./dotnet_service
+    container_name: dotnet_service
+    restart: on-failure
+    depends_on:
+      - mysql_db
+    networks:
+      - veggie_net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_gateway
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - django
+      - dotnet
+    networks:
+      - veggie_net
+
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: veggie_db
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - veggie_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - veggie_net
+
+networks:
+  veggie_net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:

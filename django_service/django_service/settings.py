@@ -214,3 +214,26 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 GHN_TOKEN = os.getenv('GHN_TOKEN')
 GHN_SHOP_ID = os.getenv('GHN_SHOP_ID')
 GHN_API_URL = os.getenv('GHN_API_URL')
+
+
+# REDIS
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
+
+if importlib.util.find_spec("django_redis") and REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "veggie-local-cache",
+        }
+    }

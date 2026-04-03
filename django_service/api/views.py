@@ -16,6 +16,10 @@ from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib import messages
 
+# redis
+
+from django.core.cache import cache
+
 class LoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -363,30 +367,27 @@ def admin_contact_view(request):
 class GHNProxyBase(APIView):
     permission_classes = [IsAuthenticated]
     ghn_headers = {
-        "Token": settings.GHN_TOKEN,
-        "Content-Type": "application/json",
+        "Token" : settings.GHN_TOKEN,
+        "Content-Type" : "application/json"
     }
-
     if settings.GHN_SHOP_ID:
         ghn_headers["ShopId"] = str(settings.GHN_SHOP_ID)
 
     def request_ghn(self, method, endpoint, payload=None):
         url = f"{settings.GHN_API_URL}{endpoint}"
-
-        try:
+        try: 
             response = requests.request(
                 method=method,
                 url=url,
                 headers=self.ghn_headers,
                 json=payload,
-                timeout=15,
+                timeout=15
             )
             data = response.json()
         except requests.RequestException as exc:
-            return Response(
-                {"message": f"Không kết nối được GHN: {exc}"},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
+            return Response({
+                "message" : f"hông kết nối được GHN: {exc}"
+            }, status=status.HTTP_502_BAD_GATEWAY)
         except ValueError:
             return Response(
                 {"message": "GHN trả về dữ liệu không hợp lệ."},
@@ -394,25 +395,56 @@ class GHNProxyBase(APIView):
             )
 
         return Response(data, status=response.status_code)
-
+    
 class GetProvincesView(GHNProxyBase):
     def get(self, request):
-        return self.request_ghn("GET", "province")
+        cache_key = "ghn_provinces"
+
+        data = cache.get(cache_key)
+        if data:
+            return Response(data)
+        response = self.request_ghn("GET", "province")
+        if response.status_code == status.HTTP_200_OK:
+            data = response.data
+            cache.set(cache_key, data, timeout=86400)
+        return response
+    
 
 class GetDistrictsView(GHNProxyBase):
     def post(self, request):
         province_id = request.data.get('province_id')
         if not province_id:
             return Response({"message": "Thiếu province_id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cache_key = f"ghn_districts_{province_id}"
+
+        data = cache.get(cache_key)
+        if data:
+            return Response(data)
 
         payload = {"province_id": int(province_id)}
-        return self.request_ghn("POST", "district", payload)
+        response = self.request_ghn("POST", "district", payload)
+        if response.status_code == status.HTTP_200_OK:
+            data = response.data
+            cache.set(cache_key, data, timeout=86400)
+        return response
 
 class GetWardsView(GHNProxyBase):
     def post(self, request):
         district_id = request.data.get('district_id')
+
         if not district_id:
-            return Response({"message": "Thiếu district_id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Thiếu district_id"}, status=400)
+
+        cache_key = f"ghn_wards_{district_id}"
+
+        data = cache.get(cache_key)
+        if data:
+            return Response(data)
 
         payload = {"district_id": int(district_id)}
-        return self.request_ghn("POST", "ward", payload)
+        response = self.request_ghn("POST", "ward", payload)
+        if response.status_code == status.HTTP_200_OK:
+            data = response.data
+            cache.set(cache_key, data, timeout=86400)
+        return response
