@@ -1,7 +1,10 @@
 let editingAddressId = null;
+let selectedAvatarObjectUrl = null;
+const DEFAULT_AVATAR_SRC = "https://via.placeholder.com/120?text=Avatar";
 
 document.addEventListener("DOMContentLoaded", () => {
     initAddressForm();
+    initAvatarInput();
     loadUserProfile();
     updateAccount();
     updatePassword();
@@ -26,6 +29,81 @@ function renderStatus(status) {
         default:
             return '<span class="badge bg-dark">Không xác định</span>';
     }
+}
+
+function resolveAvatarUrl(avatarPath) {
+    if (!avatarPath) {
+        return DEFAULT_AVATAR_SRC;
+    }
+
+    if (/^(data:|blob:)/i.test(avatarPath)) {
+        return avatarPath;
+    }
+
+    if (/^https?:/i.test(avatarPath)) {
+        try {
+            const parsedUrl = new URL(avatarPath);
+
+            if (parsedUrl.pathname.startsWith("/media/")) {
+                return `${parsedUrl.pathname}${parsedUrl.search}${parsedUrl.hash}`;
+            }
+
+            return parsedUrl.href;
+        } catch (error) {
+            console.error(error);
+            return avatarPath;
+        }
+    }
+
+    return avatarPath.startsWith("/") ? avatarPath : `/${avatarPath}`;
+}
+
+function setAvatarPreview(avatarPath, isObjectUrl = false) {
+    const avatarPreview = document.getElementById("detail-avatar-preview");
+
+    if (!avatarPreview) {
+        return;
+    }
+
+    if (selectedAvatarObjectUrl) {
+        URL.revokeObjectURL(selectedAvatarObjectUrl);
+        selectedAvatarObjectUrl = null;
+    }
+
+    if (isObjectUrl) {
+        selectedAvatarObjectUrl = avatarPath;
+        avatarPreview.src = avatarPath;
+        return;
+    }
+
+    avatarPreview.src = resolveAvatarUrl(avatarPath);
+}
+
+function initAvatarInput() {
+    const avatarInput = document.getElementById("detail-avatar-input");
+
+    if (!avatarInput) {
+        return;
+    }
+
+    avatarInput.addEventListener("change", (event) => {
+        const [file] = event.target.files || [];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            event.target.value = "";
+            antd.notification.warning({
+                message: "Tệp không hợp lệ",
+                description: "Vui lòng chọn một tệp hình ảnh."
+            });
+            return;
+        }
+
+        setAvatarPreview(URL.createObjectURL(file), true);
+    });
 }
 
 async function fetchGHNData(endpoint, method = "GET", body = null) {
@@ -266,6 +344,10 @@ async function loadUserProfile() {
         document.getElementById('email').value = user.email || "";
         document.getElementById('fullname').value =
             `${user.first_name || ""} ${user.last_name || ""}`.trim();
+        setAvatarPreview(user.avatar);
+        window.dispatchEvent(new CustomEvent("user-profile-updated", {
+            detail: user
+        }));
 
     } catch (err) {
         console.error(err);
@@ -276,27 +358,30 @@ async function loadUserProfile() {
 function updateAccount() {
     const token = localStorage.getItem("access_token");
     const accountForm = document.getElementById('account-details-form');
+    const avtInput = document.getElementById('detail-avatar-input');
 
     if (!token || !accountForm) return;
 
     accountForm.addEventListener("submit", async function (e) {
         e.preventDefault();
 
-        const updateData = {
-            first_name: document.getElementById('fname').value,
-            last_name: document.getElementById('lname').value,
-            email: document.getElementById('email').value
-        };
+        const updateData = new FormData();
+        updateData.append("first_name", document.getElementById('fname').value.trim());
+        updateData.append("last_name", document.getElementById('lname').value.trim());
+        updateData.append("email", document.getElementById('email').value.trim());
 
+        const avatarFile = avtInput?.files?.[0];
+        if (avatarFile) {
+            updateData.append("avatar", avatarFile);
+        }
 
         try {
             const res = await fetch('/api/user/update/', {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify(updateData)
+                body: updateData
             });
 
             const data = await res.json();
@@ -309,7 +394,11 @@ function updateAccount() {
                     duration: 3
                 });
 
-                loadUserProfile();
+                if (avtInput) {
+                    avtInput.value = "";
+                }
+
+                await loadUserProfile();
 
             } else {
                 antd.notification.error({
