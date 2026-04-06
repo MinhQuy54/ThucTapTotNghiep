@@ -51,6 +51,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const activatedStatus = urlParams.get('activated');
+    const oauthStatus = urlParams.get('oauth');
 
     if (activatedStatus === 'success') {
         antd.notification.success({
@@ -60,5 +61,7 @@ window.onload = function () {
         });
     } else if (activatedStatus === 'error') {
         antd.message.error('Link kích hoạt không hợp lệ hoặc đã hết hạn.');
+    } else if (oauthStatus === 'error') {
+        antd.message.error('Đăng nhập Google thất bại. Vui lòng thử lại.');
     }
 };

@@ -15,10 +15,43 @@ import requests
 from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib import messages
+from django.views.decorators.http import require_GET
 
 # redis
 
 from django.core.cache import cache
+
+
+@require_GET
+def google_oauth_success(request):
+    if not request.user.is_authenticated:
+        return redirect(f"{settings.FRONTEND_URL}/login.html?oauth=error")
+
+    user = request.user
+    updated_fields = []
+
+    if user.role_id is None:
+        customer_role = Role.objects.filter(name='Customer').first()
+        if customer_role:
+            user.role = customer_role
+            updated_fields.append('role')
+
+    google_account = user.socialaccount_set.filter(provider='google').first()
+    if google_account and user.google_id != google_account.uid:
+        user.google_id = google_account.uid
+        updated_fields.append('google_id')
+
+    if updated_fields:
+        user.save(update_fields=updated_fields)
+
+    refresh = RefreshToken.for_user(user)
+
+    return render(request, "auth/social_login_success.html", {
+        "access_token": str(refresh.access_token),
+        "refresh_token": str(refresh),
+        "username": user.username,
+        "email": user.email,
+    })
 
 class LoginView(APIView):
     def post(self, request):
@@ -59,7 +92,7 @@ class RegisterView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        
+        role = Role.objects.filter(name='Customer').first()
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
@@ -70,6 +103,8 @@ class RegisterView(APIView):
                 {"error": "Email đã tồn tại"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        if not role:
+            return Response({"error": "Chưa tạo role Customer"}, status=500)
         
         activation_token = str(uuid.uuid4())
 
@@ -88,7 +123,8 @@ class RegisterView(APIView):
             password=data['password'],
             first_name=data.get('firstname', ''), 
             last_name=data.get('lastname', ''),   
-            is_active= False
+            is_active= False,
+            role=role
         )
         user.activation_token = activation_token
         user.save()

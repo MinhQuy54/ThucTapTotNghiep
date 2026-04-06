@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Google</title>
+</head>
+<body>
+    <p>Đăng nhập Google thành công, đang chuyển hướng...</p>
+
+    <script>
+        localStorage.setItem("access_token", "{{ access_token|escapejs }}");
+        localStorage.setItem("refresh_token", "{{ refresh_token|escapejs }}");
+        localStorage.setItem("username", "{{ username|escapejs }}");
+        localStorage.setItem("email", "{{ email|escapejs }}");
+        window.location.replace("/index.html");
+    </script>
+</body>
+</html>

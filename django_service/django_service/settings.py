@@ -29,10 +29,27 @@ pymysql.install_as_MySQLdb()
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8080')
 
 ALLOWED_HOSTS = ['*']
+SOCIALACCOUNT_LOGIN_ON_GET = True
+CORS_ALLOW_ALL_ORIGINS = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+LOGIN_REDIRECT_URL = '/api/oauth/google/success/'
 
-
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        },
+        'EMAIL_AUTHENTICATION': True,
+        'VERIFIED_EMAIL': True,
+    }
+}
 # Application definition
 
 OPTIONAL_INSTALLED_APPS = []
@@ -41,6 +58,7 @@ if importlib.util.find_spec("jazzmin") is not None:
 
 
 INSTALLED_APPS = OPTIONAL_INSTALLED_APPS + [
+    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,6 +68,10 @@ INSTALLED_APPS = OPTIONAL_INSTALLED_APPS + [
     'api',
     'corsheaders',
     'rest_framework',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'django_service.urls'
@@ -157,11 +180,15 @@ JAZZMIN_SETTINGS = {
     "site_brand": "Veggie Management",
     "welcome_sign": "Chào mừng Quy đến với hệ thống quản lý Veggie",
     "copyright": "Veggie Store Ltd",
+    "search_model": ["api.User", "api.Product"],
     "topmenu_links": [
         {"name": "Trang chủ", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
     "show_sidebar": True,
     "navigation_expanded": True,
+    "hide_apps": [],  # Đảm bảo không ẩn app nào
+    "hide_models": [], # Đảm bảo không ẩn model nào
+    "order_with_respect_to": ["api", "socialaccount", "sites"], # Ưu tiên hiện các app này
     "icons": {
         "api.User": "fas fa-user",
         "api.Product": "fas fa-shopping-basket",
@@ -169,6 +196,7 @@ JAZZMIN_SETTINGS = {
         "api.Order": "fas fa-file-invoice-dollar",
         "api.Review": "fas fa-comments",
         "api.Contact": "fas fa-envelope",
+        "sites.Site": "fas fa-globe", # Thêm icon cho Sites
     },
     "theme": "flatly",
     "dark_mode_theme": None,
@@ -199,6 +227,12 @@ JAZZMIN_UI_CONFIG = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 # email 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

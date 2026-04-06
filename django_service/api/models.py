@@ -12,6 +12,7 @@ class Role(models.Model):
 
 
 class Permission(models.Model):
+    code = models.CharField(max_length=100, unique=True, null=True, blank=True)  
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 

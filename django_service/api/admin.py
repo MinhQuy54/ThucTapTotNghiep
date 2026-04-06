@@ -66,7 +66,6 @@ class ContactReplyForm(forms.Form):
         strip=True,
     )
 
-
 class ContactAdmin(admin.ModelAdmin):
     change_list_template = "admin/contact_reply.html"
     list_display = ("full_name", "email", "reply_status", "created_at")
@@ -192,6 +191,7 @@ class ContactAdmin(admin.ModelAdmin):
             "Cam on ban da lien he Veggie Shop."
         )
 
-
 admin.site.register(Contact, ContactAdmin)
+
 admin.site.register([Role, User, Product, ProductImage, Category, Order, OrderItem])
+
