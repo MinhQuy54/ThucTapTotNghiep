@@ -214,3 +214,39 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.email}"
+    
+
+# Banner
+
+class Banner(models.Model):
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='banners/', null=True, blank=True)
+    link = models.URLField(blank=True)
+    
+    position = models.CharField(max_length=50) 
+    status = models.BooleanField(default=True)
+
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+
+
+class BannerItem(models.Model):
+    banner = models.ForeignKey(
+        Banner, 
+        on_delete=models.CASCADE, 
+        related_name='items'
+    )
+    image = models.ImageField(upload_to='banners/')
+    link = models.URLField(blank=True)
+    sort_order = models.IntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.banner.title} - {self.sort_order}"
