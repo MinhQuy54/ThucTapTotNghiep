@@ -1,5 +1,8 @@
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, transaction
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 # --- 1. Roles & Permissions ---
@@ -28,7 +31,7 @@ class RolePermission(models.Model):
         return f"{self.role.name} - {self.permission.name}"
 
 
-# --- 2. User ---
+# --- 2. User & Reward Points ---
 class User(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
@@ -37,11 +40,31 @@ class User(AbstractUser):
     activation_token = models.CharField(max_length=255, blank=True, null=True)
     reset_token = models.CharField(max_length=255, blank=True, null=True)
 
-    role = models.ForeignKey('Role', on_delete=models.SET_NULL, null=True)
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(unique=True)
+    
+    # Tính năng tích điểm
+    reward_points = models.IntegerField(default=0, help_text="Điểm tích lũy hiện tại")
 
     def __str__(self):
         return f"{self.username} ({self.email})"
+
+
+class PointHistory(models.Model):
+    class ActionType(models.TextChoices):
+        EARN = 'earn', 'Tích điểm (Mua hàng)'
+        REDEEM = 'redeem', 'Tiêu điểm (Đổi thưởng/Thanh toán)'
+        REFUND = 'refund', 'Hoàn điểm (Hủy đơn)'
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='point_histories')
+    order = models.ForeignKey('Order', on_delete=models.SET_NULL, null=True, blank=True)
+    points = models.IntegerField(help_text="Số điểm cộng (+) hoặc trừ (-)")
+    action_type = models.CharField(max_length=20, choices=ActionType.choices)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} | {self.points} pts | {self.get_action_type_display()}"
 
 
 # --- 3. Shipping Address ---
@@ -61,13 +84,17 @@ class ShippingAddress(models.Model):
 
     def save(self, *args, **kwargs):
         if self.default:
-            ShippingAddress.objects.filter(user=self.user, default=True)\
-                .exclude(pk=self.pk)\
-                .update(default=False)
-        super().save(*args, **kwargs)
+            with transaction.atomic():
+                ShippingAddress.objects.filter(user=self.user, default=True)\
+                    .exclude(pk=self.pk)\
+                    .update(default=False)
+                super().save(*args, **kwargs)
+        else:
+            super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.full_name} - {self.city}"
+
 
 # --- 4. Category & Product ---
 class Category(models.Model):
@@ -107,20 +134,20 @@ class ProductImage(models.Model):
         return f"Image of {self.product.name}"
 
 
-# --- 5. Order ---
+# --- 5. Order & Payment ---
 class Order(models.Model):
-    STATUS_CHOICES = [
-        (1, "Chờ xác nhận"),
-        (2, "Đã xác nhận"),
-        (3, "Đang giao"),
-        (4, "Đã giao"),
-        (5, "Đã hủy"),
-        (6, "Hoàn trả"),
-    ]
+    class Status(models.IntegerChoices):
+        PENDING = 1, "Chờ xác nhận"
+        CONFIRMED = 2, "Đã xác nhận"
+        SHIPPING = 3, "Đang giao"
+        DELIVERED = 4, "Đã giao"
+        CANCELLED = 5, "Đã hủy"
+        REFUNDED = 6, "Hoàn trả"
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     total_price = models.DecimalField(max_digits=12, decimal_places=2)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
+    points_used = models.IntegerField(default=0, help_text="Số điểm đã dùng để thanh toán") 
+    status = models.IntegerField(choices=Status.choices, default=Status.PENDING)
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -143,7 +170,6 @@ class OrderStatusHistory(models.Model):
     status = models.IntegerField()
     changed_at = models.DateTimeField(auto_now_add=True)
     note = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Order #{self.order.id} - Status {self.status}"
@@ -155,21 +181,30 @@ class Payment(models.Model):
     transaction_id = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.IntegerField()
-    paid_at = models.DateTimeField(null=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Payment Order #{self.order.id} - {self.amount}"
 
 
-# --- 6. Cart / Review / Wishlist ---
+# --- 6. Cart, Review, Wishlist & Notifications ---
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
+    status = models.CharField(max_length=50, default="active")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.status}"
+
+
 class CartItem(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name} x{self.quantity}"
+        return f"Cart {self.cart.id} - {self.product.name} x{self.quantity}"
 
 
 class Review(models.Model):
@@ -214,39 +249,86 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.email}"
-    
 
-# Banner
 
-class Banner(models.Model):
-    title = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='banners/', null=True, blank=True)
-    link = models.URLField(blank=True)
-    
-    position = models.CharField(max_length=50) 
-    status = models.BooleanField(default=True)
+# --- 7. Vouchers ---
+class Voucher(models.Model):
+    class DiscountType(models.TextChoices):
+        PERCENT = 'percent', 'Phần trăm'
+        FIXED = 'fixed', 'Số tiền'
 
-    start_date = models.DateTimeField(auto_now_add=True)
-    end_date = models.DateTimeField(null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    code = models.CharField(max_length=50, unique=True)
+    discount_type = models.CharField(max_length=10, choices=DiscountType.choices)
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2)
+    min_order_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    max_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    quantity = models.IntegerField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.title
+        return self.code
 
 
-class BannerItem(models.Model):
-    banner = models.ForeignKey(
-        Banner, 
+class UserVoucher(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE)
+    used_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.voucher}"
+
+
+# --- 8. Inventory & Suppliers ---
+class Supplier(models.Model):
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=11)
+
+    def __str__(self):
+        return f"{self.name} - {self.phone}"
+
+
+class EntryForm(models.Model):
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
+    created_user = models.ForeignKey(
+        User, 
         on_delete=models.CASCADE, 
-        related_name='items'
+        limit_choices_to={'role__name': 'Staff'},
+        related_name='created_entry_forms'
     )
-    image = models.ImageField(upload_to='banners/')
-    link = models.URLField(blank=True)
-    sort_order = models.IntegerField(default=0)
+    status = models.CharField(max_length=50, default="Draft")
+    note = models.TextField(blank=True, null=True)
+    date = models.DateField()
 
+    def __str__(self):
+        return f"EntryForm #{self.id} - {self.supplier.name}"
+
+
+class EntryFormDetail(models.Model):
+    entry_form = models.ForeignKey(EntryForm, on_delete=models.CASCADE, related_name='details')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    quantity = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.product.name} x{self.quantity} (Entry #{self.entry_form.id})"
+
+
+class CancelForm(models.Model):
+    class ReasonChoices(models.TextChoices):
+        EXPIRED = 'expired', 'Hết hạn sử dụng'
+        DAMAGED = 'damaged', 'Hư hỏng/Lỗi'
+        LOST = 'lost', 'Thất lạc'
+
+    created_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, limit_choices_to={'role__name': 'Staff'}
+    )
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    reason = models.CharField(max_length=50, choices=ReasonChoices.choices)
+    note = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.banner.title} - {self.sort_order}"
+        return f"Hủy {self.quantity} {self.product.name} - {self.get_reason_display()}"

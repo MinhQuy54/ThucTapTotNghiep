@@ -13,7 +13,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils import timezone
-from .models import Category, Contact, Order, OrderItem, Product, ProductImage, Role, User
+from .models import Category, Contact, Order, OrderItem, Product, ProductImage, Role, User, Voucher
 
 
 class VeggieAdminSite(admin.AdminSite):
@@ -194,4 +194,3 @@ class ContactAdmin(admin.ModelAdmin):
 admin.site.register(Contact, ContactAdmin)
 
 admin.site.register([Role, User, Product, ProductImage, Category, Order, OrderItem])
-

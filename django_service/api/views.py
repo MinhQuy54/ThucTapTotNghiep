@@ -15,43 +15,44 @@ import requests
 from django.conf import settings
 from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib import messages
+from django.utils import timezone
 from django.views.decorators.http import require_GET
 
 # redis
 
 from django.core.cache import cache
 
+# from django.contrib.auth.models import User
+
 
 @require_GET
 def google_oauth_success(request):
-    if not request.user.is_authenticated:
-        return redirect(f"{settings.FRONTEND_URL}/login.html?oauth=error")
-
-    user = request.user
+    user : User = request.user
     updated_fields = []
-
+    if not user.is_authenticated:
+        return redirect(f"{settings.FRONTEND_URL}/login.html?oauth=error")
+    
     if user.role_id is None:
         customer_role = Role.objects.filter(name='Customer').first()
-        if customer_role:
-            user.role = customer_role
-            updated_fields.append('role')
+        user.role=customer_role
+        updated_fields.append('role')
 
     google_account = user.socialaccount_set.filter(provider='google').first()
+
     if google_account and user.google_id != google_account.uid:
         user.google_id = google_account.uid
         updated_fields.append('google_id')
 
     if updated_fields:
         user.save(update_fields=updated_fields)
-
     refresh = RefreshToken.for_user(user)
-
     return render(request, "auth/social_login_success.html", {
-        "access_token": str(refresh.access_token),
-        "refresh_token": str(refresh),
-        "username": user.username,
+        "access_token" : str(refresh.access_token),
+        "refresh_token" : str(refresh),
+         "username": user.username,
         "email": user.email,
     })
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -363,6 +364,7 @@ class ContactList(APIView):
                 "message": "Gửi liên hệ thành công"
             }, status=status.HTTP_201_CREATED)
         return Response(serializers.errors, status=400)
+
 
 def admin_contact_view(request):
     contacts = Contact.objects.all().order_by('-created_at')
