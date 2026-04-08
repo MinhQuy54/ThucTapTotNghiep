@@ -17,7 +17,7 @@ python-dotenv==1.2.2
 requests==2.32.5
 sqlparse==0.5.5
 urllib3==2.6.3
-django-jazzmin==3.0.4
+django-unfold==0.88.0
 django-redis==6.0.0
 django-allauth==65.15.1
 cryptography==44.0.1

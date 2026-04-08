@@ -16,6 +16,7 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import pymysql
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -52,12 +53,8 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 # Application definition
 
-OPTIONAL_INSTALLED_APPS = []
-if importlib.util.find_spec("jazzmin") is not None:
-    OPTIONAL_INSTALLED_APPS.append("jazzmin")
-
-
-INSTALLED_APPS = OPTIONAL_INSTALLED_APPS + [
+INSTALLED_APPS = [
+    "unfold",
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -174,55 +171,120 @@ REST_FRAMEWORK = {
 
 }
 
-JAZZMIN_SETTINGS = {
-    "site_title": "Veggie Admin",
-    "site_header": "Veggie Store",
-    "site_brand": "Veggie Management",
-    "welcome_sign": "Chào mừng Quy đến với hệ thống quản lý Veggie",
-    "copyright": "Veggie Store Ltd",
-    "search_model": ["api.User", "api.Product"],
-    "topmenu_links": [
-        {"name": "Trang chủ", "url": "admin:index", "permissions": ["auth.view_user"]},
+UNFOLD = {
+    "SITE_TITLE": "Veggie Admin",
+    "SITE_HEADER": "Veggie Store",
+    "SITE_SUBHEADER": "Bảng quản trị vận hành Veggie Store",
+    "SITE_SYMBOL": "eco",
+    "SITE_URL": FRONTEND_URL,
+    "SITE_DROPDOWN": [
+        {
+            "icon": "storefront",
+            "title": "Mở website",
+            "link": FRONTEND_URL,
+            "attrs": {
+                "target": "_blank",
+                "rel": "noopener noreferrer",
+            },
+        },
+        {
+            "icon": "contact_mail",
+            "title": "Hộp thư liên hệ",
+            "link": reverse_lazy("admin:api_contact_changelist"),
+        },
     ],
-    "show_sidebar": True,
-    "navigation_expanded": True,
-    "hide_apps": [],  # Đảm bảo không ẩn app nào
-    "hide_models": [], # Đảm bảo không ẩn model nào
-    "order_with_respect_to": ["api", "socialaccount", "sites"], # Ưu tiên hiện các app này
-    "icons": {
-        "api.User": "fas fa-user",
-        "api.Product": "fas fa-shopping-basket",
-        "api.Category": "fas fa-list",
-        "api.Order": "fas fa-file-invoice-dollar",
-        "api.Review": "fas fa-comments",
-        "api.Contact": "fas fa-envelope",
-        "sites.Site": "fas fa-globe", # Thêm icon cho Sites
+    "SHOW_HISTORY": True,
+    "DASHBOARD_CALLBACK": "api.admin.dashboard_callback",
+    "COLORS": {
+        "primary": {
+            "50": "#effcf6",
+            "100": "#d9f7e8",
+            "200": "#b8efd3",
+            "300": "#8ddfb5",
+            "400": "#57c88c",
+            "500": "#2fab68",
+            "600": "#1f8f63",
+            "700": "#176d4b",
+            "800": "#15543b",
+            "900": "#123b2e",
+            "950": "#092118",
+        },
     },
-    "theme": "flatly",
-    "dark_mode_theme": None,
-}
-
-JAZZMIN_UI_CONFIG = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": "navbar-success",  
-    "accent": "accent-success",
-    "navbar": "navbar-success navbar-dark",
-    "no_navbar_border": False,
-    "navbar_fixed": True,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": True,
-    "sidebar": "sidebar-dark-success",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "flatly",
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": "Tổng quan",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Dashboard",
+                        "icon": "space_dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                    {
+                        "title": "Liên hệ khách hàng",
+                        "icon": "contact_mail",
+                        "link": reverse_lazy("admin:api_contact_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Danh mục",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Sản phẩm",
+                        "icon": "inventory_2",
+                        "link": reverse_lazy("admin:api_product_changelist"),
+                    },
+                    {
+                        "title": "Danh mục sản phẩm",
+                        "icon": "category",
+                        "link": reverse_lazy("admin:api_category_changelist"),
+                    },
+                    {
+                        "title": "Ảnh sản phẩm",
+                        "icon": "photo_library",
+                        "link": reverse_lazy("admin:api_productimage_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Bán hàng",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Đơn hàng",
+                        "icon": "receipt_long",
+                        "link": reverse_lazy("admin:api_order_changelist"),
+                    },
+                    {
+                        "title": "Chi tiết đơn",
+                        "icon": "shopping_cart_checkout",
+                        "link": reverse_lazy("admin:api_orderitem_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": "Tài khoản",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Người dùng",
+                        "icon": "group",
+                        "link": reverse_lazy("admin:api_user_changelist"),
+                    },
+                    {
+                        "title": "Vai trò",
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:api_role_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
 }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

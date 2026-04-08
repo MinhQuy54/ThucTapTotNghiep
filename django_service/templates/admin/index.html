@@ -1,112 +1,294 @@
-{% extends "admin/index.html" %}
+{% extends "admin/base_site.html" %}
+
+{% block is_fullwidth %}1{% endblock %}
 
 {% block content %}
 <style>
-    .tile-stats {
-        border: 1px solid #ddd;
-        padding: 20px;
-        border-radius: 5px;
-        background: #fff;
-        margin-bottom: 20px;
-        text-align: center;
+    .dashboard-shell {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
     }
 
-    .tile-stats .count {
-        font-size: 30px;
-        font-weight: bold;
-        color: #26B99A;
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
     }
 
-    .tile-stats h3 {
+    .metric-card,
+    .dashboard-panel {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+    }
+
+    .metric-card {
+        padding: 22px;
+    }
+
+    .metric-card::after {
+        content: "";
+        position: absolute;
+        top: -48px;
+        right: -48px;
+        width: 128px;
+        height: 128px;
+        border-radius: 999px;
+        background: rgba(31, 143, 99, 0.10);
+    }
+
+    .metric-label {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 14px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .metric-value {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        color: #0f172a;
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .metric-subtle {
+        position: relative;
+        z-index: 1;
+        margin-top: 12px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .dashboard-panels {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+        gap: 16px;
+    }
+
+    .dashboard-panel {
+        padding: 24px;
+    }
+
+    .dashboard-panel-head {
+        margin-bottom: 18px;
+    }
+
+    .dashboard-panel-head h2 {
+        margin: 0 0 8px;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .dashboard-panel-head p {
+        margin: 0;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .chart-shell {
+        min-height: 340px;
+    }
+
+    .dashboard-actions {
+        display: grid;
+        gap: 14px;
+    }
+
+    .dashboard-action {
+        display: block;
+        padding: 16px 18px;
+        border: 1px solid #dbe5dd;
+        border-radius: 18px;
+        background: #ffffff;
+        color: inherit;
+        text-decoration: none;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .dashboard-action:hover {
+        transform: translateY(-2px);
+        border-color: rgba(31, 143, 99, 0.35);
+        box-shadow: 0 16px 28px rgba(31, 143, 99, 0.12);
+    }
+
+    .dashboard-action strong {
+        display: block;
+        margin-bottom: 6px;
+        color: #0f172a;
         font-size: 15px;
-        color: #73879C;
+    }
+
+    .dashboard-action span {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .dashboard-notes {
+        margin-top: 18px;
+        padding: 18px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(31, 143, 99, 0.10) 0%, rgba(255, 255, 255, 0.92) 100%);
+        border: 1px solid rgba(31, 143, 99, 0.16);
+    }
+
+    .dashboard-notes h3 {
+        margin: 0 0 10px;
+        color: #15543b;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .dashboard-notes p {
+        margin: 0;
+        color: #355246;
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    .dashboard-main {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    @media (min-width: 1280px) {
+        .dashboard-main {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+
+        .dashboard-main > :first-child {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .dashboard-main > :last-child {
+            width: 360px;
+            flex: 0 0 360px;
+        }
+    }
+
+    @media (max-width: 1180px) {
+        .dashboard-grid,
+        .dashboard-panels {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-panels > :first-child {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .dashboard-grid,
+        .dashboard-panels {
+            grid-template-columns: 1fr;
+        }
+
+        .metric-card,
+        .dashboard-panel {
+            padding: 18px;
+        }
+
+        .chart-shell {
+            min-height: 280px;
+        }
     }
 </style>
 
-<div class="row">
-    <div class="col-md-3 col-sm-6">
-        <div class="tile-stats">
-            <div class="count">{{ total_orders }}</div>
-            <h3>Total Orders</h3>
-        </div>
+<div class="dashboard-shell">
+    <div class="dashboard-grid">
+        <section class="metric-card">
+            <div class="metric-label">Tổng đơn hàng</div>
+            <p class="metric-value">{{ total_orders }}</p>
+            <div class="metric-subtle">Toàn bộ đơn đã tạo trong hệ thống.</div>
+        </section>
+
+        <section class="metric-card">
+            <div class="metric-label">Doanh thu theo dõi</div>
+            <p class="metric-value">{{ total_revenue|floatformat:0 }}</p>
+            <div class="metric-subtle">Giá trị hiện đang được thống kê từ đơn hàng trong admin.</div>
+        </section>
+
+        <section class="metric-card">
+            <div class="metric-label">Sản phẩm sắp hết</div>
+            <p class="metric-value">{{ low_stock }}</p>
+            <div class="metric-subtle">Các mặt hàng có tồn kho dưới 10 đơn vị.</div>
+        </section>
+
+        <section class="metric-card">
+            <div class="metric-label">Liên hệ chưa trả lời</div>
+            <p class="metric-value">{{ new_contacts }}</p>
+            <div class="metric-subtle">Khách hàng đang chờ phản hồi từ đội vận hành.</div>
+        </section>
     </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="tile-stats">
-            <div class="count">{{ total_revenue|floatformat:0 }}</div>
-            <h3>Revenue (VNĐ)</h3>
-        </div>
+
+    <div class="dashboard-panels">
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <h2>Ma trận đơn hàng 7 ngày gần nhất</h2>
+                <p>Đây là cohort chart có sẵn của Unfold. Mỗi ô thể hiện số đơn theo ngày và theo trạng thái, không cần mình tự viết Chart.js riêng.</p>
+            </div>
+
+            <div class="chart-shell">
+                {% include "unfold/components/chart/cohort.html" with data=cohort_data %}
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <h2>Đi tắt quan trọng</h2>
+                <p>Mở nhanh những khu vực quản trị được dùng nhiều nhất trong quá trình vận hành.</p>
+            </div>
+
+            <div class="dashboard-actions">
+                <a class="dashboard-action" href="{% url 'admin:api_contact_changelist' %}">
+                    <strong>Hộp thư liên hệ</strong>
+                    <span>Xem tin nhắn mới và gửi phản hồi trực tiếp cho khách hàng.</span>
+                </a>
+
+                <a class="dashboard-action" href="{% url 'admin:api_order_changelist' %}">
+                    <strong>Quản lý đơn hàng</strong>
+                    <span>Theo dõi trạng thái xử lý, giao hàng và cập nhật tiến độ bán hàng.</span>
+                </a>
+
+                <a class="dashboard-action" href="{% url 'admin:api_product_changelist' %}">
+                    <strong>Kho sản phẩm</strong>
+                    <span>Kiểm tra nhanh mặt hàng sắp hết và cập nhật thông tin sản phẩm.</span>
+                </a>
+            </div>
+
+            <div class="dashboard-notes">
+                <h3>Nhịp xử lý gợi ý</h3>
+                <p>Ưu tiên phản hồi liên hệ mới trước, sau đó kiểm tra đơn hàng và cuối cùng rà lại những sản phẩm đang xuống tồn kho.</p>
+            </div>
+        </section>
     </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="tile-stats">
-            <div class="count">{{ low_stock }}</div>
-            <h3>Low Stock Items</h3>
+
+    <div class="dashboard-main">
+        <div>
+            {% include "unfold/helpers/app_list_default.html" %}
         </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="tile-stats">
-            <div class="count">{{ new_contacts }}</div>
-            <h3>New Messages</h3>
+
+        <div>
+            {% include "unfold/helpers/history.html" %}
         </div>
     </div>
 </div>
-
-<div class="row" style="margin-top: 20px;">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Xu hướng đơn hàng 1 tháng gần nhất</h3>
-            </div>
-            <div class="card-body">
-                <canvas id="mainChart" style="height: 300px;"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const trendLabels = {{ trend_labels|default:"[]"|safe }};
-    const trendData = {{ trend_data|default:"[]"|safe }};
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const canvas = document.getElementById('mainChart');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: trendLabels,
-                    datasets: [{
-                        label: 'Số đơn hàng',
-                        data: trendData,
-                        borderColor: '#26B99A',
-                        backgroundColor: 'rgba(38, 185, 154, 0.18)',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#26B99A',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-
-{{ block.super }}
 {% endblock %}

@@ -1,4 +1,4 @@
-#!/Users/minhquy54/Documents/STU/TTTN/django_service/env/bin/python3.11
+#!/Users/minhquy54/Documents/STU/ThucTapTotNghiep/django_service/env/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -1,4 +1,4 @@
-const DEFAULT_HEADER_AVATAR = "https://via.placeholder.com/80?text=U";
+const DEFAULT_HEADER_AVATAR = `img/IMG_4420.JPG`;
 
 fetch('header.html')
     .then(res => res.text())
