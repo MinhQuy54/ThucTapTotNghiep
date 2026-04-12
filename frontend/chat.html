@@ -1,0 +1,59 @@
+<div class="chat-wrapper" data-chat-widget>
+    <button id="chat-circle" class="chat-launcher" type="button" data-chat-toggle aria-controls="veggie-chat-panel"
+        aria-expanded="false" aria-label="Mở Veggie AI">
+        <span class="material-symbols-outlined">forum</span>
+        <span class="chat-launcher-label">
+            <strong>Veggie AI</strong>
+            <small>Tư vấn ngay</small>
+        </span>
+    </button>
+
+    <section id="veggie-chat-panel" class="veggie-chat-panel is-hidden" data-chat-panel aria-hidden="true">
+        <div class="veggie-chat-glow" aria-hidden="true"></div>
+
+        <div class="veggie-chat-header">
+            <div class="veggie-chat-title-wrap">
+                <span class="veggie-chat-kicker">Tư vấn mua sắm thông minh</span>
+                <h3>Hỏi sản phẩm, giá và chính sách của Veggie</h3>
+                <p>Trả lời nhanh từ dữ liệu RAG đang hoạt động của cửa hàng.</p>
+            </div>
+
+            <button type="button" class="veggie-chat-close" data-chat-close aria-label="Đóng hộp chat">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="veggie-chat-suggestions" data-chat-suggestions>
+            <button type="button" class="veggie-chat-chip"
+                data-chat-prompt="Giới thiệu cho tôi một vài loại rau xanh bán chạy">Rau bán chạy</button>
+            <button type="button" class="veggie-chat-chip"
+                data-chat-prompt="Cửa hàng có chính sách đổi trả như thế nào">Chính sách đổi trả</button>
+            <button type="button" class="veggie-chat-chip"
+                data-chat-prompt="Tư vấn giúp tôi các loại củ quả phù hợp để nấu canh">Tư vấn bữa ăn</button>
+        </div>
+
+        <div class="veggie-chat-log" data-chat-log role="log" aria-live="polite">
+            <article class="veggie-chat-message is-bot">
+                <div class="veggie-chat-avatar">V</div>
+                <div class="veggie-chat-bubble">
+                    <p>Chào bạn, mình là Veggie AI. Bạn có thể hỏi về sản phẩm, tồn kho và các chính sách của cửa
+                        hàng.</p>
+                </div>
+            </article>
+        </div>
+
+        <form class="veggie-chat-form" data-chat-form>
+            <label class="visually-hidden" for="veggie-chat-input">Tin nhắn</label>
+            <textarea id="veggie-chat-input" data-chat-input rows="1" maxlength="500"
+                placeholder="Ví dụ: Cửa hàng có chính sách giao hàng hay đổi trả thế nào?"></textarea>
+            <button type="submit" class="veggie-chat-submit" data-chat-submit aria-label="Gửi tin nhắn">
+                <span class="material-symbols-outlined">north_east</span>
+            </button>
+        </form>
+
+        <div class="veggie-chat-meta">
+            <span data-chat-status>Sẵn sàng hỗ trợ.</span>
+            <span>Enter để gửi, Shift + Enter để xuống dòng</span>
+        </div>
+    </section>
+</div>
