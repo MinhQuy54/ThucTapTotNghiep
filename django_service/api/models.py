@@ -43,7 +43,6 @@ class User(AbstractUser):
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(unique=True)
     
-    # Tính năng tích điểm
     reward_points = models.IntegerField(default=0, help_text="Điểm tích lũy hiện tại")
 
     def __str__(self):

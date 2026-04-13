@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import Base
 
 from django import forms
 from django.conf import settings
@@ -13,7 +14,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
-from .models import Category, Contact, Order, OrderItem, Product, ProductImage, Role, User
+from .models import Category, Contact, Order, OrderItem, Permission, Product, ProductImage, Role, User
 
 
 BADGE_STYLES = {
@@ -174,8 +175,12 @@ class RoleAdmin(BaseAdmin):
     list_display = ("name", "created_at")
     search_fields = ("name",)
     ordering = ("name",)
-
-
+@admin.register(Permission)
+class Permission(BaseAdmin):
+    list_display = ("code", "name", "created_at")
+    search_fields = ("name",)
+    ordering = ("name", )
+    
 @admin.register(User)
 class UserAdmin(BaseAdmin):
     list_display = ("username", "email", "role", "is_staff", "reward_points", "date_joined")

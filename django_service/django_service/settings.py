@@ -281,6 +281,11 @@ UNFOLD = {
                         "icon": "badge",
                         "link": reverse_lazy("admin:api_role_changelist"),
                     },
+                    {
+                        "title": "Phân quyền",
+                        "icon": "badge",
+                        "link": reverse_lazy("admin:api_permission_changelist"),
+                    },
                 ],
             },
         ],
