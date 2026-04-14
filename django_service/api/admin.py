@@ -1,4 +1,6 @@
 from datetime import timedelta
+from re import search
+from tkinter import Entry
 from unittest.mock import Base
 
 from django import forms
@@ -14,7 +16,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
-from .models import Category, Contact, Order, OrderItem, Permission, Product, ProductImage, Role, User
+from .models import CancelForm, Category, Contact, EntryForm, EntryFormDetail, Order, OrderItem, Permission, Product, ProductImage, Role, RolePermission, Supplier, User, UserVoucher, Voucher
 
 
 BADGE_STYLES = {
@@ -181,6 +183,11 @@ class Permission(BaseAdmin):
     search_fields = ("name",)
     ordering = ("name", )
     
+@admin.register(RolePermission)
+class RolePermission(BaseAdmin):
+    list_display = ("role", "permission")
+    search_fields = ("permission", )
+    ordering = ("permission", )
 @admin.register(User)
 class UserAdmin(BaseAdmin):
     list_display = ("username", "email", "role", "is_staff", "reward_points", "date_joined")
@@ -189,7 +196,40 @@ class UserAdmin(BaseAdmin):
     ordering = ("-date_joined",)
     autocomplete_fields = ("role",)
     filter_horizontal = ("groups", "user_permissions")
+@admin.register(Voucher)
+class VoucherAdmin(BaseAdmin):
+    list_display = ("code", "discount_type", "discount_value", "min_order_value", "max_discount", "quantity", "start_date", "end_date", "is_active")
+    # search_fields = ("code", "discount_type", "discount_value", "min_order_value", "max_discount", "quantity", "start_date", "end_date", "is_active")
+    list_filter = ("start_date", "end_date")
 
+@admin.register(UserVoucher)
+class VoucherAdmin(BaseAdmin):
+    list_display = ("user", "voucher", "used_at")
+    # search_fields = ("voucher")
+
+@admin.register(Supplier)
+class SupplierAdmin(BaseAdmin):
+    list_display = ("name", "phone")
+    # search_fields = ("name")
+
+@admin.register(EntryForm)
+class EntryForm(BaseAdmin):
+    list_display = ("supplier", "status", "note", "date", "created_user")
+    search_fields = ("supplier", "status",)
+    # list_filter = ("status")
+    # ordering = ("-date")
+
+@admin.register(EntryFormDetail)
+class EntryFormDetail(BaseAdmin):
+    list_display = ("entry_form", "product", "price", "quantity")
+    search_fields = ("product", "entry_form",)
+    # list_filter = ("price")
+
+@admin.register(CancelForm)
+class CancelForm(BaseAdmin):
+    list_display = ("created_user", "product", "quantity", "reason", "note", "created_at")
+    # search_fields = ("product")
+    # list_filter = ("price")
 
 @admin.register(Category)
 class CategoryAdmin(BaseAdmin):
@@ -380,3 +420,4 @@ class ContactAdmin(BaseAdmin):
             f"- Noi dung: {contact.message}\n\n"
             "Cam on ban da lien he Veggie Shop."
         )
+

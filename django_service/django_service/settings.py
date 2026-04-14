@@ -211,85 +211,162 @@ UNFOLD = {
         },
     },
     "SIDEBAR": {
-        "show_search": True,
-        "show_all_applications": True,
-        "navigation": [
-            {
-                "title": "Tổng quan",
-                "separator": True,
-                "items": [
-                    {
-                        "title": "Dashboard",
-                        "icon": "space_dashboard",
-                        "link": reverse_lazy("admin:index"),
-                    },
-                    {
-                        "title": "Liên hệ khách hàng",
-                        "icon": "contact_mail",
-                        "link": reverse_lazy("admin:api_contact_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": "Danh mục",
-                "separator": True,
-                "items": [
-                    {
-                        "title": "Sản phẩm",
-                        "icon": "inventory_2",
-                        "link": reverse_lazy("admin:api_product_changelist"),
-                    },
-                    {
-                        "title": "Danh mục sản phẩm",
-                        "icon": "category",
-                        "link": reverse_lazy("admin:api_category_changelist"),
-                    },
-                    {
-                        "title": "Ảnh sản phẩm",
-                        "icon": "photo_library",
-                        "link": reverse_lazy("admin:api_productimage_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": "Bán hàng",
-                "separator": True,
-                "items": [
-                    {
-                        "title": "Đơn hàng",
-                        "icon": "receipt_long",
-                        "link": reverse_lazy("admin:api_order_changelist"),
-                    },
-                    {
-                        "title": "Chi tiết đơn",
-                        "icon": "shopping_cart_checkout",
-                        "link": reverse_lazy("admin:api_orderitem_changelist"),
-                    },
-                ],
-            },
-            {
-                "title": "Tài khoản",
-                "separator": True,
-                "items": [
-                    {
-                        "title": "Người dùng",
-                        "icon": "group",
-                        "link": reverse_lazy("admin:api_user_changelist"),
-                    },
-                    {
-                        "title": "Vai trò",
-                        "icon": "badge",
-                        "link": reverse_lazy("admin:api_role_changelist"),
-                    },
-                    {
-                        "title": "Phân quyền",
-                        "icon": "badge",
-                        "link": reverse_lazy("admin:api_permission_changelist"),
-                    },
-                ],
-            },
-        ],
-    },
+    "show_search": True,
+    "show_all_applications": True,
+    "navigation": [
+
+        # ================= TỔNG QUAN =================
+        {
+            "title": "Tổng quan",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Dashboard",
+                    "icon": "dashboard",
+                    "link": reverse_lazy("admin:index"),
+                },
+                {
+                    "title": "Liên hệ khách hàng",
+                    "icon": "support_agent",
+                    "link": reverse_lazy("admin:api_contact_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_contact"),
+                },
+            ],
+        },
+
+        # ================= CUNG CẤP =================
+        {
+            "title": "Cung cấp",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Nhà Cung Cấp",
+                    "icon": "local_shipping",
+                    "link": reverse_lazy("admin:api_supplier_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_supplier"),
+                },
+                {
+                    "title": "Phiếu nhập",
+                    "icon": "assignment_return",
+                    "link": reverse_lazy("admin:api_entryform_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_entryform"),
+                },
+                {
+                    "title": "Chi tiết phiếu nhập",
+                    "icon": "list_alt",
+                    "link": reverse_lazy("admin:api_entryformdetail_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_entryformdetail"),
+                }
+            ]
+        },
+
+        # ================= GIẢM GIÁ =================
+        {
+            "title": "Giảm giá",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Voucher",
+                    "icon": "card_giftcard",
+                    "link": reverse_lazy("admin:api_voucher_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_voucher"),
+                },
+                {
+                    "title": "Người sử dụng",
+                    "icon": "how_to_reg",
+                    "link": reverse_lazy("admin:api_uservoucher_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_uservoucher"),
+                }
+            ]
+        },
+
+        # ================= DANH MỤC =================
+        {
+            "title": "Danh mục",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Sản phẩm",
+                    "icon": "inventory",
+                    "link": reverse_lazy("admin:api_product_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_product"),
+                },
+                {
+                    "title": "Danh mục sản phẩm",
+                    "icon": "category",
+                    "link": reverse_lazy("admin:api_category_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_category"),
+                },
+                {
+                    "title": "Ảnh sản phẩm",
+                    "icon": "photo",
+                    "link": reverse_lazy("admin:api_productimage_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_productimage"),
+                },
+            ],
+        },
+
+        # ================= BÁN HÀNG =================
+        {
+            "title": "Bán hàng",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Đơn hàng",
+                    "icon": "receipt",
+                    "link": reverse_lazy("admin:api_order_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_order"),
+                },
+                {
+                    "title": "Chi tiết đơn",
+                    "icon": "shopping_cart",
+                    "link": reverse_lazy("admin:api_orderitem_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_orderitem"),
+                },
+            ],
+        },
+
+        # ================= TÀI KHOẢN =================
+        {
+            "title": "Tài khoản",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Người dùng",
+                    "icon": "person",
+                    "link": reverse_lazy("admin:api_user_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_user"),
+                },
+                {
+                    "title": "Vai trò",
+                    "icon": "admin_panel_settings",
+                    "link": reverse_lazy("admin:api_role_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_role"),
+                },
+                {
+                    "title": "Phân quyền",
+                    "icon": "lock",
+                    "link": reverse_lazy("admin:api_permission_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_permission"),
+                },
+            ],
+        },
+
+        # ================= HỦY =================
+        {
+            "title": "Hủy",
+            "separator": True,
+            "items": [
+                {
+                    "title": "Phiếu hủy",
+                    "icon": "cancel",
+                    "link": reverse_lazy("admin:api_cancelform_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_cancelform"),
+                },
+            ],
+        },
+    ],
+}
 }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
