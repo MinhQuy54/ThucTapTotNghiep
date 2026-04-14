@@ -162,6 +162,7 @@ document.addEventListener("click", function (e) {
 
 async function addToCart(productId = null) {
 
+    console.log("Token hiện tại trong Storage là:", localStorage.getItem("access_token"));
     // nếu không truyền id → dùng id đang mở trong quickview
     if (!productId) {
         productId = currentProductId;

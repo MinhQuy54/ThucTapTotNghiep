@@ -22,6 +22,7 @@ namespace dotnet_service.Models
         public int Stock { get; set; }
         public int Status { get; set; }
         public string Unit { get; set; } = null!;
+        public int WeightGram { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public long CategoryId { get; set; }

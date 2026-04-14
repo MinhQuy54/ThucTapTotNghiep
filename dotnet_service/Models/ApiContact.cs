@@ -11,5 +11,7 @@ namespace dotnet_service.Models
         public string Email { get; set; } = null!;
         public string Message { get; set; } = null!;
         public bool IsReply { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? ReplyContent { get; set; }
     }
 }

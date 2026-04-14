@@ -10,6 +10,22 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePassword();
     loadAddress();
     loadOrder();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabName = urlParams.get('tab');
+
+    if (tabName === 'orders') {
+        const btnOrder = document.getElementById('tab-orders');
+        
+        if (btnOrder) {
+            const tabTrigger = new bootstrap.Tab(btnOrder);
+            tabTrigger.show();
+            
+            if (typeof loadOrderHistory === "function") {
+                loadOrderHistory();
+            }
+        }
+    }
 });
 
 function renderStatus(status) {

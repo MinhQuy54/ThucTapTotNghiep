@@ -9,6 +9,7 @@
         public int Stock { get; set; }
         public int Status { get; set; }
         public string Unit { get; set; } = null!;
+        public int WeightGram { get; set; }
         public long CategoryId { get; set; }
         public string CategoryName { get; set; } = null!;
     }

@@ -15,6 +15,7 @@ namespace dotnet_service.Models
             ApiUserGroups = new HashSet<ApiUserGroup>();
             ApiUserUserPermissions = new HashSet<ApiUserUserPermission>();
             ApiWishlists = new HashSet<ApiWishlist>();
+            DjangoAdminLogs = new HashSet<DjangoAdminLog>();
         }
 
         public long Id { get; set; }
@@ -45,5 +46,6 @@ namespace dotnet_service.Models
         public virtual ICollection<ApiUserGroup> ApiUserGroups { get; set; }
         public virtual ICollection<ApiUserUserPermission> ApiUserUserPermissions { get; set; }
         public virtual ICollection<ApiWishlist> ApiWishlists { get; set; }
+        public virtual ICollection<DjangoAdminLog> DjangoAdminLogs { get; set; }
     }
 }

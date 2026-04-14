@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <li class="mb-2 pb-2 border-bottom border-light">
                             <a href="javascript:void(0)" data-id="${cat.id}" data-name="${cat.name}"
                                class="category-link text-decoration-none ${isActive} d-flex justify-content-between align-items-center small">
-                                ${cat.name}
+                                 ${cat.name}
                                 <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
                             </a>
                         </li>
@@ -104,14 +104,13 @@ async function loadProducts(apiUrl) {
 
     try {
         const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Không có sản phẩm");
 
-        if (!response.ok) {
-            throw new Error("Không có sản phẩm");
-        }
-
-        const data = await response.json();
+        const res = await response.json();
         productContainer.innerHTML = '';
-        const items = data.data;
+        
+        // res.data là mảng sản phẩm để vẽ giao diện
+        const items = res.data || [];
 
         if (items.length === 0) {
             productContainer.innerHTML = `
@@ -125,7 +124,7 @@ async function loadProducts(apiUrl) {
         items.forEach(product => {
             const clone = template.content.cloneNode(true);
             const price = parseFloat(product.price);
-            let imageUrl = 'img/bag-filled.png'; // Chua sua
+            let imageUrl = 'img/bag-filled.png';
 
             if (product.images && product.images.length > 0) {
                 imageUrl = product.images[0].image;
@@ -146,7 +145,8 @@ async function loadProducts(apiUrl) {
             productContainer.appendChild(clone);
         });
 
-        renderPagination(data);
+        // QUAN TRỌNG: Truyền toàn bộ 'res' (có chứa count) vào hàm phân trang
+        renderPagination(res);
 
     } catch (error) {
         console.error(error);
@@ -155,7 +155,7 @@ async function loadProducts(apiUrl) {
 }
 
 function applyFilters(page = 1) {
-    currentPage = page;
+    currentPage = parseInt(page);
 
     const minPriceEl = document.querySelector('input[placeholder="From Vnd"]');
     const maxPriceEl = document.querySelector('input[placeholder="To Vnd"]');
@@ -168,7 +168,7 @@ function applyFilters(page = 1) {
     const stockStatusEl = document.querySelector('input[name="stockStatus"]:checked');
     const stockStatus = stockStatusEl ? stockStatusEl.value : '';
 
-    let apiUrl = `/api/product?Page=${page}&PageSize=9`;
+    let apiUrl = `/api/product?Page=${currentPage}&PageSize=9`;
 
     if (currentCategoryId) apiUrl += `&categoryid=${currentCategoryId}`;
     if (minPrice) apiUrl += `&minprice=${minPrice}`;
@@ -178,13 +178,13 @@ function applyFilters(page = 1) {
         apiUrl += `&stock=${stockStatus}`;
     }
 
-    console.log("➡️ API URL:", apiUrl);
-
     loadProducts(apiUrl);
 }
 
 function changePage(page) {
-    applyFilters(page);
+    currentPage = parseInt(page);
+    applyFilters(currentPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function renderPagination(data) {
@@ -192,31 +192,35 @@ function renderPagination(data) {
     if (!pagination) return;
 
     pagination.innerHTML = '';
-    const totalCount = data.count !== undefined ? data.count : (Array.isArray(data) ? data.length : 0);
+
+    const totalCount = data.totalItems !== undefined ? data.totalItems : (Array.isArray(data) ? data.length : 0);
+    
     const totalPages = Math.ceil(totalCount / 9);
 
-    if (totalPages <= 1) return;
+    console.log("Dữ liệu thực tế - Total Items:", totalCount, "Total Pages:", totalPages);
+
+    if (totalPages <= 1) return; 
 
     let html = '';
 
     if (currentPage > 1) {
         html += `
-            <div class="page-btn" onclick="changePage(${currentPage - 1})" style="cursor: pointer;">
+            <div class="page-btn" onclick="changePage(${currentPage - 1})">
                 <i class="fa-solid fa-angles-left"></i>
             </div>`;
     }
 
     for (let i = 1; i <= totalPages; i++) {
-        const activeClass = i === currentPage ? 'active' : '';
+        const activeClass = i === parseInt(currentPage) ? 'active' : '';
         html += `
-            <div class="page-btn ${activeClass}" onclick="changePage(${i})" style="cursor: pointer;">
+            <div class="page-btn ${activeClass}" onclick="changePage(${i})">
                 ${i}
             </div>`;
     }
 
     if (currentPage < totalPages) {
         html += `
-            <div class="page-btn" onclick="changePage(${currentPage + 1})" style="cursor: pointer;">
+            <div class="page-btn" onclick="changePage(${currentPage + 1})">
                 <i class="fa-solid fa-angles-right"></i>
             </div>`;
     }
