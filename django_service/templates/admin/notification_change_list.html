@@ -1,0 +1,153 @@
+{% extends "admin/change_list.html" %}
+
+{% block result_list %}
+    <style>
+        .notification-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .notification-intro {
+            padding: 20px 22px;
+            border: 1px solid #dbe5dd;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(31, 143, 99, 0.08), rgba(255, 255, 255, 0.96));
+        }
+
+        .notification-intro h2 {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .notification-intro p {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .notification-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .notification-card {
+            display: grid;
+            grid-template-columns: 60px minmax(0, 1fr) auto;
+            gap: 16px;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(31, 143, 99, 0.25);
+            box-shadow: 0 22px 40px rgba(31, 143, 99, 0.10);
+        }
+
+        .notification-card--highlight {
+            border-color: rgba(31, 143, 99, 0.4);
+            box-shadow: 0 0 0 4px rgba(31, 143, 99, 0.12);
+        }
+
+        .notification-icon {
+            display: inline-flex;
+            width: 56px;
+            height: 56px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+        }
+
+        .notification-body {
+            min-width: 0;
+        }
+
+        .notification-title {
+            margin: 0 0 6px;
+            color: #0f172a;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .notification-message {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .notification-time {
+            text-align: right;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
+        .notification-empty {
+            padding: 36px 24px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 24px;
+            background: #fff;
+            color: #64748b;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        @media (max-width: 767px) {
+            .notification-card {
+                grid-template-columns: 52px minmax(0, 1fr);
+            }
+
+            .notification-time {
+                grid-column: 2 / 3;
+                text-align: left;
+            }
+        }
+    </style>
+
+    <div class="notification-shell">
+        <section class="notification-intro">
+            <h2>Thông báo vận hành</h2>
+            <p>Theo dõi các liên hệ và phiếu nhập mới. Khi bạn mở trang này, các thông báo chưa đọc sẽ được đánh dấu là đã đọc.</p>
+        </section>
+
+        {% if notification_cards %}
+            <section class="notification-list">
+                {% for item in notification_cards %}
+                    <a href="{{ item.link }}" id="notification-{{ item.id }}" class="notification-card {% if notification_highlight == item.id|stringformat:'s' %}notification-card--highlight{% endif %}">
+                        <span class="notification-icon {{ item.icon_class }}">
+                            <span class="material-symbols-outlined text-[28px]">
+                                {{ item.icon }}
+                            </span>
+                        </span>
+
+                        <span class="notification-body">
+                            <h3 class="notification-title">{{ item.title }}</h3>
+                            <p class="notification-message">{{ item.message }}</p>
+                        </span>
+
+                        <span class="notification-time">
+                            {{ item.created_at|date:"H:i d-m-Y" }}<br>
+                            {{ item.created_at|timesince }} trước
+                        </span>
+                    </a>
+                {% endfor %}
+            </section>
+        {% else %}
+            <div class="notification-empty">
+                Chưa có thông báo nào khớp với điều kiện hiện tại.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

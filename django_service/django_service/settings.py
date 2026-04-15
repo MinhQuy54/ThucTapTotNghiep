@@ -194,6 +194,7 @@ UNFOLD = {
         },
     ],
     "SHOW_HISTORY": True,
+    "GLOBAL_CALLBACK": "api.admin.global_callback",
     "DASHBOARD_CALLBACK": "api.admin.dashboard_callback",
     "COLORS": {
         "primary": {

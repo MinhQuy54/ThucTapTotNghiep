@@ -1,0 +1,82 @@
+{% load i18n static unfold %}
+
+<div class="flex flex-row gap-4 items-center ml-auto">
+    {% if environment %}
+        {% include "unfold/helpers/label.html" with text=environment.0 type=environment.1 %}
+    {% endif %}
+
+    {% if notification_link %}
+        <div class="relative" x-data="{ openNotifications: false }">
+            <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-default border border-base-200 text-font-default-light transition-colors hover:bg-base-100 hover:text-font-important-light dark:border-base-700 dark:text-font-default-dark dark:hover:bg-base-800 dark:hover:text-font-important-dark" title="{% trans 'Notifications' %}" aria-label="{% trans 'Notifications' %}" x-on:click="openNotifications = !openNotifications" x-bind:class="{ 'bg-base-100 text-font-important-light dark:bg-base-800 dark:text-font-important-dark': openNotifications }">
+                <span class="material-symbols-outlined text-[20px]">
+                    notifications
+                </span>
+
+                {% if notification_unread_count %}
+                    <span class="absolute -right-1.5 -top-1.5 min-w-5 rounded-full bg-primary-600 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none text-white">
+                        {{ notification_unread_label }}
+                    </span>
+                {% endif %}
+            </button>
+
+            <div class="absolute right-0 top-12 z-50 w-[360px] overflow-hidden rounded-2xl border border-base-200 bg-white shadow-2xl dark:border-base-700 dark:bg-base-900" x-cloak x-show="openNotifications" x-transition x-on:click.outside="openNotifications = false">
+                <div class="flex items-center justify-between border-b border-base-200 px-4 py-3 dark:border-base-800">
+                    <div>
+                        <div class="text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                            Thông báo
+                        </div>
+                        <div class="text-xs text-font-subtle-light dark:text-font-subtle-dark">
+                            {{ notification_unread_count }} chưa đọc
+                        </div>
+                    </div>
+
+                    <a href="{{ notification_link }}" class="text-xs font-medium text-primary-700 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300" x-on:click="openNotifications = false">
+                        Xem tất cả
+                    </a>
+                </div>
+
+                {% if notification_items %}
+                    <div class="max-h-[420px] overflow-y-auto">
+                        {% for item in notification_items %}
+                            <a href="{{ item.link }}" class="flex gap-3 border-b border-base-200 px-4 py-3 transition-colors hover:bg-base-50 dark:border-base-800 dark:hover:bg-base-800/70 {% if not item.is_read %}bg-primary-50/50 dark:bg-primary-500/10{% endif %}" x-on:click="openNotifications = false">
+                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl {{ item.icon_class }}">
+                                    <span class="material-symbols-outlined text-[20px]">
+                                        {{ item.icon }}
+                                    </span>
+                                </span>
+
+                                <span class="min-w-0 flex-1">
+                                    <span class="flex items-start justify-between gap-3">
+                                        <span class="flex items-center gap-2 truncate text-sm font-semibold text-font-important-light dark:text-font-important-dark">
+                                            {{ item.title }}
+
+                                            {% if not item.is_read %}
+                                                <span class="inline-flex h-2.5 w-2.5 shrink-0 rounded-full bg-primary-600"></span>
+                                            {% endif %}
+                                        </span>
+                                        <span class="shrink-0 text-[11px] text-font-subtle-light dark:text-font-subtle-dark">
+                                            {{ item.created_at|date:"H:i d-m-Y" }}
+                                        </span>
+                                    </span>
+                                    <span class="mt-1 block line-clamp-2 text-xs leading-5 text-font-default-light dark:text-font-default-dark">
+                                        {{ item.message }}
+                                    </span>
+                                </span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="px-4 py-8 text-center text-sm text-font-subtle-light dark:text-font-subtle-dark">
+                        Chưa có thông báo nào.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% action_list %}
+
+    {% if nav_global_side %}
+        {{ nav_global_side }}
+    {% endif %}
+</div>
