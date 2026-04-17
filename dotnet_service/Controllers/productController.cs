@@ -64,6 +64,7 @@ namespace dotnet_service.Controllers
                         Price = p.Price,
                         Stock = p.Stock,
                         Unit = p.Unit,
+                        WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name
                     })

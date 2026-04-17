@@ -1,530 +1,478 @@
+const CART_ENDPOINTS = {
+    base: "/api/cart",
+    clear: "/api/cart/clear",
+    shipping: "/api/shippingAddress/user-addresses",
+    ghn: "http://localhost:8080/api/GhnShipping/calculate-fee"
+};
 
-document.addEventListener("show.bs.offcanvas", function (event) {
-    if (event.target.id === "miniCart") {
-        loadMiniCart();
-    }
-});
-document.addEventListener("click", function (e) {
+let listAddresses = [];
+let selectedAddressId = null;
+let addressModal;
+let currentSubtotal = 0;
+let currentWeight = 0;
 
-    const removeBtn = e.target.closest(".remove-item-btn");
-    if (!removeBtn) return;
+function initCartEvents() {
+    if (window.cartEventsInitialized) return;
+    window.cartEventsInitialized = true;
+    
+    document.addEventListener("show.bs.offcanvas", (e) => {
+        if (e.target.id === "miniCart") loadMiniCart();
+    });
 
-    const id = removeBtn.getAttribute("data-id");
-    removeItemMiniCart(id);
+    document.addEventListener("click", (e) => {
+        const removeMini = e.target.closest(".remove-item-btn");
+        const removeFull = e.target.closest(".btn-remove-item");
+        const minusBtn = e.target.closest(".btn-minus");
+        const plusBtn = e.target.closest(".btn-plus");
+        const removeAll = e.target.closest(".remove-all-item");
+        const token = localStorage.getItem("access_token");
 
-});
-
-document.addEventListener("click", function (e) {
-
-    const removeBtn = e.target.closest(".btn-remove-item");
-    if (!removeBtn) return;
-
-    const id = removeBtn.getAttribute("data-id");
-    removeCartItem(id);
-
-});
-
-document.addEventListener("click", function (e) {
-
-    const minusBtn = e.target.closest(".btn-minus");
-    const plusBtn = e.target.closest(".btn-plus");
-
-    if (minusBtn) {
-        const cartId = minusBtn.getAttribute("data-id");
-        changeQty(minusBtn, cartId, -1);
-    }
-
-    if (plusBtn) {
-        const cartId = plusBtn.getAttribute("data-id");
-        changeQty(plusBtn, cartId, 1);
-    }
-});
-
-document.querySelector(".remove-all-item")?.addEventListener("click", async () => {
-    const isConfirmed = confirm("Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng không? Hành động này không thể hoàn tác.");
-
-    if (!isConfirmed) return; 
-
-    try {
-        const response = await fetchWithAuth("/api/cart/clear", {
-            method: "DELETE"
-        });
-
-        if (response.ok) {
-            alert("Giỏ hàng đã được làm trống!");
-            
-            if (typeof loadCart === "function") await loadCart();
-            if (typeof loadMiniCart === "function") await loadMiniCart();
-            if (typeof updateCartBadge === "function") await updateCartBadge();
+        if (!token) {
+            if (removeFull) handleGuestAction('remove', removeFull.dataset.id);
+            if (minusBtn) handleGuestAction('minus', minusBtn.dataset.id);
+            if (plusBtn) handleGuestAction('plus', plusBtn.dataset.id);
+            if (removeAll) handleGuestAction('clear');
         } else {
-            const errorData = await response.json();
-            alert("Lỗi: " + (errorData.message || "Không thể xóa giỏ hàng."));
+            if (removeMini) removeItemMiniCart(removeMini.dataset.id);
+            if (removeFull) removeCartItem(removeFull.dataset.id);
+            if (minusBtn) changeQty(minusBtn, minusBtn.dataset.id, -1);
+            if (plusBtn) changeQty(plusBtn, plusBtn.dataset.id, 1);
+            if (removeAll) clearAllCart();
         }
-    } catch (error) {
-        console.error("Lỗi khi xóa toàn bộ giỏ hàng:", error);
-        alert("Đã xảy ra lỗi kết nối máy chủ.");
+    });
+}
+
+function initCartState() {
+    const modalEl = document.getElementById('addressModal');
+    if (modalEl) {
+        addressModal = new bootstrap.Modal(modalEl);
     }
-});
+    syncGuestCart().then(() => {
+        updateCartBadge();
+        loadCart();
+        loadAddresses();
+    });
+}
 
-document.addEventListener("DOMContentLoaded", function () {
-    updateCartBadge();
+window.runCartInit = function() {
+    initCartState();
+    initCartEvents();
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", window.runCartInit);
+} else {
+    window.runCartInit();
+}
+
+function handleGuestAction(action, id) {
+    let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+    if (action === 'remove') {
+        guestCart = guestCart.filter(item => item.id !== id && item.product.id != id);
+    } else if (action === 'minus') {
+        let item = guestCart.find(i => i.id === id || i.product.id == id);
+        if (item && item.quantity > 1) item.quantity -= 1;
+    } else if (action === 'plus') {
+        let item = guestCart.find(i => i.id === id || i.product.id == id);
+        if (item && item.quantity < (item.product.stock || 99)) item.quantity += 1;
+    } else if (action === 'clear') {
+        guestCart = [];
+    }
+    localStorage.setItem('guest_cart', JSON.stringify(guestCart));
     loadCart();
+    loadMiniCart();
+    updateCartBadge();
+}
 
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-    loadUserAddresses();
-});
-
+async function syncGuestCart() {
+    const token = localStorage.getItem("access_token");
+    let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+    if (token && guestCart.length > 0) {
+        for (let item of guestCart) {
+            try {
+                await fetch(CART_ENDPOINTS.base, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        product_id: item.product.id,
+                        quantity: item.quantity
+                    })
+                });
+            } catch (e) {}
+        }
+        localStorage.removeItem('guest_cart');
+    }
+}
 
 async function updateCartBadge() {
-
     const badge = document.querySelector(".cart-badge");
     const token = localStorage.getItem("access_token");
-
-
-    if (!badge) {
-        setTimeout(updateCartBadge, 200);
-        return;
-    }
-
-    if (!token) {
-        badge.innerText = 0;
-        return;
-    }
-
+    if (!badge) return;
+    
     try {
-
-        const response = await fetchWithAuth(`/api/cart`)
-
-        if (!response.ok) {
-            badge.innerText = 0;
-            return;
-        }
-
-        const cartItems = await response.json();
-
-        let totalQuantity = 0;
-
-        cartItems.forEach(item => {
-            totalQuantity += item.quantity;
-        });
-
-        badge.innerText = totalQuantity;
-
-    } catch (error) {
-        console.error(error);
-        badge.innerText = 0;
-    }
-}
-
-async function loadMiniCart() {
-
-    const miniCartContainer = document.getElementById("mini-cart-list");
-    const template = document.getElementById("mini-cart-template");
-    const subtotalEl = document.getElementById("mini-cart-subtotal");
-
-    const token = localStorage.getItem("access_token");
-
-    if (!token) return;
-
-    try {
-
-        const response = await fetchWithAuth(`/api/cart`);
-
-        if (!response.ok) {
-            throw new Error("Không tìm thấy giỏ hàng");
-        }
-
-        const cartItems = await response.json();
-
-        miniCartContainer.innerHTML = "";
-        let subtotal = 0;
-
-        if (cartItems.length === 0) {
-            miniCartContainer.innerHTML = "<p class='text-center fw-bold'>Giỏ hàng trống</p>";
-            subtotalEl.innerText = "0đ";
-            return;
-        }
-        cartItems.forEach(cart => {
-
-            const clone = template.content.cloneNode(true);
-            const product = cart.product;
-            const price = parseFloat(product.price);
-
-            let imageUrl = "img/bag-filled.png";
-            if (product.images && product.images.length > 0) {
-                imageUrl = CONFIG.API_BASE_URL + product.images[0].image;
+        let count = 0;
+        if (token) {
+            const response = await fetch(CART_ENDPOINTS.base, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const items = await response.json();
+                count = items.reduce((sum, i) => sum + i.quantity, 0);
             }
-            const removeBtn = clone.querySelector(".remove-item-btn");
-            removeBtn.setAttribute("data-id", cart.id);
-            clone.querySelector(".mini-cart-img").src = imageUrl;
-            clone.querySelector(".mini-cart-name").innerText = product.name;
-            clone.querySelector(".mini-cart-quantity").innerText = cart.quantity;
-            clone.querySelector(".mini-cart-price").innerText = price.toLocaleString("vi-VN") + "đ";
-
-            subtotal += parseFloat(product.price) * cart.quantity;
-
-            miniCartContainer.appendChild(clone);
-        });
-
-        subtotalEl.innerText = subtotal.toLocaleString("vi-VN") + "đ";
-
-    } catch (error) {
-
-        console.error(error);
-        miniCartContainer.innerHTML =
-            "<p class='text-danger text-center'>Không thể tải giỏ hàng</p>";
-    }
-}
-
-async function removeItemMiniCart(id) {
-
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Vui lòng đăng nhập");
-        return;
-    }
-
-    try {
-
-        const response = await fetchWithAuth(`/api/cart/${id}/`, {
-            method: "DELETE"
-        });
-
-        if (response.ok) {
-            loadMiniCart();
-            updateCartBadge();
+        } else {
+            let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+            count = guestCart.reduce((sum, i) => sum + i.quantity, 0);
         }
-
-    } catch (error) {
-        console.error(error);
+        badge.innerText = count;
+        
+        if (count > 0) {
+            badge.style.display = "inline-flex";
+            badge.style.alignItems = "center";
+            badge.style.justifyContent = "center";
+            badge.style.backgroundColor = "#89b500";
+            badge.style.color = "white";
+            badge.style.borderRadius = "50%";
+            badge.style.width = "20px";
+            badge.style.height = "20px";
+            badge.style.fontSize = "11px";
+            badge.style.position = "absolute";
+            badge.style.top = "-5px";
+            badge.style.right = "-10px";
+        } else {
+            badge.style.display = "none";
+        }
+    } catch {
+        badge.style.display = "none";
     }
 }
 
 async function loadCart() {
     const template = document.getElementById("template-cart");
-    const cartContainer = document.getElementById("cart-item");
-
-
+    const container = document.getElementById("cart-item");
+    const cartTotals = document.querySelector('.row.g-5');
+    const actionButtons = document.querySelector('.d-flex.flex-wrap.gap-2.mb-5');
     const token = localStorage.getItem("access_token");
-
-    if (!cartContainer || !template) return;
-    if (!token) {
-        alert("Vui long dang nhap de xem gio hang");
-        window.location.href = "login.html";
-        return;
-    }
-
+    
+    if (!container || !template) return;
+    
+    let data = [];
     try {
-
-        const response = await fetchWithAuth(`/api/cart`);
-
-        if (!response.ok) {
-            throw new Error("Khong tim thay san pham");
+        if (token) {
+            const response = await fetch(CART_ENDPOINTS.base, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (response.ok) data = await response.json();
+        } else {
+            data = JSON.parse(localStorage.getItem('guest_cart')) || [];
         }
 
-        const data = await response.json();
-
-        cartContainer.innerHTML = '';
-        let subtotal = 0;
-
-        if (data.length === 0) {
-            const cartItem = document.getElementById("cart-item");
-    
-            cartItem.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-5">
-                        <div class="py-3">
-                            <h3 class="fw-bold mb-3">Giỏ Hàng</h3>
-                            <h4 class="text-muted">Giỏ hàng của bạn hiện tại đang trống.</h4>
-                            <p class="mb-4">Có vẻ như bạn chưa chọn được sản phẩm nào.</p>
-                            <a href="detail.html" class="btn-veggie-cart text-decoration-none">
-                                HÃY TIẾP TỤC MUA SẮM
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-            `;
-
-            // Ẩn các phần thừa khác (nếu có) như phần tính phí ship hoặc tổng tiền
-            const cartTotals = document.querySelector('.row.g-5');
+        if (!data || data.length === 0) {
+            container.innerHTML = "<tr><td colspan='7' class='text-center py-5'>Giỏ hàng của bạn đang trống.</td></tr>";
             if (cartTotals) cartTotals.style.display = 'none';
-            
-            const actionButtons = document.querySelector('.d-flex.flex-wrap.gap-2.mb-5');
             if (actionButtons) actionButtons.style.display = 'none';
-
-            document.querySelectorAll(".total-price").forEach(el => {
-                el.innerText = "0đ";
-            });
             return;
         }
-        data.forEach(item => {
+        
+        if (cartTotals) cartTotals.style.display = 'flex';
+        if (actionButtons) actionButtons.style.display = 'flex';
+        container.innerHTML = '';
+        
+        let subtotal = 0;
+        let totalWeight = 0;
 
+        data.forEach(item => {
             const clone = template.content.cloneNode(true);
             const product = item.product;
-            const price = parseFloat(product.price);
-
-            let imageUrl = "img/bag-filled.png";
-            if (product.images && product.images.length > 0) {
-                imageUrl = CONFIG.API_BASE_URL + product.images[0].image;
-            }
-
-            const removeBtn = clone.querySelector(".btn-remove-item");
-            const minusBtn = clone.querySelector(".btn-minus");
-            const plusBtn = clone.querySelector(".btn-plus");
-
-            removeBtn.setAttribute("data-id", item.id);
-            minusBtn.setAttribute("data-id", item.id);
-            plusBtn.setAttribute("data-id", item.id);
-
-            clone.querySelector(".cart-img").src = imageUrl;
-            clone.querySelector(".cart-name").innerText = product.name;
-            clone.querySelector(".cart-price").innerText =
-                price.toLocaleString("vi-VN") + "đ";
-
-            clone.querySelector(".cart-qty").value = item.quantity;
-
-            const totalItem = price * item.quantity;
-            clone.querySelector(".total-price-item").innerText =
-                totalItem.toLocaleString("vi-VN") + "đ";
-
-            subtotal += totalItem;
-
-            cartContainer.appendChild(clone);
+            const price = parseFloat(product.price) || 0;
+            const weightGram = parseFloat(product.weightgram) || parseFloat(product.weightGram) || parseFloat(product.WeightGram) || 0;
+            const itemWeight = weightGram * parseInt(item.quantity);
+            subtotal += price * item.quantity;
+            totalWeight += itemWeight;
+            
+            const img = clone.querySelector(".cart-img");
+            if (img) img.src = product.images?.[0]?.image ? (product.images[0].image.startsWith('http') ? product.images[0].image : (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : '') + product.images[0].image) : "img/bag-filled.png";
+            
+            const nameEl = clone.querySelector(".cart-name");
+            if (nameEl) nameEl.innerText = product.name;
+            
+            const priceEl = clone.querySelector(".cart-price");
+            if (priceEl) priceEl.innerText = price.toLocaleString("vi-VN") + " đ";
+            
+            const qtyEl = clone.querySelector(".cart-qty");
+            if (qtyEl) qtyEl.value = item.quantity;
+            
+            const weightEl = clone.querySelector(".cart-weight");
+            if (weightEl) weightEl.innerText = itemWeight + "g";
+            
+            const totalItemEl = clone.querySelector(".total-price-item");
+            if (totalItemEl) totalItemEl.innerText = (price * item.quantity).toLocaleString("vi-VN") + " đ";
+            
+            const btns = [".btn-remove-item", ".btn-minus", ".btn-plus"];
+            btns.forEach(cls => {
+                const b = clone.querySelector(cls);
+                if (b) b.setAttribute("data-id", token ? item.id : (item.id || product.id));
+            });
+            
+            container.appendChild(clone);
         });
+        
+        currentWeight = totalWeight + 300; 
+        currentSubtotal = subtotal;
 
-        document.querySelectorAll(".total-price").forEach(el => {
-            el.innerText = subtotal.toLocaleString("vi-VN") + "đ";
+        const productWeightEl = document.getElementById('productWeight');
+        if (productWeightEl) productWeightEl.innerText = totalWeight + " g";
+        
+        const totalWeightEl = document.getElementById('totalWeight');
+        if (totalWeightEl) totalWeightEl.innerText = currentWeight + " g";
+        
+        const totalPriceEls = document.querySelectorAll(".total-price");
+        totalPriceEls.forEach(el => {
+            el.innerText = currentSubtotal.toLocaleString("vi-VN") + " đ";
         });
-
-        updateShippingUI(0);
-        calculateShipping();
-
+        
+        if (token) calculateShipping(currentWeight, currentSubtotal);
     } catch (error) {
-        console.error(error);
-        cartContainer.innerHTML =
-            "<p class='text-danger text-center'>Không thể tải giỏ hàng</p>";
+        container.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Lỗi tải dữ liệu.</td></tr>";
     }
-
 }
 
-async function removeCartItem(id) {
-
-    const isConfirmed = confirm("Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng không?");
-    if (!isConfirmed) return; // Nếu khách bấm 'Hủy' thì dừng lại luôn, không chạy code bên dưới
-
+async function loadMiniCart() {
+    const container = document.getElementById("mini-cart-list");
     const token = localStorage.getItem("access_token");
-    if (!token) {
-        alert("Vui lòng đăng nhập");
+    if (!container) return;
+
+    let data = [];
+    try {
+        if (token) {
+            const response = await fetch(CART_ENDPOINTS.base, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (response.ok) data = await response.json();
+        } else {
+            data = JSON.parse(localStorage.getItem('guest_cart')) || [];
+        }
+    } catch (e) {}
+
+    if (data.length === 0) {
+        container.innerHTML = '<li class="text-center py-3">Giỏ hàng trống</li>';
         return;
     }
 
-    try {
-        const response = await fetchWithAuth(`/api/cart/${id}/`, {
-            method: "DELETE"
-        });
-
-        if (response.ok) {
-            console.log("Đã xóa bó rau thành công!"); 
-            loadCart();
-            loadMiniCart();
-            updateCartBadge();
-        }
-
-    } catch (error) {
-        console.error("Lỗi khi xóa:", error);
-    }
-}
-
-async function changeQty(button, cartId, amount) {
-    const token = localStorage.getItem("access_token");
-    if (!token) return;
-
-    const container = button.closest(".d-flex") || button.closest("tr");
-    const qtyInput = container.querySelector(".cart-qty") || container.querySelector(".mini-cart-quantity");
-
-    let currentQty = parseInt(qtyInput.value || qtyInput.innerText);
-    currentQty += amount;
-
-    if (currentQty < 1) return; // Không cho giảm xuống dưới 1
-
-    try {
-       const response = await fetchWithAuth(`/api/cart/${cartId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ quantity: currentQty })
-        });
-
-        if (response.ok) {
-            await Promise.all([loadCart(), loadMiniCart(), updateCartBadge()]);
-        }
-    } catch (error) {
-        console.error("Lỗi cập nhật số lượng:", error);
-    }
-}
-
-let listAddresses = [];
-let selectedAddressId = null; 
-let addressModal;
-
-document.addEventListener('DOMContentLoaded', function() {
-    addressModal = new bootstrap.Modal(document.getElementById('addressModal'));
-    loadAddresses();
-});
-
-function calculateTotalWeight() {
-    let total = 0;
-    if (typeof cartItems !== 'undefined' && cartItems.length > 0) {
-        cartItems.forEach(item => {
-            const weight = item.weightGram || item.weight_gram || 0;
-            total += (weight * item.quantity);
-        });
-    }
-
-    const packagingWeight = 300; 
-    return total + packagingWeight;
+    container.innerHTML = "";
+    data.forEach(item => {
+        const product = item.product;
+        const price = parseFloat(product.price) || 0;
+        const img = product.images?.[0]?.image || 'img/bag-filled.png';
+        
+        const li = document.createElement("li");
+        li.className = "d-flex align-items-center mb-3 p-2 border-bottom";
+        li.innerHTML = `
+            <img src="${img.startsWith('http') ? img : (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : '') + img}" style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
+            <div class="flex-grow-1">
+                <h6 class="mb-0 small fw-bold">${product.name}</h6>
+                <small class="text-muted">${item.quantity} x ${price.toLocaleString('vi-VN')} đ</small>
+            </div>
+            <button class="btn btn-sm text-danger remove-item-btn" data-id="${token ? item.id : (item.id || product.id)}">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+        container.appendChild(li);
+    });
 }
 
 async function loadAddresses() {
+    const token = localStorage.getItem("access_token");
+    const display = document.getElementById('addressDisplay');
+    
+    if (!token) {
+        // For guests: show login/register prompt
+        if (display) {
+            display.innerHTML = `
+                <div class="alert alert-info p-3 mb-0">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-info-circle me-3 mt-1 text-info" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <strong>Vui lòng đăng nhập</strong>
+                            <p class="mb-2 small mt-1">Để xem và quản lý địa chỉ giao hàng của bạn, vui lòng đăng nhập hoặc đăng ký tài khoản.</p>
+                            <div class="d-flex gap-2">
+                                <a href="login.html" class="btn btn-sm btn-primary">Đăng nhập</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        return;
+    }
+
+    // For authenticated users: load from API
     try {
-        const response = await fetchWithAuth('/api/shippingAddress/user-addresses');
+        const response = await fetch(CART_ENDPOINTS.shipping, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error();
         listAddresses = await response.json();
         
-        const defaultAddr = listAddresses.find(addr => addr.default === true) || listAddresses[0];
-
-        if (defaultAddr) {
-            selectedAddressId = defaultAddr.id;
-            renderAddress(defaultAddr);
-            calculateShipping();
-        } else {
-            document.getElementById('addressDisplay').innerHTML = 
-                `<p class="text-danger mb-0">Chưa có địa chỉ. Vui lòng thêm mới!</p>`;
+        if (!listAddresses || listAddresses.length === 0) {
+            if (display) {
+                display.innerHTML = `
+                    <div class="alert alert-warning p-3 mb-0">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-exclamation-triangle me-3 mt-1"></i>
+                            <div>
+                                <strong>Bạn chưa có địa chỉ giao hàng</strong>
+                                <p class="mb-2 small mt-1">Vui lòng thêm địa chỉ giao hàng trước khi thanh toán.</p>
+                                <a href="account.html?tab=address" class="btn btn-sm btn-warning">Thêm địa chỉ</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
         }
-    } catch (error) {
-        console.error(error);
+        
+        const activeAddr = listAddresses.find(a => a.default) || listAddresses[0];
+        if (activeAddr) {
+            selectedAddressId = activeAddr.id;
+            renderAddress(activeAddr);
+            calculateShipping(); 
+        }
+        renderAddressListModal(listAddresses);
+    } catch (e) {
+        if (display) display.innerHTML = '<div class="text-danger small">Lỗi tải địa chỉ.</div>';
     }
 }
 
 function renderAddress(addr) {
-    const displayDiv = document.getElementById('addressDisplay');
-    displayDiv.innerHTML = `
-        <div class="address-item">
-            <div class="fw-bold text-dark fs-5 mb-1">${addr.fullName}</div>
-            <div class="text-secondary mb-1" style="font-size: 0.95rem;">${addr.address}</div>
-            <div class="text-muted" style="font-size: 0.9rem;">
-                ${addr.ward ? addr.ward + ', ' : ''}${addr.district ? addr.district + ', ' : ''}${addr.city}
-            </div>
-        </div>
-    `;
+    const display = document.getElementById('addressDisplay');
+    if (display) {
+        display.innerHTML = `
+            <div class="fw-bold">${addr.fullName} | ${addr.phone}</div>
+            <div class="small text-secondary">${addr.address}</div>
+            <div class="small text-muted">${addr.city}</div>`;
+    }
 }
 
-function openAddressModal() {
-    const modalList = document.getElementById('modalAddressList');
-    modalList.innerHTML = ''; 
-
-    if (listAddresses.length === 0) {
-        modalList.innerHTML = '<div class="p-3 text-center">Bạn chưa có địa chỉ nào.</div>';
-    } else {
-        listAddresses.forEach(addr => {
-            const isActive = addr.id === selectedAddressId ? 'border-primary bg-light' : '';
-            modalList.innerHTML += `
-                <button type="button" class="list-group-item list-group-item-action p-3 ${isActive}" 
-                        onclick="selectAddress(${addr.id})">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold text-dark">${addr.fullName}</div>
-                            <div class="small text-secondary">${addr.address}</div>
-                        </div>
-                        ${addr.id === selectedAddressId ? '<i class="fas fa-check-circle text-primary"></i>' : ''}
-                    </div>
-                </button>
-            `;
-        });
+function renderAddressListModal(addresses) {
+    const container = document.getElementById("modalAddressList");
+    if (!container) return;
+    if (addresses.length === 0) {
+        container.innerHTML = '<div class="text-center p-3 text-muted">Trống</div>';
+        return;
     }
-    addressModal.show();
+    container.innerHTML = addresses.map(addr => `
+        <button type="button" 
+                class="list-group-item list-group-item-action p-3 ${addr.id === selectedAddressId ? 'active' : ''}"
+                onclick="selectAddress(${addr.id})">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="fw-bold">${addr.fullName} ${addr.default ? '<span class="badge bg-success ms-2">Mặc định</span>' : ''}</div>
+                <div class="small">${addr.phone}</div>
+            </div>
+            <div class="small mt-1">${addr.address}</div>
+        </button>
+    `).join('');
 }
 
 function selectAddress(id) {
-    const foundAddr = listAddresses.find(a => a.id === id);
-    if (foundAddr) {
+    const addr = listAddresses.find(a => a.id === id);
+    if (addr) {
         selectedAddressId = id;
-        renderAddress(foundAddr);
-        addressModal.hide();
+        renderAddress(addr); 
+        const modalEl = document.getElementById('addressModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) modalInstance.hide();
         calculateShipping();
+        renderAddressListModal(listAddresses);
     }
 }
 
-async function calculateShipping() {
+async function calculateShipping(weight = currentWeight, subtotal = currentSubtotal) {
     if (!selectedAddressId) return;
-
     const addr = listAddresses.find(a => a.id === selectedAddressId);
-    const currentWeight = calculateTotalWeight();
-
-    const requestBody = {
-        "fromDistrictId": 1451,
-        "toDistrictId": parseInt(addr.districtId),
-        "toWardCode": String(addr.wardCode),
-        "weight": currentWeight,
-        "insuranceValue": 0
-    };
-
-
-    const feeDisplay = document.getElementById('shippingFee');
-    if(feeDisplay) feeDisplay.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
+    if (!addr) return;
     try {
-        const response = await fetch('http://localhost:8080/api/GhnShipping/calculate-fee', {
+        const response = await fetch(CART_ENDPOINTS.ghn, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({
+                fromDistrictId: 1451,
+                toDistrictId: parseInt(addr.districtId),
+                toWardCode: String(addr.wardCode),
+                weight: weight || 300,
+                insuranceValue: 0
+            })
         });
-
         const result = await response.json();
-
-        if (response.ok) {
-            const fee = result.total || result.data?.total || result; 
-            updateShippingUI(fee);
-        } else {
-            if(feeDisplay) feeDisplay.innerText = 'Lỗi tính phí';
-        }
-    } catch (error) {
-        console.error(error);
-        if(feeDisplay) feeDisplay.innerText = '--';
+        const fee = result.total || result.data?.total || 0;
+        updateSummaryUI(subtotal, fee);
+    } catch (e) {
+        updateSummaryUI(subtotal, 0);
     }
 }
 
-function updateShippingUI(fee = 0) {
-    const feeDisplay = document.getElementById('shippingFee');
-    const priceElements = document.querySelectorAll('.total-price');
-    const subTotalDisplay = priceElements[0]; 
-    const totalDisplay = priceElements[1];
+function updateSummaryUI(subtotal, fee) {
+    const feeEl = document.getElementById('shippingFee');
+    const totals = document.querySelectorAll(".total-price");
+    if (feeEl) feeEl.innerText = fee.toLocaleString('vi-VN') + " đ";
+    if (totals[0]) totals[0].innerText = subtotal.toLocaleString('vi-VN') + " đ";
+    if (totals[1]) totals[1].innerText = (subtotal + fee).toLocaleString('vi-VN') + " đ";
+}
 
-    let subTotal = 0;
-    const cartRows = document.querySelectorAll('#cart-item tr');
-    
-    if (cartRows.length > 0) {
-        cartRows.forEach(row => {
-            const priceText = row.querySelector('.cart-price')?.innerText || "0";
-            const qtyInput = row.querySelector('.cart-qty')?.value || "0";
-            const price = Number(priceText.replace(/[^0-9]/g, "")) || 0;
-            const qty = Number(qtyInput) || 0;
-            subTotal += (price * qty);
+window.openAddressModal = function() {
+    if (addressModal) addressModal.show();
+};
+
+async function removeItemMiniCart(id) { await removeCartItem(id); }
+
+async function removeCartItem(id) {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    try {
+        await fetch(`${CART_ENDPOINTS.base}/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
         });
-    }
+        loadCart();
+        loadMiniCart();
+        updateCartBadge();
+    } catch(e) {}
+}
 
-    if (subTotalDisplay) {
-        subTotalDisplay.innerText = subTotal.toLocaleString('vi-VN') + ' đ';
-    }
+async function changeQty(btn, id, delta) {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    try {
+        const row = btn.closest('tr');
+        const qtyInput = row ? row.querySelector('.cart-qty') : null;
+        let currentQty = qtyInput ? parseInt(qtyInput.value) : 0;
+        let newQty = currentQty + delta;
+        if (newQty < 1) newQty = 1;
+        if (qtyInput) qtyInput.value = newQty;
+        
+        await fetch(`${CART_ENDPOINTS.base}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ quantity: newQty })
+        });
+        loadCart();
+        loadMiniCart();
+        updateCartBadge();
+    } catch(e) {}
+}
 
-    if (feeDisplay) {
-        feeDisplay.innerText = Number(fee).toLocaleString('vi-VN') + ' đ';
-    }
-
-    if (totalDisplay) {
-        let finalTotal = subTotal + (Number(fee) || 0);
-        totalDisplay.innerText = finalTotal.toLocaleString('vi-VN') + ' đ';
-    }
+async function clearAllCart() {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+    try {
+        await fetch(CART_ENDPOINTS.clear, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadCart();
+        loadMiniCart();
+        updateCartBadge();
+    } catch(e) {}
 }

@@ -6,6 +6,15 @@ fetch('header.html')
         document.getElementById("header").innerHTML = html;
         // Chờ một chút để DOM ổn định rồi mới bắt sự kiện
         setTimeout(updateHoverMenu, 100);
+        
+        // Load cart.js into global context if it's not present to support mini-cart on all pages
+        if (!document.querySelector('script[src*="cart.js"]')) {
+            const script = document.createElement("script");
+            script.src = "./js/cart.js";
+            document.body.appendChild(script);
+        } else if (typeof window.runCartInit === "function") {
+            window.runCartInit();
+        }
     });
 
 window.addEventListener("user-profile-updated", (event) => {

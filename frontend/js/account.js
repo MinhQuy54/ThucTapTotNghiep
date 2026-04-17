@@ -14,15 +14,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tabName = urlParams.get('tab');
 
-    if (tabName === 'orders') {
-        const btnOrder = document.getElementById('tab-orders');
-        
-        if (btnOrder) {
-            const tabTrigger = new bootstrap.Tab(btnOrder);
-            tabTrigger.show();
-            
-            if (typeof loadOrderHistory === "function") {
-                loadOrderHistory();
+    if (tabName) {
+        const tabMap = {
+            'orders': 'tab-orders',
+            'address': 'tab-address',
+        };
+
+        const targetId = tabMap[tabName];
+        if (targetId) {
+            const btnTab = document.getElementById(targetId);
+            if (btnTab) {
+                const tabTrigger = new bootstrap.Tab(btnTab);
+                tabTrigger.show();
+
+                if (tabName === 'address') {
+                    setTimeout(() => {
+                        openAddModal();
+                        const modalEl = document.getElementById('addressModal');
+                        if (modalEl) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                            modal.show();
+                        }
+                    }, 400);
+                }
             }
         }
     }

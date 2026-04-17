@@ -118,6 +118,7 @@
                                 <th>Tên</th>
                                 <th class="text-center">Giá</th>
                                 <th class="text-center">Số lượng</th>
+                                <th class="text-center">Khối lượng</th>
                                 <th class="text-center">Tổng cộng</th>
                                 <th class="text-center">Xóa</th>
                             </tr>
@@ -135,6 +136,7 @@
                                 <div class="fw-bold text-dark cart-name">Tên sản phẩm</div>
                             </td>
                             <td class="fw-bold text-center text-muted cart-price">$0.00</td>
+
                             <td>
                                 <div class="action-wrapper d-flex justify-content-center">
                                     <div class="qty-container d-flex align-items-center bg-white shadow-sm">
@@ -149,6 +151,9 @@
                                     </div>
                                 </div>
                             </td>
+
+                            <td class="fw-bold text-center text-muted cart-weight">0g</td>
+
                             <td class="fw-bold text-center text-success total-price-item">$0.00</td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-outline-danger border-0 rounded-circle btn-remove-item" data-id="">
@@ -197,24 +202,53 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="cart-totals-card p-4">
-                        <h5 class="fw-bold mb-4 text-center text-uppercase">Tổng đơn hàng</h5>
-                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+                    <div class="cart-totals-card p-4 shadow-sm border rounded-3 bg-white" style="border-radius: 12px !important;">
+                        <h5 class="fw-bold mb-4 text-dark" style="font-size: 1.1rem;">Tóm tắt đơn hàng</h5>
+                        
+                        <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Tạm tính</span>
-                            <span class="total-price fw-bold">0 đ</span>
+                            <span class="total-price fw-semibold text-dark">0 đ</span>
                         </div>
-                        <div class="d-flex justify-content-between py-2 border-bottom border-secondary-subtle">
+
+                        <div class="py-3 border-top border-bottom my-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Khối lượng sản phẩm</span>
+                                <span id="productWeight" class="small text-dark fw-medium">0 g</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Bao bì & Đóng gói</span>
+                                <span class="small text-dark fw-medium">+ 300 g</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small fw-bold text-uppercase">Tổng trọng lượng</span>
+                                <span id="totalWeight" class="small fw-bold text-success">0 g</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
                             <span class="text-muted">Phí vận chuyển</span>
-                            <span id="shippingFee" class="fw-bold text-primary">0 đ</span>
+                            <span id="shippingFee" class="fw-semibold text-dark">0 đ</span>
                         </div>
-                        <div class="d-flex justify-content-between py-3">
-                            <span class="fw-bold fs-5">Thành tiền</span>
-                            <span class="fw-bold fs-4 text-success total-price">0 đ</span>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mb-4">
+                            <span class="fw-bold text-dark" style="font-size: 1.1rem;">Tổng thanh toán</span>
+                            <span class="total-price fw-bold text-success fs-3">0 đ</span>
                         </div>
-                        <a href="checkout.html"
-                            class="btn-veggie-cart w-100 text-uppercase mt-3 py-3 text-decoration-none shadow">Thanh toán ngay</a>
+
+                        <a href="checkout.html" 
+                        class="btn-veggie-cart w-100 text-uppercase py-3 text-decoration-none shadow-sm d-block text-center fw-bold" 
+                        style="background-color: #82ae46 !important; border-radius: 8px; font-size: 14px; border: none;">
+                            Thanh toán ngay
+                        </a>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted" style="font-size: 11px;">
+                                <i class="fas fa-shield-alt me-1"></i> Thanh toán an toàn và bảo mật
+                            </small>
+                        </div>
                     </div>
                 </div>
+                
             </div>
         </section>                                          
     </main>
@@ -233,7 +267,10 @@
                     </div>
                 </div>
                 <div class="modal-footer border-top-0">
-                    <button class="btn btn-light w-100 rounded-3" onclick="window.location.href='/user/address'">+ Thêm địa chỉ mới</button>
+                    <button class="btn btn-light w-100 rounded-3" 
+                            onclick="window.location.href='account.html?tab=address'">
+                        + Thêm địa chỉ mới
+                    </button>
                 </div>
             </div>
         </div>

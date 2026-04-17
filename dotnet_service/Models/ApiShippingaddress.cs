@@ -15,12 +15,12 @@ namespace dotnet_service.Models
         public string Phone { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string City { get; set; } = null!;
+        public int? ProvinceId { get; set; }
+        public int? DistrictId { get; set; }
+        public string? WardCode { get; set; }
         public bool Default { get; set; }
         public DateTime CreatedAt { get; set; }
         public long UserId { get; set; }
-        public int? DistrictId { get; set; }
-        public int? ProvinceId { get; set; }
-        public string? WardCode { get; set; }
 
         public virtual ApiUser User { get; set; } = null!;
         public virtual ICollection<ApiOrder> ApiOrders { get; set; }

@@ -10,10 +10,12 @@ namespace dotnet_service.Models
             ApiOrderitems = new HashSet<ApiOrderitem>();
             ApiOrderstatushistories = new HashSet<ApiOrderstatushistory>();
             ApiPayments = new HashSet<ApiPayment>();
+            ApiPointhistories = new HashSet<ApiPointhistory>();
         }
 
         public long Id { get; set; }
         public decimal TotalPrice { get; set; }
+        public int PointsUsed { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public long? ShippingAddressId { get; set; }
@@ -24,5 +26,6 @@ namespace dotnet_service.Models
         public virtual ICollection<ApiOrderitem> ApiOrderitems { get; set; }
         public virtual ICollection<ApiOrderstatushistory> ApiOrderstatushistories { get; set; }
         public virtual ICollection<ApiPayment> ApiPayments { get; set; }
+        public virtual ICollection<ApiPointhistory> ApiPointhistories { get; set; }
     }
 }

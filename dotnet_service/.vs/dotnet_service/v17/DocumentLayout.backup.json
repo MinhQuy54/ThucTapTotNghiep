@@ -1,82 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\",
+  "WorkspaceRootPath": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\momo\\momoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:momo\\momoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\momo\\momooptionmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:momo\\momooptionmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\momo\\momocreatepaymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:momo\\momocreatepaymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\momo\\imomoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:momo\\imomoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\momo\\momoexecuteresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:momo\\momoexecuteresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\shippingaddresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\shippingaddresscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\models\\apiorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:models\\apiorder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\mymodels\\checkoutrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\checkoutrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\models\\apiproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:models\\apiproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\models\\apirolepermission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:models\\apirolepermission.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -86,190 +34,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "IMomoService.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\IMomoService.cs",
-              "RelativeDocumentMoniker": "Momo\\IMomoService.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\IMomoService.cs",
-              "RelativeToolTip": "Momo\\IMomoService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:35:33.392Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MomoService.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoService.cs",
-              "RelativeDocumentMoniker": "Momo\\MomoService.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoService.cs",
-              "RelativeToolTip": "Momo\\MomoService.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAuwBcAAABXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:29:25.72Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "MomoExecuteResponseModel.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoExecuteResponseModel.cs",
-              "RelativeDocumentMoniker": "Momo\\MomoExecuteResponseModel.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoExecuteResponseModel.cs",
-              "RelativeToolTip": "Momo\\MomoExecuteResponseModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:26:52.151Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MomoCreatePaymentResponseModel.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoCreatePaymentResponseModel.cs",
-              "RelativeDocumentMoniker": "Momo\\MomoCreatePaymentResponseModel.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoCreatePaymentResponseModel.cs",
-              "RelativeToolTip": "Momo\\MomoCreatePaymentResponseModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:26:09.372Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MomoOptionModel.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoOptionModel.cs",
-              "RelativeDocumentMoniker": "Momo\\MomoOptionModel.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Momo\\MomoOptionModel.cs",
-              "RelativeToolTip": "Momo\\MomoOptionModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:21:45.21Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T14:05:13.947Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAIwBcAAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-04-10T11:35:17.774Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "cartController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
-              "RelativeDocumentMoniker": "Controllers\\cartController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
-              "RelativeToolTip": "Controllers\\cartController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T08:17:43.172Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "checkoutController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
-              "RelativeDocumentMoniker": "Controllers\\checkoutController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
-              "RelativeToolTip": "Controllers\\checkoutController.cs",
-              "ViewState": "AgIAAJUAAAAAAAAAAAAQwKQAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T08:15:51.866Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "CheckoutRequest.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CheckoutRequest.cs",
-              "RelativeDocumentMoniker": "MyModels\\CheckoutRequest.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CheckoutRequest.cs",
-              "RelativeToolTip": "MyModels\\CheckoutRequest.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAA6AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T06:39:27.258Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "ApiOrder.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiOrder.cs",
-              "RelativeDocumentMoniker": "Models\\ApiOrder.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiOrder.cs",
-              "RelativeToolTip": "Models\\ApiOrder.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T05:50:38.97Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "veggie_dbContext.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
-              "RelativeDocumentMoniker": "Data\\veggie_dbContext.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
-              "RelativeToolTip": "Data\\veggie_dbContext.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAywDMAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T03:42:52.413Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "CProduct.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
-              "RelativeDocumentMoniker": "MyModels\\CProduct.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
-              "RelativeToolTip": "MyModels\\CProduct.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T03:21:11.901Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "ApiProduct.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiProduct.cs",
-              "RelativeDocumentMoniker": "Models\\ApiProduct.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiProduct.cs",
-              "RelativeToolTip": "Models\\ApiProduct.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAxwBgAAAArAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-10T03:20:47.617Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
@@ -280,68 +46,77 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "shippingAddressController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\shippingAddressController.cs",
-              "RelativeDocumentMoniker": "Controllers\\shippingAddressController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\shippingAddressController.cs",
-              "RelativeToolTip": "Controllers\\shippingAddressController.cs",
-              "ViewState": "AgIAAA4AAAAAAAAAAAAAwCYAAAANAAAAAAAAAA==",
+              "DocumentIndex": 4,
+              "Title": "CProduct.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
+              "RelativeDocumentMoniker": "MyModels\\CProduct.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
+              "RelativeToolTip": "MyModels\\CProduct.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:24:36.012Z",
+              "WhenOpened": "2026-04-15T12:09:30.138Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "cartController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
+              "RelativeDocumentMoniker": "Controllers\\cartController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
+              "RelativeToolTip": "Controllers\\cartController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAANIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T10:40:16.248Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "ApiRolepermission.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiRolepermission.cs",
-              "RelativeDocumentMoniker": "Models\\ApiRolepermission.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Models\\ApiRolepermission.cs",
-              "RelativeToolTip": "Models\\ApiRolepermission.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "checkoutController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
+              "RelativeDocumentMoniker": "Controllers\\checkoutController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
+              "RelativeToolTip": "Controllers\\checkoutController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAIQAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:22:50.147Z",
+              "WhenOpened": "2026-04-15T10:39:52.813Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "Controllers\\WeatherForecastController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "Controllers\\WeatherForecastController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:22:27.451Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 2,
               "Title": "productController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
               "RelativeDocumentMoniker": "Controllers\\productController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
               "RelativeToolTip": "Controllers\\productController.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAxwGEAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAAFoAAAAAAAAAAAAowGMAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-09T04:22:15.387Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-14T06:31:37.61Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 5,
               "Title": "GhnShippingController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
               "RelativeDocumentMoniker": "Controllers\\GhnShippingController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
               "RelativeToolTip": "Controllers\\GhnShippingController.cs",
-              "ViewState": "AgIAADAAAAAAAAAAAAAYwCoAAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAYwCcAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-04-08T13:05:38.815Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-15T10:39:33.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "veggie_dbContext.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
+              "RelativeDocumentMoniker": "Data\\veggie_dbContext.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
+              "RelativeToolTip": "Data\\veggie_dbContext.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T07:30:41.91Z"
             }
           ]
         }

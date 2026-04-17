@@ -7,7 +7,9 @@ namespace dotnet_service.Models
     {
         public ApiProduct()
         {
+            ApiCancelforms = new HashSet<ApiCancelform>();
             ApiCartitems = new HashSet<ApiCartitem>();
+            ApiEntryformdetails = new HashSet<ApiEntryformdetail>();
             ApiOrderitems = new HashSet<ApiOrderitem>();
             ApiProductimages = new HashSet<ApiProductimage>();
             ApiReviews = new HashSet<ApiReview>();
@@ -19,16 +21,18 @@ namespace dotnet_service.Models
         public string Slug { get; set; } = null!;
         public string Description { get; set; } = null!;
         public decimal Price { get; set; }
+        public int WeightGram { get; set; }
         public int Stock { get; set; }
         public int Status { get; set; }
         public string Unit { get; set; } = null!;
-        public int WeightGram { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public long CategoryId { get; set; }
 
         public virtual ApiCategory Category { get; set; } = null!;
+        public virtual ICollection<ApiCancelform> ApiCancelforms { get; set; }
         public virtual ICollection<ApiCartitem> ApiCartitems { get; set; }
+        public virtual ICollection<ApiEntryformdetail> ApiEntryformdetails { get; set; }
         public virtual ICollection<ApiOrderitem> ApiOrderitems { get; set; }
         public virtual ICollection<ApiProductimage> ApiProductimages { get; set; }
         public virtual ICollection<ApiReview> ApiReviews { get; set; }
