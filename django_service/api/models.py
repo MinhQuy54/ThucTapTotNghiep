@@ -1,8 +1,13 @@
+from ast import arg
+from curses import OK
+from email import message
+
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from requests import delete
 
 
 # --- 1. Roles & Permissions ---
@@ -293,7 +298,7 @@ class EntryForm(models.Model):
     created_user = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
-        limit_choices_to={'role__name': 'Staff'},
+        limit_choices_to={'groups__name': 'Staff'},
         related_name='created_entry_forms'
     )
     status = models.CharField(max_length=50, default="Draft")
@@ -302,6 +307,40 @@ class EntryForm(models.Model):
 
     def __str__(self):
         return f"EntryForm #{self.id} - {self.supplier.name}"
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+
+        if self.pk:
+            old = EntryForm.objects.get(pk=self.pk)
+        else: old = None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            admins = User.objects.filter(is_superuser=True)
+
+            for admin in admins:
+                Notification.objects.create(
+                    user=admin,
+                    type="ENTRY_FORM",
+                    message=f"Phiếu nhập #{self.id} từ {self.supplier.name} vừa được tạo bởi {self.created_user}."
+                )
+        if old and old.status != 'None' and self.status == 'Done':
+            for detail in self.details.all():
+                detail.product.stock += detail.quantity
+                detail.product.save()
+
+            if self.created_user_id:
+                    Notification.objects.create(
+                    user=self.created_user,
+                    type="ENTRY_FORM_DONE",
+                    message=f"Phiếu nhập #{self.id} đã được xác nhận hoàn tất."
+                )
+
+        if old and old.status == "Done" and self.status != "Done":
+            for detail in self.details.all():
+                detail.product.stock -= detail.quantity
+                detail.product.save()
 
 
 class EntryFormDetail(models.Model):
@@ -312,6 +351,13 @@ class EntryFormDetail(models.Model):
 
     def __str__(self):
         return f"{self.product.name} x{self.quantity} (Entry #{self.entry_form.id})"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+
 
 
 class CancelForm(models.Model):

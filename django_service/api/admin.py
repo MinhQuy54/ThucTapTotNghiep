@@ -1,7 +1,9 @@
 from datetime import timedelta
+from locale import normalize
 from re import search
 from tkinter import Entry
 from unittest.mock import Base
+from urllib import response
 
 from django import forms
 from django.conf import settings
@@ -16,7 +18,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
-from .models import CancelForm, Category, Contact, EntryForm, EntryFormDetail, Order, OrderItem, Permission, Product, ProductImage, Role, RolePermission, Supplier, User, UserVoucher, Voucher
+from .models import CancelForm, Category, Contact, EntryForm, EntryFormDetail, Order, OrderItem, Permission, Product, ProductImage, Role, RolePermission, Supplier, User, UserVoucher, Voucher, Notification
 
 
 BADGE_STYLES = {
@@ -154,6 +156,81 @@ def dashboard_callback(request, context):
     return context
 
 
+NOTIFICATION_META = {
+    "CONTACT": {
+        "title": "Liên hệ mới",
+        "icon": "contact_mail",
+        "icon_class": "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200",
+    },
+    "ENTRY_FORM": {
+        "title": "Phiếu nhập mới",
+        "icon": "inventory_2",
+        "icon_class": "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-200",
+    },
+    "ENTRY_FORM_DONE": {
+        "title": "Phiếu nhập hoàn tất",
+        "icon": "task_alt",
+        "icon_class": "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-200",
+    },
+    "ORDER": {
+        "title": "Đơn hàng mới",
+        "icon": "receipt_long",
+        "icon_class": "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-200",
+    },
+    "DEFAULT": {
+        "title": "Thông báo",
+        "icon": "notifications",
+        "icon_class": "bg-base-100 text-base-700 dark:bg-base-800 dark:text-base-200",
+    },
+}
+
+def get_notification_meta(notification_type):
+    normalized = (notification_type or "").strip().upper()
+
+    if normalized in NOTIFICATION_META:
+        return NOTIFICATION_META[normalized]
+    
+    lowered = normalized.lower()
+    if "contact" in lowered or "liên hệ" in lowered:
+        return NOTIFICATION_META["CONTACT"]
+    if "entry" in lowered or "nhập" in lowered or "kho" in lowered:
+        return NOTIFICATION_META["ENTRY_FORM"]
+    if "order" in lowered or "đơn" in lowered:
+        return NOTIFICATION_META["ORDER"]
+
+    return NOTIFICATION_META["DEFAULT"]
+
+
+def build_notification_payload(notification):
+    meta = get_notification_meta(notification.type)
+
+    return {
+        "id": notification.pk,
+        "title": meta["title"],
+        "message": notification.message,
+        "icon": meta["icon"],
+        "icon_class": meta["icon_class"],
+        "created_at": notification.created_at,
+        "is_read": notification.is_read,
+        "link": f'{reverse("admin:api_notification_changelist")}?highlight={notification.pk}',
+    }
+
+
+def global_callback(request):
+    if not request.user.is_authenticated or not request.user.has_perm("api.view_notification"):
+        return {}
+
+    notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
+    unread_count = notifications.filter(is_read=False).count()
+
+    return {
+        "notification_link": reverse("admin:api_notification_changelist"),
+        "notification_unread_count": unread_count,
+        "notification_unread_label": "99+" if unread_count > 99 else str(unread_count),
+        "notification_items": [build_notification_payload(item) for item in notifications[:5]],
+    }
+
+
 class BaseAdmin(UnfoldModelAdmin):
     list_filter_submit = True
 
@@ -170,6 +247,45 @@ class ContactReplyForm(forms.Form):
         ),
         strip=True,
     )
+
+
+@admin.register(Notification)
+class NotificationAdmin(BaseAdmin):
+    change_list_template = "admin/notification_change_list.html"
+    list_display = ("user", "type", "message", "is_read", "created_at")
+    list_filter = ("is_read", "type")
+    search_fields = ("message", "type", "user__username", "user__email")
+    ordering = ("-created_at",)
+    list_per_page = 12
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request).select_related("user")
+        return queryset.filter(user=request.user)
+
+    def has_add_permission(self, request):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context)
+
+        if hasattr(response, "context_data") and response.context_data.get("cl"):
+            response.context_data["notification_cards"] = [
+                build_notification_payload(notification)
+                for notification in response.context_data["cl"].result_list
+            ]
+            response.context_data["notification_highlight"] = request.GET.get("highlight")
+
+        self.get_queryset(request).filter(is_read=False).update(is_read=True)
+
+        if hasattr(response, "context_data"):
+            response.context_data["notification_unread_count"] = 0
+            response.context_data["notification_unread_label"] = "0"
+            response.context_data["notification_items"] = [
+                build_notification_payload(notification)
+                for notification in self.get_queryset(request).order_by("-created_at")[:5]
+            ]
+
+        return response
 
 
 @admin.register(Role)
@@ -218,6 +334,10 @@ class EntryForm(BaseAdmin):
     search_fields = ("supplier", "status",)
     # list_filter = ("status")
     # ordering = ("-date")
+    def get_readonly_fields(self, request, obj=None):
+        if not request.user.is_superuser:
+            return ["status"]
+        return []
 
 @admin.register(EntryFormDetail)
 class EntryFormDetail(BaseAdmin):
@@ -420,4 +540,3 @@ class ContactAdmin(BaseAdmin):
             f"- Noi dung: {contact.message}\n\n"
             "Cam on ban da lien he Veggie Shop."
         )
-
