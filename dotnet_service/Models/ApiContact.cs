@@ -10,6 +10,8 @@ namespace dotnet_service.Models
         public string PhoneNumber { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Message { get; set; } = null!;
+        public string? ReplyContent { get; set; }
         public bool IsReply { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

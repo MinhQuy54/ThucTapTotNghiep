@@ -1,26 +1,30 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\",
+  "WorkspaceRootPath": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\productcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\categorycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:data\\veggie_dbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\mymodels\\productfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\productfilter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:mymodels\\cproduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\data\\veggiecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:data\\veggiecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|d:\\hoctap\\thuctaptotnghiep\\dotnet_service\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|c:\\users\\msi-modern\\onedrive\\m\u00E1y t\u00EDnh\\thuctaptotnghiep\\dotnet_service\\controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39402486-1D15-45F1-B345-97EF3FCB4751}|dotnet_service.csproj|solutionrelative:controllers\\ghnshippingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,7 +34,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,64 +46,77 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "ProductFilter.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\ProductFilter.cs",
-              "RelativeDocumentMoniker": "MyModels\\ProductFilter.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\MyModels\\ProductFilter.cs",
-              "RelativeToolTip": "MyModels\\ProductFilter.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-29T05:22:13.583Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAABQAAAADAAAAAAAAAA==",
+              "Title": "CProduct.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
+              "RelativeDocumentMoniker": "MyModels\\CProduct.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\MyModels\\CProduct.cs",
+              "RelativeToolTip": "MyModels\\CProduct.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T12:16:51.467Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "VeggieContext.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\VeggieContext.cs",
-              "RelativeDocumentMoniker": "Data\\VeggieContext.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Data\\VeggieContext.cs",
-              "RelativeToolTip": "Data\\VeggieContext.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAxwCwAAACaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T12:16:06.176Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "productController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
-              "RelativeDocumentMoniker": "Controllers\\productController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
-              "RelativeToolTip": "Controllers\\productController.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAmwFkAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-28T12:11:16.619Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-15T12:09:30.138Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "categoryController.cs",
-              "DocumentMoniker": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\categoryController.cs",
-              "RelativeDocumentMoniker": "Controllers\\categoryController.cs",
-              "ToolTip": "D:\\HOCTAP\\ThucTapTotNghiep\\dotnet_service\\Controllers\\categoryController.cs",
-              "RelativeToolTip": "Controllers\\categoryController.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABgAAAAcAAAAAAAAAA==",
+              "Title": "cartController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
+              "RelativeDocumentMoniker": "Controllers\\cartController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\cartController.cs",
+              "RelativeToolTip": "Controllers\\cartController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-27T13:18:35.999Z"
+              "WhenOpened": "2026-04-15T10:40:16.248Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "checkoutController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
+              "RelativeDocumentMoniker": "Controllers\\checkoutController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\checkoutController.cs",
+              "RelativeToolTip": "Controllers\\checkoutController.cs",
+              "ViewState": "AgIAAIMAAAAAAAAAAIAwwJMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T10:39:52.813Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "productController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "RelativeDocumentMoniker": "Controllers\\productController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\productController.cs",
+              "RelativeToolTip": "Controllers\\productController.cs",
+              "ViewState": "AgIAAFoAAAAAAAAAAAAowGMAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-14T06:31:37.61Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GhnShippingController.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
+              "RelativeDocumentMoniker": "Controllers\\GhnShippingController.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Controllers\\GhnShippingController.cs",
+              "RelativeToolTip": "Controllers\\GhnShippingController.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAYwCcAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T10:39:33.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "veggie_dbContext.cs",
+              "DocumentMoniker": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
+              "RelativeDocumentMoniker": "Data\\veggie_dbContext.cs",
+              "ToolTip": "C:\\Users\\MSI-MODERN\\OneDrive\\M\u00E1y t\u00EDnh\\ThucTapTotNghiep\\dotnet_service\\Data\\veggie_dbContext.cs",
+              "RelativeToolTip": "Data\\veggie_dbContext.cs",
+              "ViewState": "AgIAABIAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-15T07:30:41.91Z"
             }
           ]
         }

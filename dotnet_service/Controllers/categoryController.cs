@@ -8,7 +8,8 @@ namespace dotnet_service.Controllers
     [ApiController]
     public class categoryController : ControllerBase
     {
-        private readonly VeggieContext db = new VeggieContext();
+        private readonly veggie_dbContext db = new veggie_dbContext();
+
         [HttpGet]
         public async Task<IActionResult> GetCategories()
         {

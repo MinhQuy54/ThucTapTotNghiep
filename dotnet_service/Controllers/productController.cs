@@ -11,7 +11,7 @@ namespace dotnet_service.Controllers
     [ApiController]
     public class productController : ControllerBase
     {
-        private readonly VeggieContext db = new VeggieContext();
+        private readonly veggie_dbContext db = new veggie_dbContext();
 
         [HttpGet]
         public async Task<IActionResult> GetProducts([FromQuery] ProductFilter filter)
@@ -64,6 +64,7 @@ namespace dotnet_service.Controllers
                         Price = p.Price,
                         Stock = p.Stock,
                         Unit = p.Unit,
+                        WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name
                     })
@@ -103,6 +104,7 @@ namespace dotnet_service.Controllers
                         Price = p.Price,
                         Stock = p.Stock,
                         Unit = p.Unit,
+                        WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name
                     })

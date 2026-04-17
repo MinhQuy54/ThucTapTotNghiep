@@ -19,9 +19,8 @@
     }
 
     .qty-container {
-        width: 100px;
-        /* Cố định độ rộng ô số lượng */
-        height: 35px;
+        min-width: 120px !important; /* Đảm bảo khung đủ rộng */
+        padding: 2px 5px;
     }
 
     .cart-img {
@@ -31,34 +30,32 @@
 
     /* Tinh chỉnh input số lượng */
     .cart-qty {
-        width: 30px !important;
-        font-size: 14px;
+        width: 50px !important;
+        font-size: 1rem;
+        outline: none;
     }
 
-
-    #qty-input::-webkit-inner-spin-button,
-    #qty-input::-webkit-outer-spin-button {
+    .cart-qty::-webkit-outer-spin-button,
+    .cart-qty::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
     }
 
 
     .btn-veggie-cart {
-        background-color: #84b800 !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 0 !important;
-        /* Nút vuông giống ảnh */
-        padding: 10px 20px !important;
-        /* Nhỏ lại theo yêu cầu */
-        font-size: 13px !important;
-        font-weight: 700 !important;
-        width: auto !important;
-        height: 50px;
-        /* Nút tự co theo chữ */
-        transition: 0.3s;
         display: inline-block;
+        padding: 12px 25px;
+        border-radius: 5px; /* Bo góc nhẹ cho hiện đại */
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
         text-align: center;
+        background-color: #82ae46; /* Màu xanh lá chính */
+        color: #fff !important;
+        margin-right: 10px; /* Tạo khoảng cách giữa các nút */
     }
 
     .btn-veggie-cart:hover {
@@ -75,6 +72,17 @@
         width: 100% !important;
         padding: 15px !important;
     }
+    
+    .btn-veggie-cart.remove-all-item {
+        background-color: transparent;
+        color: #dc3545 !important; /* Chữ màu đỏ */
+        border: 1px solid #dc3545; /* Viền đỏ */
+    }
+    .btn-veggie-cart.remove-all-item:hover {
+        background-color: #dc3545;
+        color: #fff !important;
+    }
+
 </style>
 
 <body>
@@ -97,87 +105,176 @@
             </div>
         </section>
 
-        <section class="py-lg-5">
+        <section class="py-lg-5 py-4 bg-light">
             <div class="container">
-                <div class="table-responsive mb-4">
-                    <div class="table-responsive mb-4">
-                        <table class="table align-middle border-top border-bottom" style="min-width: 800px;">
-                            <tbody id="cart-item">
-                            </tbody>
-                        </table>
-
-                        <template id="template-cart">
-                            <tr style="height: 150px;">
-                                <td style="width: 150px;">
-                                    <img src="" alt="" class="img-fluid cart-img">
-                                </td>
-                                <td style="width: 250px;">
-                                    <div class="fw-bold cart-name">name</div>
-                                </td>
-                                <td class="fw-bold text-center cart-price" style="width: 150px;">$0.00</td>
-                                <td style="width: 200px;">
-                                    <div class="action-wrapper d-flex justify-content-center">
-                                        <div class="qty-container d-flex align-items-center border bg-white shadow-sm">
-                                            <button class="btn btn-link text-decoration-none text-dark px-2 btn-minus">
-                                                <i class="fas fa-minus fa-xs"></i>
-                                            </button>
-                                            <input type="number" value="1" min="1"
-                                                class="form-control border-0 text-center fw-bold bg-transparent p-0 cart-qty">
-                                            <button class="btn btn-link text-decoration-none text-dark px-2 btn-plus">
-                                                <i class="fas fa-plus fa-xs"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="fw-bold text-center total-price-item" style="width: 150px;">$0.00</td>
-                                <td class="text-center" style="width: 50px;">
-                                    <button class="btn btn-sm text-dark border-0 btn-remove-item" data-id="">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                </td>
+            <h2 class="fw-bold mb-4">Giỏ hàng của bạn</h2>
+            
+            <div class="cart-container mb-4">
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Tên</th>
+                                <th class="text-center">Giá</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-center">Khối lượng</th>
+                                <th class="text-center">Tổng cộng</th>
+                                <th class="text-center">Xóa</th>
                             </tr>
-                        </template>
-                    </div>
+                        </thead>
+                        <tbody id="cart-item">
+                            </tbody>
+                    </table>
+
+                    <template id="template-cart">
+                        <tr>
+                            <td style="width: 120px;">
+                                <img src="" alt="" class="img-fluid cart-img" style="width: 80px; height: 80px;">
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark cart-name">Tên sản phẩm</div>
+                            </td>
+                            <td class="fw-bold text-center text-muted cart-price">$0.00</td>
+
+                            <td>
+                                <div class="action-wrapper d-flex justify-content-center">
+                                    <div class="qty-container d-flex align-items-center bg-white shadow-sm">
+                                        <button class="btn btn-link text-decoration-none px-2 btn-minus">
+                                            <i class="fas fa-minus fa-xs"></i>
+                                        </button>
+                                        <input type="number" value="1" min="1"
+                                            class="form-control border-0 text-center fw-bold bg-transparent p-0 cart-qty">
+                                        <button class="btn btn-link text-decoration-none px-2 btn-plus">
+                                            <i class="fas fa-plus fa-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="fw-bold text-center text-muted cart-weight">0g</td>
+
+                            <td class="fw-bold text-center text-success total-price-item">$0.00</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-danger border-0 rounded-circle btn-remove-item" data-id="">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
                 </div>
+            </div>
 
-                <div class="d-flex flex-wrap gap-2 mb-5">
-                    <button class="btn-veggie-cart text-uppercase">Update Cart</button>
-                    <button class="btn-veggie-cart text-uppercase">
-                        <a href="detail.html" class="text-decoration-none text-white">Continue Shopping</a>
-                    </button>
-                    <button class="btn-veggie-cart text-uppercase remove-all-item">Clear Cart</button>
-                </div>
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <button class="btn-veggie-cart text-uppercase">Cập nhật giỏ hàng</button>
+    
+                <a href="detail.html" class="btn-veggie-cart text-uppercase text-decoration-none bg-secondary">
+                    Tiếp tục mua sắm
+                </a>
+                
+                <button class="btn-veggie-cart text-uppercase remove-all-item ms-md-auto">
+                    Xóa hết
+                </button>
+            </div>
 
-                <div class="row g-5">
-                    <div class="col-md-6">
-                        <h5 class="fw-bold mb-3">Get shipping estimates</h5>
-                        <select class="form-select mb-3 border-light-subtle py-2 rounded-0 shadow-none">
-                            <option>---</option>
-                        </select>
-                        <input type="text" class="form-control mb-3 border-light-subtle py-2 rounded-0 shadow-none"
-                            placeholder="Zip/Postal Code">
-                        <button class="btn-veggie-cart text-uppercase">Calculate shipping</button>
-                    </div>
-
-                    <div class="col-md-6">
-                        <h5 class="fw-bold mb-3">Cart Totals</h5>
-                        <div class="border">
-                            <div class="d-flex justify-content-between p-3 border-bottom bg-light bg-opacity-10">
-                                <span class="text-muted">Subtotal</span>
-                                <span class="total-price">$110.00</span>
-                            </div>
-                            <div class="d-flex justify-content-between p-3">
-                                <span class="fw-bold">Total</span>
-                                <span class="fw-bold total-price">$110.00</span>
+            <div class="row g-5">
+                <div class="col-md-6">
+                    <div class="p-4 bg-white rounded-4 shadow-sm border">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0 text-dark">
+                                <i class="fas fa-truck me-2 text-success"></i>Địa chỉ giao hàng
+                            </h5>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="openAddressModal()">
+                                Thay đổi
+                            </button>
+                        </div>
+                        
+                        <div id="addressDisplay" class="p-3 rounded-4 border bg-light-subtle mb-3">
+                            <div class="d-flex flex-column">
+                                <p class="text-muted mb-0">Đang tải thông tin địa chỉ...</p>
                             </div>
                         </div>
-                        <a href="checkout.html"
-                            class=" btn-veggie-cart btn-checkout text-uppercase mt-3 text-decoration-none text-white">Proceed
-                            to Checkout</a>
+
+                        <button class="btn btn-success w-100 py-2 text-uppercase fw-bold rounded-3" onclick="calculateShipping()">
+                            Tính toán phí giao hàng
+                        </button>
                     </div>
                 </div>
-        </section>
+
+                <div class="col-md-6">
+                    <div class="cart-totals-card p-4 shadow-sm border rounded-3 bg-white" style="border-radius: 12px !important;">
+                        <h5 class="fw-bold mb-4 text-dark" style="font-size: 1.1rem;">Tóm tắt đơn hàng</h5>
+                        
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Tạm tính</span>
+                            <span class="total-price fw-semibold text-dark">0 đ</span>
+                        </div>
+
+                        <div class="py-3 border-top border-bottom my-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Khối lượng sản phẩm</span>
+                                <span id="productWeight" class="small text-dark fw-medium">0 g</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted small">Bao bì & Đóng gói</span>
+                                <span class="small text-dark fw-medium">+ 300 g</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted small fw-bold text-uppercase">Tổng trọng lượng</span>
+                                <span id="totalWeight" class="small fw-bold text-success">0 g</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="text-muted">Phí vận chuyển</span>
+                            <span id="shippingFee" class="fw-semibold text-dark">0 đ</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mb-4">
+                            <span class="fw-bold text-dark" style="font-size: 1.1rem;">Tổng thanh toán</span>
+                            <span class="total-price fw-bold text-success fs-3">0 đ</span>
+                        </div>
+
+                        <a href="checkout.html" 
+                        class="btn-veggie-cart w-100 text-uppercase py-3 text-decoration-none shadow-sm d-block text-center fw-bold" 
+                        style="background-color: #82ae46 !important; border-radius: 8px; font-size: 14px; border: none;">
+                            Thanh toán ngay
+                        </a>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted" style="font-size: 11px;">
+                                <i class="fas fa-shield-alt me-1"></i> Thanh toán an toàn và bảo mật
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>                                          
     </main>
+
+    <!-- Modal load danh sách địa chỉ -->
+    <div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold">Chọn địa chỉ giao hàng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="modalAddressList" class="list-group list-group-flush">
+                        <div class="text-center p-3">Đang tải danh sách...</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0">
+                    <button class="btn btn-light w-100 rounded-3" 
+                            onclick="window.location.href='account.html?tab=address'">
+                        + Thêm địa chỉ mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div id="footer"></div>
 </body>
@@ -189,5 +286,6 @@
 <script src="./js/cart.js"></script>
 <script src="./js/header.js"></script>
 <script src="./js/search.js"></script>
+<script src="./js/checkout.js"></script>
 
 </html>

@@ -43,6 +43,9 @@ document.getElementById("registerForm").addEventListener("submit", async functio
             return;
         }
 
+        // Store guest address for later use (will be saved on first login)
+        // The address will be saved when user logs in for the first time
+        
         // THÔNG BÁO THÀNH CÔNG KIỂU ANT DESIGN
         antd.notification.success({
             message: 'Đăng ký thành công ',

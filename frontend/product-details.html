@@ -63,118 +63,85 @@
 
     <div id="header"></div>
 
-    <main>
-        <section class="category-banner text-white d-flex align-items-center"
-            style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('img/Vegetable_Background.jpg') center/cover; height: 400px;">
-            <div class="container d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-success fw-bold text-uppercase small">Welcome to our store</h6>
-                    <h1 id="category-title" class="display-4 fw-bold">Chi Tiết Sản Phẩm</h1>
+    <main class="container py-4">
+
+        <div class="row g-5">
+            <div class="col-md-5">
+                <div class="position-relative border rounded p-4 text-center d-flex align-items-center justify-content-center bg-white" style="height: 450px;">
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-3 px-2 py-1 fs-6 rounded-1">-14%</span>
+                    <img id="product-img" src="img/bag-filled.png" alt="Product Image" class="img-fluid" style="max-height: 100%; object-fit: contain;">
                 </div>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="index.html"
-                                class="text-white text-decoration-none">Home</a></li>
-                        <li id="breadcrumb-category" class="breadcrumb-item active text-success fw-bold"
-                            aria-current="page">Chi Tiết Sản Phẩm</li>
-                    </ol>
-                </nav>
             </div>
-        </section>
 
-        <section class="product-details py-5">
-            <div class="container">
-                <div class="row g-5">
-                    <div class="col-lg-6">
-                        <div class="product-image-wrapper p-4 ">
-                            <img id="product-img" src="" alt="Product" class="img-fluid w-100 object-fit-contain"
-                                style="max-height: 350px;">
+            <div class="col-md-7">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="text-muted small">Đã bán 0k</div>
+                    <button class="btn btn-light rounded-circle text-muted p-2 border" title="Yêu thích">
+                        <i class="fa-regular fa-heart"></i>
+                    </button>
+                </div>
+
+                <h1 id="product-name" class="h4 fw-bold mb-2 text-dark">Đang tải tên sản phẩm...</h1>
+                <div class="text-muted small mb-3" id="category">ĐVT: Hộp</div>
+
+                <div class="p-3 rounded-3 mb-4" style="background-color: #f2f9f2;">
+                    <div class="row text-muted small gy-3">
+                        <div class="col-6">
+                            <div>Xuất xứ</div>
+                            <div class="fw-bold text-dark">Việt Nam</div>
                         </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="product-info-content">
-                            <div class="rating mb-2 text-warning">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-regular fa-star"></i>
-                                <span class="text-muted small ms-2">(95 Reviews)</span>
-                            </div>
-
-                            <h1 id="product-name" class="fw-bold mb-3 h2"></h1>
-
-                            <div class="price-box mb-4">
-                                <span id="product-price" class="h3 fw-bold text-success"></span>
-                            </div>
-
-                            <div class="category-meta mb-4 pb-4 border-bottom">
-                                <p class="mb-1" id="category"><span class="fw-bold"></span> </p>
-                            </div>
-
-                            <div class="action-wrapper d-flex align-items-center gap-3 mb-4">
-                                <div class="qty-container d-flex align-items-center border rounded">
-                                    <button class="qty-btn border-0 bg-transparent px-3 py-2"
-                                        onclick="changeQty(-1)">-</button>
-                                    <input type="number" id="qty-input" value="1" min="1"
-                                        class="qty-input border-0 text-center fw-bold" style="width: 50px;">
-                                    <button class="qty-btn border-0 bg-transparent px-3 py-2"
-                                        onclick="changeQty(1)">+</button>
-                                </div>
-                                <button class="btn btn-success px-5 py-2 fw-bold d-flex align-items-center"
-                                    onclick="addToCart()">
-                                    <i class="fa-solid fa-cart-shopping"></i> THÊM VÀO GIỎ HÀNG
-                                </button>
-                            </div>
-
-                            <div class="utility-links d-flex gap-4 mb-4 small fw-semibold text-muted">
-                                <a href="#" class="text-decoration-none text-reset"><i
-                                        class="fa-regular fa-heart me-1"></i> Add to Wishlist</a>
-                                <a href="#" class="text-decoration-none text-reset"><i
-                                        class="fa-solid fa-shuffle me-1"></i> Compare</a>
-                            </div>
-
-                            <div class="guaranteed-box  p-3 rounded bg-white">
-                                <p class="small fw-bold mb-2">Guaranteed Safe Checkout</p>
-                                <div class="">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                                        width="30" class="me-2">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-                                        width="50">
-                                </div>
-                            </div>
+                        <div class="col-6">
+                            <div>VAT</div>
+                            <div class="fw-bold text-dark">0%</div>
+                        </div>
+                        <div class="col-6">
+                            <div>Thương hiệu</div>
+                            <div class="fw-bold text-success">Veggie Store</div>
+                        </div>
+                        <div class="col-6">
+                            <div>Bảo quản</div>
+                            <div class="fw-bold text-dark"><i class="fa-solid fa-snowflake text-info me-1"></i>Tủ lạnh</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mt-5 pt-5">
-                    <div class="col-12">
-                        <ul class="nav nav-tabs custom-tabs" id="productTab" role="tablist">
-                            <li class="nav-item">
-                                <button class="nav-link active fw-bold text-uppercase py-3" data-bs-toggle="tab"
-                                    data-bs-target="#desc">Description</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link fw-bold text-uppercase py-3" data-bs-toggle="tab"
-                                    data-bs-target="#reviews">Reviews</button>
-                            </li>
-                        </ul>
-                        <div class="tab-content p-4 ">
-                            <div class="tab-pane fade show active" id="desc">
-                                <p class="text-muted lh-lg" id="product-desc">
-                                    Praesent congue erat at massa. Sed cursus turpis vitae tortor... (Mô tả sẽ load từ
-                                    API)
-                                </p>
-                            </div>
-                            <div class="tab-pane fade" id="reviews">
-                                <p>No reviews yet.</p>
-                            </div>
+                <div class="border rounded-3 p-4 mb-4 shadow-sm bg-white">
+                    <div class="d-flex align-items-end mb-1">
+                        <h2 id="product-price" class="text-success fw-bold mb-0 me-3">0đ</h2>
+                        <span class="text-muted text-decoration-line-through small pb-1">32,000đ</span>
+                    </div>
+                    <div class="small text-muted mb-3 fst-italic">(Giá đã bao gồm VAT)</div>
+
+                    <div class="stock-status mb-3 fw-bold small"></div>
+
+                    <div class="d-flex gap-3 align-items-center mb-3">
+                        <div class="input-group border border-success rounded-2" style="width: 140px; height: 44px;">
+                            <button class="btn text-success fw-bold border-0 px-3 fs-5" type="button" onclick="changeQty(-1)">-</button>
+                            <input type="text" id="qty-input" class="form-control text-center border-0 text-success fw-bold bg-transparent" value="1" readonly>
+                            <button class="btn text-success fw-bold border-0 px-3 fs-5" type="button" onclick="changeQty(1)">+</button>
                         </div>
+                        
+                        <button class="btn btn-success flex-grow-1 fw-bold fs-6 add-cart-btn btn-add-to-cart" style="height: 44px;">
+                            Thêm vào giỏ
+                        </button>
+                    </div>
+
+                    <div class="small text-muted border-top pt-3 mt-3">
+                        <div class="mb-2"><i class="fa-solid fa-truck text-success me-2"></i> Nhận hàng sớm nhất từ <span class="fw-bold text-dark">6h00 ngày mai</span></div>
+                        <div><i class="fa-solid fa-shield-check text-success me-2"></i> Thanh toán khi giao • Miễn phí vận chuyển</div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-8">
+                <h4 class="fw-bold mb-3 border-bottom pb-2">Mô tả sản phẩm</h4>
+                <div id="product-desc" class="text-dark" style="line-height: 1.8; text-align: justify;">
+                    Đang tải mô tả...
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="footer"></div>
