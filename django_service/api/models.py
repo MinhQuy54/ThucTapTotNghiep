@@ -1,6 +1,7 @@
 from ast import arg
 from curses import OK
 from email import message
+from pyexpat import model
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -122,6 +123,7 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)
     status = models.IntegerField(default=1)
     unit = models.CharField(max_length=50)
+    weight_gram = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
