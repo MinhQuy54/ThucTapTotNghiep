@@ -20,11 +20,23 @@ namespace dotnet_service.Services.Momo
         public async Task<MomoCreatePaymentResponseModel> CreatePaymentAsync(ApiOrder order)
         {
             var requestId = Guid.NewGuid().ToString();
-            var orderId = order.Id.ToString() + "_" + DateTime.UtcNow.Ticks.ToString();
-            var orderInfo = "Thanh toan don hang " + order.Id; // Bỏ dấu tiếng Việt để tránh lỗi format
+            // Rút ngắn orderId - Momo yêu cầu <= 40 ký tự
+            var orderId = $"ORD{order.Id}_{DateTime.Now.Ticks % 1000000}";
+            var orderInfo = $"Thanh toan don hang {order.Id}";
 
-            string amountString = ((long)order.TotalPrice).ToString(); // Chuỗi để băm chữ ký
-            long amountNumber = (long)order.TotalPrice; // Số để gửi JSON
+            // Chuyển về dạng số nguyên và loại bỏ decimals nếu có
+            long amountNumber = (long)Math.Ceiling(order.TotalPrice);
+            
+            if (amountNumber <= 0)
+            {
+                return new MomoCreatePaymentResponseModel
+                {
+                    ResultCode = -1,
+                    Message = "Invalid amount"
+                };
+            }
+
+            string amountString = amountNumber.ToString();
 
             string rawData =
                 $"accessKey={_options.Value.AccessKey}&" +
@@ -47,7 +59,7 @@ namespace dotnet_service.Services.Momo
             {
                 partnerCode = _options.Value.PartnerCode,
                 requestId = requestId,
-                amount = amountNumber, // ĐÃ SỬA: Phải là số (long)
+                amount = amountNumber,
                 orderId = orderId,
                 orderInfo = orderInfo,
                 redirectUrl = _options.Value.ReturnUrl,
@@ -61,7 +73,12 @@ namespace dotnet_service.Services.Momo
             request.AddJsonBody(requestData);
             var response = await client.ExecuteAsync(request);
 
-            return JsonConvert.DeserializeObject<MomoCreatePaymentResponseModel>(response.Content);
+            return JsonConvert.DeserializeObject<MomoCreatePaymentResponseModel>(response.Content) ?? 
+                   new MomoCreatePaymentResponseModel 
+                   { 
+                       ResultCode = -1, 
+                       Message = "Empty response from Momo" 
+                   };
         }
 
         // Hàm xử lý dữ liệu khi MoMo trả về sau thanh toán

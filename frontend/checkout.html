@@ -119,6 +119,41 @@
         background-color: var(--veggie-green);
         color: white;
     }
+
+    /* Voucher cards */
+    .voucher-card {
+        border: 1.5px dashed #ccc;
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.82rem;
+        background: #fff;
+        position: relative;
+    }
+    .voucher-card:hover {
+        border-color: #84b800;
+        background: #f8ffe0;
+    }
+    .voucher-card.selected {
+        border-color: #84b800;
+        background: #f1f8e9;
+    }
+    .voucher-card.selected::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        color: #84b800;
+        font-size: 0.85rem;
+    }
+    .voucher-card.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
 </style>
 
 <body>
@@ -232,6 +267,38 @@
                         <div class="summary-row d-flex justify-content-between py-3 border-bottom border-light">
                             <span class="text-muted">Phí vận chuyển</span>
                             <span id="shippingFee" class="fw-bold text-primary">Đang tính...</span>
+                        </div>
+
+                        <!-- Voucher Section -->
+                        <div class="py-3 border-bottom border-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold small text-uppercase" style="color:#555;">Mã giảm giá</span>
+                                <button id="btn-toggle-vouchers" class="btn btn-sm btn-link text-success p-0 text-decoration-none small fw-bold">
+                                    <i class="fa-solid fa-ticket me-1"></i>Chọn voucher
+                                </button>
+                            </div>
+
+                            <!-- Danh sách voucher có sẵn -->
+                            <div id="voucher-list-checkout" style="display:none;" class="mb-2">
+                                <div id="voucher-cards-loading" class="text-center py-2 text-muted small">
+                                    <div class="spinner-border spinner-border-sm text-success" role="status"></div> Đang tải...
+                                </div>
+                                <div id="voucher-cards-container"></div>
+                            </div>
+
+                            <!-- Nhập tay -->
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="text" id="voucher-input" class="form-control form-control-sm" 
+                                    placeholder="Nhập hoặc chọn mã voucher..." style="border-radius: 0;">
+                                <button id="btn-apply-voucher" class="btn btn-sm btn-outline-success fw-bold text-nowrap" 
+                                    style="border-radius: 0; min-width: 90px;">Áp dụng</button>
+                            </div>
+                            <div id="voucher-feedback" class="small mt-1"></div>
+                        </div>
+
+                        <div class="summary-row d-flex justify-content-between py-3 border-bottom border-light" id="discount-row" style="display: none !important;">
+                            <span class="text-success"><i class="fa-solid fa-tag me-1"></i>Giảm giá voucher</span>
+                            <span id="discountAmount" class="fw-bold text-success">-0 đ</span>
                         </div>
 
                         <div class="summary-row d-flex justify-content-between align-items-center py-4 mt-3 bg-light px-3 rounded-3 border">

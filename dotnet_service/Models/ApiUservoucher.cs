@@ -6,7 +6,7 @@ namespace dotnet_service.Models
     public partial class ApiUservoucher
     {
         public long Id { get; set; }
-        public DateTime UsedAt { get; set; }
+        public DateTime? UsedAt { get; set; }
         public long UserId { get; set; }
         public long VoucherId { get; set; }
 
