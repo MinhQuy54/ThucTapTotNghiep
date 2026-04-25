@@ -8,13 +8,16 @@
     {% if notification_link %}
         <div class="relative" x-data="{ openNotifications: false }">
             <button type="button" class="relative inline-flex h-10 w-10 items-center justify-center rounded-default border border-base-200 text-font-default-light transition-colors hover:bg-base-100 hover:text-font-important-light dark:border-base-700 dark:text-font-default-dark dark:hover:bg-base-800 dark:hover:text-font-important-dark" title="{% trans 'Notifications' %}" aria-label="{% trans 'Notifications' %}" x-on:click="openNotifications = !openNotifications" x-bind:class="{ 'bg-base-100 text-font-important-light dark:bg-base-800 dark:text-font-important-dark': openNotifications }">
-                <span class="material-symbols-outlined text-[20px]">
-                    notifications
+                <span class="material-symbols-outlined text-[22px] {% if notification_unread_count %}text-primary-600 dark:text-primary-400{% endif %}">
+                    {% if notification_unread_count %}notifications_active{% else %}notifications{% endif %}
                 </span>
 
                 {% if notification_unread_count %}
-                    <span class="absolute -right-1.5 -top-1.5 min-w-5 rounded-full bg-primary-600 px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none text-white">
-                        {{ notification_unread_label }}
+                    <span class="absolute -right-1.5 -top-1.5 flex h-5 w-5">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary-400 opacity-75"></span>
+                        <span class="relative inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold leading-none text-white shadow-sm">
+                            {{ notification_unread_label }}
+                        </span>
                     </span>
                 {% endif %}
             </button>

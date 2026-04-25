@@ -296,6 +296,10 @@ class Supplier(models.Model):
 
 
 class EntryForm(models.Model):
+    STATUS_CHOICES = [
+        ("draft", "DRAFT"),
+        ("done", "DONE"),
+    ]
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     created_user = models.ForeignKey(
         User, 
@@ -303,7 +307,7 @@ class EntryForm(models.Model):
         limit_choices_to={'groups__name': 'Staff'},
         related_name='created_entry_forms'
     )
-    status = models.CharField(max_length=50, default="Draft")
+    status = models.CharField(max_length=50, default="draft",choices=STATUS_CHOICES)
     note = models.TextField(blank=True, null=True)
     date = models.DateField()
 
@@ -312,34 +316,40 @@ class EntryForm(models.Model):
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        old_status = None
 
-        if self.pk:
-            old = EntryForm.objects.get(pk=self.pk)
-        else: old = None
+        if not is_new:
+            try:
+                old_status = EntryForm.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+            except Exception:
+                old_status = None
+
         super().save(*args, **kwargs)
+
+        current_status = (self.status or "").lower()
+        old_status_norm = (old_status or "").lower()
 
         if is_new:
             admins = User.objects.filter(is_superuser=True)
-
             for admin in admins:
                 Notification.objects.create(
                     user=admin,
                     type="ENTRY_FORM",
                     message=f"Phiếu nhập #{self.id} từ {self.supplier.name} vừa được tạo bởi {self.created_user}."
                 )
-        if old and old.status != 'None' and self.status == 'Done':
+
+        if old_status_norm != 'done' and current_status == 'done':
             for detail in self.details.all():
                 detail.product.stock += detail.quantity
                 detail.product.save()
 
-            if self.created_user_id:
-                    Notification.objects.create(
+            if self.created_user:
+                Notification.objects.create(
                     user=self.created_user,
                     type="ENTRY_FORM_DONE",
                     message=f"Phiếu nhập #{self.id} đã được xác nhận hoàn tất."
                 )
-
-        if old and old.status == "Done" and self.status != "Done":
+        if old_status_norm == 'done' and current_status != 'done':
             for detail in self.details.all():
                 detail.product.stock -= detail.quantity
                 detail.product.save()
