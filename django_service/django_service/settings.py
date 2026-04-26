@@ -54,6 +54,7 @@ SOCIALACCOUNT_PROVIDERS = {
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "unfold",
     'django.contrib.sites',
     'django.contrib.admin',
@@ -69,7 +70,24 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'channels',
 ]
+
+ASGI_APPLICATION ='django_service.asgi.application'
+
+RABBITMQ_HOST = os.environ.get('RABBITMQ_HOST', 'rabbitmq')
+RABBITMQ_USER = 'veggie_user'
+RABBITMQ_PASS = 'veggie_password'
+
+CHANNEL_LAYERS = {
+    'default' : {
+        'BACKEND' : 'channels_rabbitmq.core.RabbitmqChannelLayer',
+        'CONFIG' : {
+            'host': f'amqp://{RABBITMQ_USER}:{RABBITMQ_PASS}@{RABBITMQ_HOST}:5672/',
+        },
+    }
+}
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -177,6 +195,10 @@ UNFOLD = {
     "SITE_SUBHEADER": "Bảng quản trị vận hành Veggie Store",
     "SITE_SYMBOL": "eco",
     "SITE_URL": FRONTEND_URL,
+    "SCRIPTS": [
+        "/static/api/js/realtime_notifications.js",
+    ],
+
     "SITE_DROPDOWN": [
         {
             "icon": "storefront",
