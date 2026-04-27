@@ -36,7 +36,6 @@ namespace dotnet_service.Controllers
         {
             try
             {
-                // Validate request
                 if (request == null)
                     return BadRequest(new { error = "Request body không hợp lệ" });
 
@@ -71,7 +70,45 @@ namespace dotnet_service.Controllers
 
                 // Calculate total
                 decimal subtotal = cartItems.Sum(c => c.Quantity * c.Product.Price);
-                decimal totalAmount = subtotal + request.ShippingFee;
+                decimal discount = 0;
+                ApiUservoucher? userVoucherToMark = null;
+
+                // Áp dụng voucher nếu có
+                if (!string.IsNullOrEmpty(request.VoucherCode))
+                {
+                    var now = DateTime.Now;
+                    var userVoucher = await db.ApiUservouchers
+                        .Include(uv => uv.Voucher)
+                        .Where(uv => uv.UserId == userId
+                            && uv.Voucher.Code == request.VoucherCode
+                            && (uv.UsedAt == null || uv.UsedAt <= DateTime.MinValue)
+                            && uv.Voucher.EndDate >= now)
+                        .FirstOrDefaultAsync();
+
+                    if (userVoucher == null)
+                        return BadRequest(new { error = "Voucher không hợp lệ hoặc đã được sử dụng." });
+
+                    var voucher = userVoucher.Voucher;
+
+                    if (subtotal < voucher.MinOrderValue)
+                        return BadRequest(new { error = $"Đơn hàng phải tối thiểu {voucher.MinOrderValue.ToString("N0")}đ để sử dụng voucher này." });
+
+                    if (voucher.DiscountType == "percentage")
+                    {
+                        discount = subtotal * voucher.DiscountValue / 100;
+                        if (voucher.MaxDiscount.HasValue && discount > voucher.MaxDiscount.Value)
+                            discount = voucher.MaxDiscount.Value;
+                    }
+                    else
+                    {
+                        discount = voucher.DiscountValue;
+                    }
+
+                    userVoucherToMark = userVoucher;
+                }
+
+                decimal totalAmount = subtotal + request.ShippingFee - discount;
+                if (totalAmount < 0) totalAmount = 0;
 
                 // Create order
                 var order = new ApiOrder
@@ -79,7 +116,7 @@ namespace dotnet_service.Controllers
                     UserId = userId,
                     ShippingAddressId = request.AddressId,
                     TotalPrice = totalAmount,
-                    Status = request.PaymentMethod == "MOMO" ? 0 : 1, // 0: pending, 1: confirmed
+                    Status = request.PaymentMethod == "MOMO" ? 0 : 1,
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -99,6 +136,13 @@ namespace dotnet_service.Controllers
                     await db.ApiOrderitems.AddAsync(orderItem);
                 }
 
+                // Đánh dấu voucher đã dùng
+                if (userVoucherToMark != null)
+                {
+                    userVoucherToMark.UsedAt = DateTime.Now;
+                    db.ApiUservouchers.Update(userVoucherToMark);
+                }
+
                 // Clear cart
                 db.ApiCartitems.RemoveRange(cartItems);
                 cart.Status = "Completed";
@@ -116,19 +160,34 @@ namespace dotnet_service.Controllers
 
                     var momoResponse = await momoService.CreatePaymentAsync(order);
 
-                    if (momoResponse?.PayUrl != null)
+                    // Kiểm tra response từ Momo
+                    if (momoResponse == null)
                     {
-                        return Ok(new
-                        {
-                            orderId = order.Id,
-                            payUrl = momoResponse.PayUrl,
-                            message = "Chuyển hướng thanh toán MOMO"
+                        return BadRequest(new { error = "Lỗi kết nối Momo: Response null" });
+                    }
+
+                    // Momo trả về ResultCode = 0 là thành công
+                    if (momoResponse.ResultCode != 0)
+                    {
+                        var errorMsg = momoResponse.Message ?? "Lỗi thanh toán Momo";
+                        var localMsg = momoResponse.LocalMessage ?? "";
+                        return BadRequest(new { 
+                            error = $"Momo error ({momoResponse.ResultCode}): {errorMsg}",
+                            detail = localMsg
                         });
                     }
-                    else
+
+                    if (string.IsNullOrEmpty(momoResponse.PayUrl))
                     {
-                        return BadRequest(new { error = "MOMO error: " + momoResponse?.Message });
+                        return BadRequest(new { error = "MOMO error: Không nhận được PayUrl" });
                     }
+
+                    return Ok(new
+                    {
+                        orderId = order.Id,
+                        payUrl = momoResponse.PayUrl,
+                        message = "Chuyển hướng thanh toán MOMO"
+                    });
                 }
                 else // COD
                 {
@@ -158,21 +217,31 @@ namespace dotnet_service.Controllers
                     return Redirect("http://localhost:8080/checkout.html?error=invalid_momo_request");
 
                 var parts = requestOrderId.Split('_');
-                if (parts.Length > 0 && long.TryParse(parts[0], out long orderId))
+                if (parts.Length > 0)
                 {
-                    var order = await db.ApiOrders.FindAsync(orderId);
-                    if (order != null)
+                    string idString = parts[0]; 
+                    
+                    if (idString.StartsWith("ORD", StringComparison.OrdinalIgnoreCase))
                     {
-                        var resultCode = Request.Query["resultCode"].ToString();
-                        if (resultCode == "0")
+                        idString = idString.Substring(3); 
+                    }
+
+                    if (long.TryParse(idString, out long orderId))
+                    {
+                        var order = await db.ApiOrders.FindAsync(orderId);
+                        if (order != null)
                         {
-                            order.Status = 1; // 1: confirmed/paid
-                            await db.SaveChangesAsync();
-                            return Redirect($"http://localhost:8080/success.html?orderId={orderId}");
-                        }
-                        else
-                        {
-                            return Redirect($"http://localhost:8080/checkout.html?error=payment_failed_{resultCode}");
+                            var resultCode = Request.Query["resultCode"].ToString();
+                            if (resultCode == "0")
+                            {
+                                order.Status = 1; 
+                                await db.SaveChangesAsync();
+                                return Redirect($"http://localhost:8080/success.html?orderId={orderId}");
+                            }
+                            else
+                            {
+                                return Redirect($"http://localhost:8080/checkout.html?error=payment_failed_{resultCode}");
+                            }
                         }
                     }
                 }

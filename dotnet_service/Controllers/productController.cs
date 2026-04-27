@@ -66,7 +66,9 @@ namespace dotnet_service.Controllers
                         Unit = p.Unit,
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
-                        CategoryName = p.Category.Name
+                        CategoryName = p.Category.Name,
+                        // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
+                        Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })
                     .ToListAsync();
 
@@ -106,7 +108,9 @@ namespace dotnet_service.Controllers
                         Unit = p.Unit,
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
-                        CategoryName = p.Category.Name
+                        CategoryName = p.Category.Name,
+                        // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
+                        Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })
                     .FirstOrDefaultAsync();
                 if (product == null)

@@ -41,14 +41,38 @@ document.addEventListener("DOMContentLoaded", function () {
             const link = e.target.closest('.category-link');
             if (!link) return;
             e.preventDefault();
-            currentCategoryId = link.getAttribute('data-id');
-            currentCategoryName = link.getAttribute('data-name');
+
+            const clickedId = link.getAttribute('data-id');
             const url = new URL(window.location);
-            url.searchParams.set('id', currentCategoryId);
-            url.searchParams.set('name', currentCategoryName);
+
+            if (currentCategoryId === clickedId) {
+                // Tắt lọc danh mục
+                currentCategoryId = null;
+                currentCategoryName = null;
+                url.searchParams.delete('id');
+                url.searchParams.delete('name');
+            } else {
+                // Chọn danh mục
+                currentCategoryId = clickedId;
+                currentCategoryName = link.getAttribute('data-name');
+                url.searchParams.set('id', currentCategoryId);
+                url.searchParams.set('name', currentCategoryName);
+            }
+
             window.history.pushState({}, '', url);
             updateHeaders(currentCategoryName);
             applyFilters(1);
+
+            // Cập nhật giao diện menu mượt mà không load trang
+            document.querySelectorAll('.category-link').forEach(el => {
+                if (el.getAttribute('data-id') == currentCategoryId) {
+                    el.classList.add('text-success', 'fw-bold');
+                    el.classList.remove('text-dark');
+                } else {
+                    el.classList.remove('text-success', 'fw-bold');
+                    el.classList.add('text-dark');
+                }
+            });
         });
     }
 
@@ -64,6 +88,21 @@ async function loadProducts(apiUrl) {
     productContainer.innerHTML = '<div class="text-center w-100 py-5"><div class="spinner-border text-success"></div></div>';
 
     try {
+        // Fetch user's wishlist if logged in
+        let wishlistIds = [];
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            try {
+                const wishlistResponse = await fetchWithAuth('/api/wishlist/GetUserWishlist');
+                if (wishlistResponse.ok) {
+                    const wishlistData = await wishlistResponse.json();
+                    wishlistIds = (wishlistData.data || []).map(item => String(item.id || item.Id));
+                }
+            } catch (error) {
+                console.warn("Không thể tải danh sách yêu thích:", error);
+            }
+        }
+
         const response = await fetch(apiUrl);
         const res = await response.json();
         productContainer.innerHTML = '';
@@ -82,6 +121,10 @@ async function loadProducts(apiUrl) {
             clone.querySelector('#product-name').textContent = product.name;
             clone.querySelector('#product-unit').textContent = product.unit;
 
+            // Gán link đến trang chi tiết sản phẩm
+            const detailUrl = `product-details.html?id=${product.id}`;
+            clone.querySelectorAll('.product-link-detail').forEach(a => a.href = detailUrl);
+
             const btnMinus = clone.querySelector('.btn-minus');
             const btnPlus = clone.querySelector('.btn-plus');
             const inputQty = clone.querySelector('.qty-input');
@@ -90,14 +133,14 @@ async function loadProducts(apiUrl) {
             if (inputQty) inputQty.value = stock > 0 ? 1 : 0;
 
             if (btnMinus) {
-                btnMinus.onclick = function() {
+                btnMinus.onclick = function () {
                     let val = parseInt(inputQty.value) || 1;
                     if (val > 1) inputQty.value = val - 1;
                 };
             }
 
             if (btnPlus) {
-                btnPlus.onclick = function() {
+                btnPlus.onclick = function () {
                     let val = parseInt(inputQty.value) || 1;
                     if (val < stock) inputQty.value = val + 1;
                     else alert("Vượt quá số lượng trong kho!");
@@ -110,8 +153,8 @@ async function loadProducts(apiUrl) {
             const addCartBtn = clone.querySelector('.add-cart-btn');
             if (addCartBtn) {
                 addCartBtn.setAttribute('data-id', product.id);
-                
-                addCartBtn.onclick = function() {
+
+                addCartBtn.onclick = function () {
                     const token = localStorage.getItem('access_token');
                     const productId = this.getAttribute('data-id');
                     const quantity = parseInt(inputQty.value) || 1;
@@ -129,9 +172,9 @@ async function loadProducts(apiUrl) {
                             });
                         }
                         localStorage.setItem('guest_cart', JSON.stringify(guestCart));
-                        
+
                         if (typeof updateCartBadge === 'function') updateCartBadge();
-                        
+
                         const modalEl = document.getElementById('successModal');
                         if (modalEl) {
                             document.getElementById('success-product-img').src = product.images?.[0]?.image || 'img/bag-filled.png';
@@ -143,6 +186,72 @@ async function loadProducts(apiUrl) {
                     }
                 };
             }
+
+            const wishlistBtn = clone.querySelector('.wishlist-btn');
+            if (wishlistBtn) {
+                wishlistBtn.setAttribute('data-id', product.id);
+
+                // Đặt mặc định là chưa active (reset trạng thái từ template nếu có)
+                wishlistBtn.classList.remove('active');
+                const icon = wishlistBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.replace('fa-solid', 'fa-regular');
+                }
+
+                // Check if product is in wishlist and color the button
+                if (wishlistIds.includes(String(product.id))) {
+                    wishlistBtn.classList.add('active');
+                    if (icon) {
+                        icon.classList.replace('fa-regular', 'fa-solid');
+                    }
+                }
+
+                wishlistBtn.onclick = async function () {
+                    const token = localStorage.getItem('access_token');
+                    if (!token) {
+                        alert("Vui lòng đăng nhập để thêm vào danh sách yêu thích!");
+                        return;
+                    }
+
+                    const productId = this.getAttribute('data-id');
+                    const isActive = this.classList.contains('active');
+                    const iconNode = this.querySelector('i');
+
+                    try {
+                        const url = isActive
+                            ? `/api/wishlist/Remove?productId=${productId}`
+                            : `/api/wishlist/Add?productId=${productId}`;
+
+                        const response = await fetchWithAuth(url, {
+                            method: 'POST'
+                        });
+
+                        if (response.ok) {
+                            if (isActive) {
+                                // Đã có -> Xoá
+                                this.classList.remove('active');
+                                if (iconNode) {
+                                    iconNode.classList.replace('fa-solid', 'fa-regular');
+                                }
+                                wishlistIds = wishlistIds.filter(id => id !== String(productId));
+                            } else {
+                                // Chưa có -> Thêm
+                                this.classList.add('active');
+                                if (iconNode) {
+                                    iconNode.classList.replace('fa-regular', 'fa-solid');
+                                }
+                                wishlistIds.push(String(productId));
+                            }
+                        } else {
+                            const resData = await response.json();
+                            console.error('Lỗi khi cập nhật wishlist:', resData.message);
+                        }
+                    } catch (error) {
+                        console.error("Lỗi khi kết nối cập nhật wishlist:", error);
+                    }
+                };
+            }
+
             productContainer.appendChild(clone);
         });
 

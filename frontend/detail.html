@@ -112,6 +112,21 @@
             background: #f0f9eb;
             color: #89b500;
         }
+
+        .wishlist-btn {
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        /* Khi có class .active (đã nằm trong danh sách yêu thích) */
+        .wishlist-btn.active {
+            color: #ff0000; /* Màu đỏ */
+        }
+
+        /* Hiệu ứng khi di chuột vào */
+        .wishlist-btn:hover {
+            color: #ff0000;
+        }
     </style>
 </head>
 
@@ -199,6 +214,9 @@
                                     <div class="position-absolute top-0 start-0 bg-danger text-white small px-2 py-1 rounded-end" style="z-index: 10;">
                                         Mã giảm giá
                                     </div>
+                                    <button class="btn-action wishlist-btn position-absolute" style="top: 10px; right: 10px; z-index: 10;" title="Yêu thích" data-id="">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </button>
                                     <div class="product-img-bg mb-2 position-relative overflow-hidden rounded text-center">
                                         <a href="#" class="product-link-detail">
                                             <img class="img-fluid" id="product-img" style="max-height: 180px; object-fit: contain;">

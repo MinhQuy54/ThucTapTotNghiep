@@ -12,5 +12,6 @@
         public int WeightGram { get; set; }
         public long CategoryId { get; set; }
         public string CategoryName { get; set; } = null!;
+        public int Sold { get; set; } // Số lượng bán
     }
 }
