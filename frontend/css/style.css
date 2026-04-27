@@ -1332,3 +1332,125 @@ body {
         flex-direction: column;
     }
 }
+
+/* =========================================================
+   ORDER DETAIL
+   ========================================================= */
+
+.page-soft {
+    background-color: #f9f9f9;
+}
+
+.veggie-hero {
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)), var(--hero-bg);
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+}
+
+.veggie-hero .breadcrumb a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.veggie-hero .breadcrumb a:hover {
+    color: var(--primary-green);
+}
+
+.order-card {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+    background: #fff;
+}
+
+.order-kv {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.order-kv:last-child {
+    border-bottom: 0;
+}
+
+.order-kv .info-label {
+    color: #667085;
+    font-weight: 600;
+    flex: 0 0 auto;
+}
+
+.order-value {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    font-weight: 600;
+    color: #111827;
+    word-break: break-word;
+}
+
+.product-img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.badge-waiting,
+.badge-payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge-waiting {
+    background: #ffc107;
+    color: #1f2328;
+}
+
+.badge-payment {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.btn-review {
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.btn-review:hover {
+    background-color: #f8f9fa;
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+@media (max-width: 575px) {
+    .order-kv {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .order-value {
+        text-align: left;
+    }
+}
