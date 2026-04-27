@@ -71,29 +71,31 @@ namespace dotnet_service.Controllers
                 // Calculate total
                 decimal subtotal = cartItems.Sum(c => c.Quantity * c.Product.Price);
                 decimal discount = 0;
-                ApiUservoucher? userVoucherToMark = null;
+                ApiVoucher? voucherToMark = null;
 
                 // Áp dụng voucher nếu có
                 if (!string.IsNullOrEmpty(request.VoucherCode))
                 {
                     var now = DateTime.Now;
-                    var userVoucher = await db.ApiUservouchers
-                        .Include(uv => uv.Voucher)
-                        .Where(uv => uv.UserId == userId
-                            && uv.Voucher.Code == request.VoucherCode
-                            && (uv.UsedAt == null || uv.UsedAt <= DateTime.MinValue)
-                            && uv.Voucher.EndDate >= now)
-                        .FirstOrDefaultAsync();
+                    
+                    // 1. Kiểm tra xem user đã dùng voucher này chưa
+                    var hasUsed = await db.ApiUservouchers.AnyAsync(uv => 
+                        uv.UserId == userId && uv.Voucher.Code == request.VoucherCode && uv.UsedAt != null && uv.UsedAt > DateTime.MinValue);
+                    
+                    if (hasUsed)
+                        return BadRequest(new { error = "Bạn đã sử dụng voucher này rồi." });
 
-                    if (userVoucher == null)
-                        return BadRequest(new { error = "Voucher không hợp lệ hoặc đã được sử dụng." });
+                    // 2. Kiểm tra tính hợp lệ của voucher trong bảng ApiVouchers
+                    var voucher = await db.ApiVouchers.FirstOrDefaultAsync(v => 
+                        v.Code == request.VoucherCode && v.IsActive && v.Quantity > 0 && v.StartDate <= now && v.EndDate >= now);
 
-                    var voucher = userVoucher.Voucher;
+                    if (voucher == null)
+                        return BadRequest(new { error = "Voucher không hợp lệ, đã hết hạn hoặc hết số lượng." });
 
                     if (subtotal < voucher.MinOrderValue)
                         return BadRequest(new { error = $"Đơn hàng phải tối thiểu {voucher.MinOrderValue.ToString("N0")}đ để sử dụng voucher này." });
 
-                    if (voucher.DiscountType == "percentage")
+                    if (voucher.DiscountType == "percentage" || voucher.DiscountType == "percent")
                     {
                         discount = subtotal * voucher.DiscountValue / 100;
                         if (voucher.MaxDiscount.HasValue && discount > voucher.MaxDiscount.Value)
@@ -104,7 +106,7 @@ namespace dotnet_service.Controllers
                         discount = voucher.DiscountValue;
                     }
 
-                    userVoucherToMark = userVoucher;
+                    voucherToMark = voucher;
                 }
 
                 decimal totalAmount = subtotal + request.ShippingFee - discount;
@@ -137,10 +139,17 @@ namespace dotnet_service.Controllers
                 }
 
                 // Đánh dấu voucher đã dùng
-                if (userVoucherToMark != null)
+                if (voucherToMark != null)
                 {
-                    userVoucherToMark.UsedAt = DateTime.Now;
-                    db.ApiUservouchers.Update(userVoucherToMark);
+                    voucherToMark.Quantity -= 1;
+                    db.ApiVouchers.Update(voucherToMark);
+
+                    var uv = new ApiUservoucher {
+                        UserId = userId,
+                        VoucherId = voucherToMark.Id,
+                        UsedAt = DateTime.Now
+                    };
+                    await db.ApiUservouchers.AddAsync(uv);
                 }
 
                 // Clear cart

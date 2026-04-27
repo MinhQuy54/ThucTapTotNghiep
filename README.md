@@ -2,7 +2,7 @@
 
 Dự án thực tập tốt nghiệp: Xây dựng hệ thống thương mại điện tử bán rau củ sạch tích hợp Chatbot tư vấn thông minh (RAG).
 
-## 🚀 Kiến Trúc Hệ Thống (Microservices)
+## Kiến Trúc Hệ Thống (Microservices)
 
 Dự án được xây dựng dựa trên kiến trúc microservices, sử dụng Docker để đóng gói và quản lý các dịch vụ:
 
@@ -60,7 +60,7 @@ graph TD
 ```
 
 
-## 🛠 Hướng Dẫn Cài Đặt
+## Hướng Dẫn Cài Đặt
 
 ### Yêu cầu hệ thống
 - Đã cài đặt **Docker** và **Docker Compose**.
@@ -102,4 +102,3 @@ graph TD
 - **Đăng nhập:** Hỗ trợ đăng nhập bằng Google.
 
 ---
-*Dự án được phát triển bởi Minh Quy (STU).*

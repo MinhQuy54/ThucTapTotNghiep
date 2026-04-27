@@ -309,8 +309,9 @@ class Notification(models.Model):
             "is_read": self.is_read,
             "created_at": self.created_at.strftime("%H:%M %d-%m-%Y")
         }
-
-        async_to_sync(channel_layer.group_send)(
+        # model => django channels layer (ko the dung await)
+        # channel_layer.group_send: tao ra 1 cong viec dang cho thuc hien
+        async_to_sync(channel_layer.group_send)( 
             group_name,
             {
                 "type": "send_notification",

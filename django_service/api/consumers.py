@@ -1,3 +1,5 @@
+
+from email import message
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -51,30 +53,27 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         from api.models import Order, Notification
         from django.utils.timezone import now
         from datetime import timedelta
-        
-        # Tìm đơn hàng trong 1 tiếng qua chưa có thông báo cho staff này
+
         time_threshold = now() - timedelta(hours=1)
         recent_orders = Order.objects.filter(
-            created_at__gte=time_threshold,
-            status=1 # PENDING
+            create_at__gte=time_threshold,
+            status=1
         )
-        
-        for order in recent_orders:
-            msg_marker = f"#{order.id}"
-            exists = Notification.objects.filter(
+
+        for i in recent_orders:
+            msg_marker = f"#{i.id}"
+            exists= Notification.objects.filter(
                 user=self.user,
                 message__contains=msg_marker
             ).exists()
-            
+
             if not exists:
-                # Tạo thông báo đúng cấu trúc của model Notification
                 Notification.objects.create(
                     user=self.user,
                     type="ORDER",
                     message=f"Có đơn hàng mới {msg_marker}. Vui lòng xác nhận đơn hàng!",
-                    is_read=False
+                    is_read=False           
                 )
-
 
     # Nhận tin nhắn từ group và gửi xuống client qua WebSocket
     async def send_notification(self, event):
