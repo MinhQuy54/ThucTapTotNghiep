@@ -5,8 +5,15 @@ __pycache__/
 node_modules/
 bin/
 obj/
+.DS_Store
 
 # Environment variables
 .env
 .env.*
 !.env.example
+
+# Python virtual environments
+chatbot/env/
+django_service/env/
+.venv/
+venv/

@@ -2,12 +2,11 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-        
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.user = self.scope.get("user")
+        self.user = self.scope.get('user')
         print(f"DEBUG: WebSocket connect attempt by user: {self.user}")
-        
+
         if self.user and self.user.is_authenticated and self.user.is_staff:
             self.group_name = "staff_notifications"
             print("DEBUG: User is staff, joining staff_notifications")
@@ -18,8 +17,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             print("DEBUG: User is NOT authenticated, closing connection")
             await self.close()
             return
-
-        # Tham gia vào group
+        
         await self.channel_layer.group_add(
             self.group_name,
             self.channel_name
@@ -30,9 +28,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         if self.user.is_staff:
             import asyncio
             self.poll_task = asyncio.create_task(self.poll_for_new_orders())
-
+            
     async def disconnect(self, close_code):
-        # Tắt Radar khi nhân viên đóng web
+    # Tắt Radar khi nhân viên đóng web
         if hasattr(self, 'poll_task'):
             self.poll_task.cancel()
             
@@ -81,3 +79,4 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     # Nhận tin nhắn từ group và gửi xuống client qua WebSocket
     async def send_notification(self, event):
         await self.send(text_data=json.dumps(event["content"]))
+
