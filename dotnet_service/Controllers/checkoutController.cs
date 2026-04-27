@@ -36,7 +36,6 @@ namespace dotnet_service.Controllers
         {
             try
             {
-                // Validate request
                 if (request == null)
                     return BadRequest(new { error = "Request body không hợp lệ" });
 
@@ -100,7 +99,7 @@ namespace dotnet_service.Controllers
                         if (voucher.MaxDiscount.HasValue && discount > voucher.MaxDiscount.Value)
                             discount = voucher.MaxDiscount.Value;
                     }
-                    else // fixed
+                    else
                     {
                         discount = voucher.DiscountValue;
                     }
