@@ -1,4 +1,4 @@
-﻿using dotnet_service.Data;
+using dotnet_service.Data;
 using dotnet_service.Models;
 using dotnet_service.MyModels;
 using Microsoft.AspNetCore.Http;
@@ -50,7 +50,9 @@ namespace dotnet_service.Controllers
                 {
                     "price" => query.OrderBy(p => p.Price),
                     "-price" => query.OrderByDescending(p => p.Price),
-                    _ => query.OrderByDescending(p => p.Id) // Cái này là mặc định sắp xếp giảm chưa phải best selling
+                    "-sold_count" => query.OrderByDescending(p => p.SoldCount),
+                    "-average_rating" => query.OrderByDescending(p => p.AverageRating),
+                    _ => query.OrderByDescending(p => p.Id)
                 };
 
                 var products = await query
