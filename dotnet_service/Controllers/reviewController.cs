@@ -19,6 +19,22 @@ namespace dotnet_service.Controllers
             return long.TryParse(claim.Value, out long id) ? id : 0;
         }
 
+        private async Task UpdateProductRating(long productId)
+        {
+            var product = await db.ApiProducts
+                .Include(p => p.ApiReviews)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product != null)
+            {
+                product.ReviewCount = product.ApiReviews.Count;
+                product.AverageRating = product.ApiReviews.Count > 0 
+                    ? (decimal)product.ApiReviews.Average(r => r.Rating) 
+                    : 0;
+                db.ApiProducts.Update(product);
+                await db.SaveChangesAsync();
+            }
+        }
+
         // GET: api/review/{productId}  - Lấy danh sách đánh giá của sản phẩm
         [HttpGet("{productId}")]
         [AllowAnonymous]
@@ -107,6 +123,8 @@ namespace dotnet_service.Controllers
                 db.ApiReviews.Add(review);
                 await db.SaveChangesAsync();
 
+                await UpdateProductRating(review.ProductId);
+
                 // Load user info để trả về
                 var user = await db.ApiUsers.FindAsync(userId);
 
@@ -158,6 +176,8 @@ namespace dotnet_service.Controllers
                 review.Comment = req.Comment.Trim();
 
                 await db.SaveChangesAsync();
+                
+                await UpdateProductRating(review.ProductId);
 
                 return Ok(new { message = "Đã cập nhật đánh giá." });
             }
@@ -183,6 +203,8 @@ namespace dotnet_service.Controllers
 
                 db.ApiReviews.Remove(review);
                 await db.SaveChangesAsync();
+
+                await UpdateProductRating(review.ProductId);
 
                 return Ok(new { message = "Đã xóa đánh giá." });
             }

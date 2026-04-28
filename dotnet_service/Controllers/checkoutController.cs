@@ -31,6 +31,24 @@ namespace dotnet_service.Controllers
             return long.TryParse(claim.Value, out long id) ? id : 0;
         }
 
+        private async Task UpdateProductSoldCount(long orderId)
+        {
+            var orderItems = await db.ApiOrderitems.Where(oi => oi.OrderId == orderId).ToListAsync();
+            foreach (var item in orderItems)
+            {
+                var product = await db.ApiProducts.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    var count = await db.ApiOrderitems
+                        .Where(oi => oi.ProductId == product.Id && oi.Order.Status >= 1 && oi.Order.Status != 5)
+                        .SumAsync(oi => oi.Quantity);
+                    product.SoldCount = count;
+                    db.ApiProducts.Update(product);
+                }
+            }
+            await db.SaveChangesAsync();
+        }
+
         [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] CheckoutRequest request)
         {
@@ -126,6 +144,11 @@ namespace dotnet_service.Controllers
                 // Add order items
                 foreach (var item in cartItems)
                 {
+                    if (item.Product.Stock < item.Quantity)
+                    {
+                        return BadRequest(new { error = $"Sản phẩm '{item.Product.Name}' chỉ còn {item.Product.Stock} sản phẩm trong kho." });
+                    }
+
                     var orderItem = new ApiOrderitem
                     {
                         OrderId = order.Id,
@@ -134,6 +157,10 @@ namespace dotnet_service.Controllers
                         Price = item.Product.Price
                     };
                     await db.ApiOrderitems.AddAsync(orderItem);
+
+                    // Trừ số lượng tồn kho
+                    item.Product.Stock -= item.Quantity;
+                    db.ApiProducts.Update(item.Product);
                 }
 
                 // Đánh dấu voucher đã dùng
@@ -191,6 +218,7 @@ namespace dotnet_service.Controllers
                 }
                 else // COD
                 {
+                    await UpdateProductSoldCount(order.Id);
                     return Ok(new
                     {
                         orderId = order.Id,
@@ -236,6 +264,7 @@ namespace dotnet_service.Controllers
                             {
                                 order.Status = 1; 
                                 await db.SaveChangesAsync();
+                                await UpdateProductSoldCount(orderId);
                                 return Redirect($"http://localhost:8080/success.html?orderId={orderId}");
                             }
                             else
