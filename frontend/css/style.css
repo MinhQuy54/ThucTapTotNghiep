@@ -500,6 +500,140 @@ body {
     color: #adb5bd !important;
 }
 
+/* LOGIN */
+.login-submit-btn {
+    min-height: 56px;
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #89b500 0%, #6f9800 100%);
+    color: #ffffff;
+    letter-spacing: 0.04em;
+    transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.login-submit-btn:hover {
+    color: #ffffff;
+    transform: translateY(-2px);
+    filter: brightness(1.02);
+}
+
+.login-submit-btn:focus-visible,
+.google-login-btn:focus-visible {
+    outline: 2px solid rgba(137, 181, 0, 0.45);
+    outline-offset: 3px;
+}
+
+.login-social-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #8a948d;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.login-social-divider::before,
+.login-social-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(137, 181, 0, 0), rgba(137, 181, 0, 0.35), rgba(137, 181, 0, 0));
+}
+
+.google-login-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border: 1px solid #dce5d1;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f7fbef 100%);
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: transform 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.google-login-btn:hover {
+    color: var(--text-dark);
+    transform: translateY(-3px);
+    border-color: #b8ce7b;
+    background: #f9fcf3;
+}
+
+.google-login-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid #ebf0e1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.google-login-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.2;
+}
+
+.google-login-copy strong {
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+.google-login-copy small {
+    color: #6d756f;
+    font-size: 0.82rem;
+}
+
+.google-login-arrow {
+    margin-left: auto;
+    color: var(--primary-green);
+    font-size: 1.45rem;
+    transition: transform 0.25s ease;
+}
+
+.google-login-btn:hover .google-login-arrow {
+    transform: translate(2px, -2px);
+}
+
+.login-links-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.login-links-row a:last-child {
+    font-weight: 600;
+}
+
+.login-links-row a:hover {
+    color: var(--primary-green) !important;
+}
+
+@media (max-width: 575px) {
+    .google-login-btn {
+        padding: 14px 16px;
+        border-radius: 18px;
+    }
+
+    .google-login-copy small {
+        display: none;
+    }
+
+    .google-login-icon {
+        width: 44px;
+        height: 44px;
+    }
+}
+
 
 .breadcrumb-item+.breadcrumb-item::before {
     content: "|";
@@ -1196,5 +1330,127 @@ body {
     .veggie-chat-meta {
         padding: 0 16px 16px;
         flex-direction: column;
+    }
+}
+
+/* =========================================================
+   ORDER DETAIL
+   ========================================================= */
+
+.page-soft {
+    background-color: #f9f9f9;
+}
+
+.veggie-hero {
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.62)), var(--hero-bg);
+    background-position: center, center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, cover;
+}
+
+.veggie-hero .breadcrumb a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.veggie-hero .breadcrumb a:hover {
+    color: var(--primary-green);
+}
+
+.order-card {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+    background: #fff;
+}
+
+.order-kv {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.order-kv:last-child {
+    border-bottom: 0;
+}
+
+.order-kv .info-label {
+    color: #667085;
+    font-weight: 600;
+    flex: 0 0 auto;
+}
+
+.order-value {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: right;
+    font-weight: 600;
+    color: #111827;
+    word-break: break-word;
+}
+
+.product-img {
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.badge-waiting,
+.badge-payment {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.badge-waiting {
+    background: #ffc107;
+    color: #1f2328;
+}
+
+.badge-payment {
+    background: #0d6efd;
+    color: #fff;
+}
+
+.btn-review {
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    transition: 0.2s ease;
+}
+
+.btn-review:hover {
+    background-color: #f8f9fa;
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+@media (max-width: 575px) {
+    .order-kv {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .order-value {
+        text-align: left;
     }
 }

@@ -4,9 +4,6 @@
     const productId = params.get('id');
     if (!productId) return;
 
-    let allReviews = [];
-    let currentFilter = 0;
-
     document.addEventListener('DOMContentLoaded', () => {
         loadReviews();
         initReviewForm();
@@ -46,94 +43,51 @@
 
             renderSummary(data.avgRating || 0, data.total || 0);
 
-            allReviews = data.data || [];
-            
-            const filterContainer = document.getElementById('review-filters');
-            if(filterContainer) {
-                 filterContainer.style.setProperty('display', allReviews.length > 0 ? 'flex' : 'none', 'important');
+            const reviews = data.data || [];
+            if (reviews.length === 0) {
+                reviewList.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-regular fa-comment-dots fa-3x mb-3 opacity-50"></i>
+                        <p>Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+                    </div>`;
+                return;
             }
 
-            renderReviewList();
+            const currentUserId = getCurrentUserId();
+
+            reviewList.innerHTML = reviews.map(r => {
+                const date = new Date(r.createdAt).toLocaleDateString('vi-VN');
+                const avatar = r.user?.avatar
+                    ? (r.user.avatar.startsWith('/media') ? r.user.avatar : `/media/${r.user.avatar}`)
+                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user?.username || 'U')}&background=78a206&color=fff&size=40`;
+                const isOwner = currentUserId && String(r.user?.id) === String(currentUserId);
+
+                return `
+                    <div class="review-card" id="review-item-${r.id}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <img src="${avatar}" alt="avatar"
+                                    class="rounded-circle" style="width:36px;height:36px;object-fit:cover;"
+                                    onerror="this.src='https://ui-avatars.com/api/?name=U&background=78a206&color=fff&size=40'">
+                                <div>
+                                    <span class="fw-bold small">${r.user?.username || 'Ẩn danh'}</span>
+                                    <div>${renderStars(r.rating)}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted" style="font-size:0.75rem;">${date}</span>
+                                ${isOwner ? `<button class="btn btn-sm text-danger p-0 border-0 bg-transparent" onclick="deleteReview(${r.id})" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+                            </div>
+                        </div>
+                        <p class="mb-0 mt-2 text-dark" style="line-height:1.6;">${escapeHtml(r.comment)}</p>
+                    </div>`;
+            }).join('');
 
         } catch (e) {
             console.error('Lỗi tải review:', e);
             document.getElementById('review-list').innerHTML =
                 '<p class="text-danger small">Không thể tải đánh giá.</p>';
         }
-    }
-
-    function renderReviewList() {
-        const reviewList = document.getElementById('review-list');
-        if (allReviews.length === 0) {
-            reviewList.innerHTML = `
-                <div class="text-center py-5 text-muted">
-                    <i class="fa-regular fa-comment-dots fa-3x mb-3 opacity-50"></i>
-                    <p>Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
-                </div>`;
-            return;
-        }
-
-        const filteredReviews = currentFilter === 0 ? allReviews : allReviews.filter(r => r.rating === currentFilter);
-        
-        if (filteredReviews.length === 0) {
-             reviewList.innerHTML = `
-                <div class="text-center py-4 text-muted">
-                    <p>Không có đánh giá ${currentFilter} sao nào.</p>
-                </div>`;
-            return;
-        }
-
-        const currentUserId = getCurrentUserId();
-
-        reviewList.innerHTML = filteredReviews.map(r => {
-            const date = new Date(r.createdAt).toLocaleDateString('vi-VN');
-            const avatar = r.user?.avatar
-                ? (r.user.avatar.startsWith('/media') ? r.user.avatar : `/media/${r.user.avatar}`)
-                : `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user?.username || 'U')}&background=78a206&color=fff&size=40`;
-            const isOwner = currentUserId && String(r.user?.id) === String(currentUserId);
-
-            return `
-                <div class="review-card" id="review-item-${r.id}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <img src="${avatar}" alt="avatar"
-                                class="rounded-circle" style="width:36px;height:36px;object-fit:cover;"
-                                onerror="this.src='https://ui-avatars.com/api/?name=U&background=78a206&color=fff&size=40'">
-                            <div>
-                                <span class="fw-bold small">${r.user?.username || 'Ẩn danh'}</span>
-                                <div>${renderStars(r.rating)}</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="text-muted" style="font-size:0.75rem;">${date}</span>
-                            ${isOwner ? `
-                                <button class="btn btn-sm text-primary p-0 border-0 bg-transparent ms-2" onclick="editReview(${r.id})" title="Sửa"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button class="btn btn-sm text-danger p-0 border-0 bg-transparent ms-2" onclick="deleteReview(${r.id})" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div id="review-content-${r.id}">
-                        <p class="mb-0 mt-2 text-dark" style="line-height:1.6;">${escapeHtml(r.comment)}</p>
-                    </div>
-                    <div id="review-edit-form-${r.id}" style="display:none;" class="mt-3">
-                        <div class="mb-2">
-                            <div class="fs-5 text-warning d-flex gap-1 edit-star-picker" id="edit-star-picker-${r.id}">
-                                <i class="fa-regular fa-star star-edit" data-val="1" data-id="${r.id}" style="cursor:pointer;"></i>
-                                <i class="fa-regular fa-star star-edit" data-val="2" data-id="${r.id}" style="cursor:pointer;"></i>
-                                <i class="fa-regular fa-star star-edit" data-val="3" data-id="${r.id}" style="cursor:pointer;"></i>
-                                <i class="fa-regular fa-star star-edit" data-val="4" data-id="${r.id}" style="cursor:pointer;"></i>
-                                <i class="fa-regular fa-star star-edit" data-val="5" data-id="${r.id}" style="cursor:pointer;"></i>
-                            </div>
-                            <input type="hidden" id="edit-rating-${r.id}" value="${r.rating}">
-                        </div>
-                        <textarea id="edit-comment-${r.id}" class="form-control mb-2" rows="2">${r.comment}</textarea>
-                        <div>
-                            <button class="btn btn-sm btn-success me-2" onclick="submitEditReview(${r.id})">Lưu</button>
-                            <button class="btn btn-sm btn-secondary" onclick="cancelEditReview(${r.id})">Hủy</button>
-                        </div>
-                    </div>
-                </div>`;
-        }).join('');
     }
 
     // Khởi tạo form đánh giá
@@ -184,16 +138,6 @@
         if (btnSubmit) {
             btnSubmit.addEventListener('click', submitReview);
         }
-
-        // Init filter buttons
-        document.querySelectorAll('#review-filters .btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('#review-filters .btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilter = parseInt(e.target.dataset.filter);
-                renderReviewList();
-            });
-        });
     }
 
     // Check xem user có mua sản phẩm này không
@@ -335,62 +279,6 @@
             }
         } catch {
             alert('Lỗi kết nối.');
-        }
-    };
-
-    window.editReview = function(id) {
-        document.getElementById(`review-content-${id}`).style.display = 'none';
-        document.getElementById(`review-edit-form-${id}`).style.display = 'block';
-        
-        const ratingInput = document.getElementById(`edit-rating-${id}`);
-        const rating = parseInt(ratingInput.value) || 0;
-        const stars = document.querySelectorAll(`#edit-star-picker-${id} .star-edit`);
-        
-        const updateStars = (val) => {
-            stars.forEach(s => {
-                const sv = parseInt(s.dataset.val);
-                s.className = sv <= val ? 'fa-solid fa-star star-edit text-warning' : 'fa-regular fa-star star-edit text-warning';
-            });
-        };
-        
-        updateStars(rating);
-        
-        stars.forEach(star => {
-            star.onmouseenter = () => updateStars(parseInt(star.dataset.val));
-            star.onmouseleave = () => updateStars(parseInt(ratingInput.value) || 0);
-            star.onclick = () => {
-                ratingInput.value = star.dataset.val;
-                updateStars(parseInt(star.dataset.val));
-            };
-        });
-    };
-
-    window.cancelEditReview = function(id) {
-        document.getElementById(`review-content-${id}`).style.display = 'block';
-        document.getElementById(`review-edit-form-${id}`).style.display = 'none';
-    };
-    
-    window.submitEditReview = async function(id) {
-        const rating = parseInt(document.getElementById(`edit-rating-${id}`).value) || 0;
-        const comment = document.getElementById(`edit-comment-${id}`).value.trim();
-        
-        if (rating === 0) return alert("Vui lòng chọn số sao");
-        if (!comment) return alert("Vui lòng nhập bình luận");
-        
-        try {
-            const res = await fetchWithAuth(`/api/review/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: parseInt(productId), rating, comment })
-            });
-            if (res.ok) {
-                await loadReviews();
-            } else {
-                const d = await res.json();
-                alert(d.message || "Cập nhật thất bại");
-            }
-        } catch(e) {
-            alert("Lỗi kết nối");
         }
     };
 
