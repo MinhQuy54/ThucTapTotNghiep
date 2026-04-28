@@ -281,17 +281,28 @@
         </section>
     </div>
 
-    <div class="dashboard-panels" style="grid-template-columns: 1fr; margin-top: 24px;">
+    <div class="dashboard-panels" style="margin-top: 24px;">
         <section class="dashboard-panel">
             <div class="dashboard-panel-head">
-                <h2>Biểu đồ doanh thu 30 ngày qua</h2>
-                <p>Thống kê doanh thu từ các đơn hàng đã xác nhận, đang giao và đã giao.</p>
+                <h2>Hiệu suất đơn hàng 7 ngày qua</h2>
+                <p>Số lượng đơn hàng phát sinh mỗi ngày trong tuần.</p>
             </div>
-            <div class="chart-shell" style="min-height: 250px;">
-                {% include "unfold/components/chart/line.html" with data=revenue_chart_data %}
+            <div class="chart-shell" style="min-height: 300px;">
+                {% include "unfold/components/chart/bar.html" with data=performance_chart_data %}
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <h2>Cấu trúc đơn hàng</h2>
+                <p>Phân bổ đơn hàng theo trạng thái hiện tại.</p>
+            </div>
+            <div class="chart-shell" style="min-height: 300px;">
+                {% include "unfold/components/chart/pie.html" with data=order_status_chart_data %}
             </div>
         </section>
     </div>
+
 
     <div class="dashboard-main">
         <div>

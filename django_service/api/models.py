@@ -352,6 +352,23 @@ class Contact(models.Model):
     is_reply = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            staff_users = User.objects.filter(
+                Q(role__name='Staff') |Q(is_superuser=True) | Q(is_staff=True)
+            ).distinct()
+
+            for su in staff_users:
+                Notification.objects.create(
+                    user=su,
+                    type='CONTACT',
+                    message=f"Có liên hệ mới từ {self.full_name} ({self.email})",
+                    is_read=False
+
+                )
+
     def __str__(self):
         return f"{self.full_name} - {self.email}"
 

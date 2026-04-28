@@ -1,10 +1,5 @@
 import json
 from datetime import timedelta
-from locale import normalize
-from re import search
-from tkinter import Entry
-from unittest.mock import Base
-from urllib import response
 
 from django import forms
 from django.conf import settings
@@ -144,29 +139,48 @@ def dashboard_callback(request, context):
     # Tính doanh thu từ các đơn hàng thành công hoặc đang xử lý (loại trừ Hủy và Hoàn tiền)
     revenue = Order.objects.exclude(status__in=[Order.Status.CANCELLED, Order.Status.REFUNDED]).aggregate(total=Sum("total_price"))["total"] or 0
 
-    # Dữ liệu biểu đồ doanh thu 30 ngày qua
-    thirty_days_ago = today - timedelta(days=29)
-    revenue_history = (
-        Order.objects.filter(
-            created_at__date__gte=thirty_days_ago,
-            status__in=[Order.Status.CONFIRMED, Order.Status.SHIPPING, Order.Status.DELIVERED]
-        )
+    # Dữ liệu biểu đồ trạng thái đơn hàng (Pie chart)
+    order_status_stats = (
+        Order.objects.values("status")
+        .annotate(count=Count("id"))
+    )
+    status_labels = dict(Order.Status.choices)
+    
+    order_status_chart_data = {
+        "labels": [status_labels.get(item["status"], item["status"]) for item in order_status_stats],
+        "datasets": [{
+            "data": [item["count"] for item in order_status_stats],
+            "backgroundColor": [
+                "#fbbf24", # PENDING - amber-400
+                "#60a5fa", # CONFIRMED - blue-400
+                "#818cf8", # SHIPPING - indigo-400
+                "#34d399", # DELIVERED - emerald-400
+                "#f87171", # CANCELLED - red-400
+                "#94a3b8", # REFUNDED - slate-400
+            ],
+            "borderWidth": 0,
+        }]
+    }
+
+    # Dữ liệu biểu đồ hiệu suất (Bar chart - đơn hàng 7 ngày qua)
+    seven_days_ago = today - timedelta(days=6)
+    order_history_counts = (
+        Order.objects.filter(created_at__date__gte=seven_days_ago)
         .values("created_at__date")
-        .annotate(total=Sum("total_price"))
+        .annotate(count=Count("id"))
         .order_by("created_at__date")
     )
+    order_map = {item["created_at__date"]: item["count"] for item in order_history_counts}
+    seven_days = [seven_days_ago + timedelta(days=i) for i in range(7)]
     
-    rev_map = {item["created_at__date"]: float(item["total"]) for item in revenue_history}
-    chart_days = [thirty_days_ago + timedelta(days=i) for i in range(30)]
-    
-    revenue_chart_data = {
-        "labels": [day.strftime("%d/%m") for day in chart_days],
+    performance_chart_data = {
+        "labels": [day.strftime("%A") for day in seven_days], # Full weekday name
         "datasets": [{
-            "label": "Doanh thu",
-            "data": [rev_map.get(day, 0) for day in chart_days],
-            "borderColor": "#2fab68",
-            "backgroundColor": "rgba(47, 171, 104, 0.1)",
-            "fill": True,
+            "label": "Đơn hàng mới",
+            "data": [order_map.get(day, 0) for day in seven_days],
+            "backgroundColor": "#2fab68", # Site primary color
+            "borderRadius": 12,
+            "borderSkipped": False,
         }]
     }
 
@@ -179,7 +193,8 @@ def dashboard_callback(request, context):
             "low_stock": Product.objects.filter(stock__lt=10).count(),
             "new_contacts": Contact.objects.filter(is_reply=False).count(),
             "cohort_data": build_order_status_cohort(start_date, today),
-            "revenue_chart_data": json.dumps(revenue_chart_data),
+            "order_status_chart_data": json.dumps(order_status_chart_data),
+            "performance_chart_data": json.dumps(performance_chart_data),
         }
     )
     return context

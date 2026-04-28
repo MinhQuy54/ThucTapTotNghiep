@@ -333,7 +333,6 @@ class OrderDetailView(APIView):
 
             if order.status not in [1,2]:
                 return Response({"error": "Không thể hủy đơn"}, status=400)
-            
             for item in order.items.all():
                 product = item.product
                 product.stock += item.quantity
@@ -351,15 +350,8 @@ class ContactList(APIView):
         serializers = ContactSerializer(data=request.data)
 
         if serializers.is_valid():
-            contact = serializers.save()
+            serializers.save()
 
-            admins = User.objects.filter(is_staff = True)
-            for admin in admins:
-                Notification.objects.create(
-                    user=admin,
-                    type="CONTACT",
-                    message=f"Liên hệ mới từ {contact.full_name}"
-                )
             return Response({
                 "message": "Gửi liên hệ thành công"
             }, status=status.HTTP_201_CREATED)
@@ -433,6 +425,17 @@ class GHNProxyBase(APIView):
             )
 
         return Response(data, status=response.status_code)
+
+class MarkNotificationAsRead(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, pk):
+        try:
+            notification = Notification.objects.get(pk=pk, user=request.user)
+            notification.is_read = True
+            notification.save()
+            return Response({"message": "Đã đánh dấu là đã đọc"})
+        except Notification.DoesNotExist:
+            return Response({"error": "Không tìm thấy thông báo"}, status=404)
     
 class GetProvincesView(GHNProxyBase):
     def get(self, request):
