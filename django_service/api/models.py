@@ -1,3 +1,5 @@
+from django.core.mail import send_mail
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
@@ -207,7 +209,24 @@ class Order(models.Model):
                 message=f"Đơn hàng #{self.id} của bạn đã chuyển sang trạng thái: {self.get_status_display()}",
                 is_read=False
             )
-        
+
+            
+            if self.status == self.Status.DELIVERED:
+                try:
+                    subject = f"Đơn hàng #{self.id} đã được giao thành công!"
+                    message = (
+                        f"Xin chào {self.user.username or self.user.email},\n\n"
+                        f"Đơn hàng #{self.id} của bạn đã được giao thành công.\n"
+                        "Cảm ơn bạn đã tin tưởng và mua sắm tại Veggie Shop!\n\n"
+                        "Trân trọng,\n"
+                        "Đội ngũ Veggie Shop."
+                    )
+                    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+                    recipient_list = [self.user.email]
+                    send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+                except Exception as e:
+                    print(f"Error sending email: {e}")
+             
     def __str__(self):
         return f"Order #{self.id} - {self.user.email} - {self.get_status_display()}"
 
@@ -311,6 +330,7 @@ class Notification(models.Model):
         }
         # model => django channels layer (ko the dung await)
         # channel_layer.group_send: tao ra 1 cong viec dang cho thuc hien
+        print(f"DEBUG: Broadcasting notification to group {group_name}: {self.message}")
         async_to_sync(channel_layer.group_send)( 
             group_name,
             {

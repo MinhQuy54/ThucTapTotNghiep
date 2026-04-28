@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from locale import normalize
 from re import search
@@ -67,15 +68,15 @@ def render_badge(label, tone="neutral"):
 
 def cohort_color(percent):
     if percent >= 85:
-        return "bg-primary-800 text-white"
-    if percent >= 70:
-        return "bg-primary-700 text-white"
-    if percent >= 55:
         return "bg-primary-600 text-white"
-    if percent >= 40:
+    if percent >= 70:
         return "bg-primary-500 text-white"
-    if percent >= 25:
+    if percent >= 55:
+        return "bg-primary-400 text-white"
+    if percent >= 40:
         return "bg-primary-300 text-primary-950"
+    if percent >= 20:
+        return "bg-primary-200 text-primary-900"
     if percent > 0:
         return "bg-primary-100 text-primary-900"
     return None
@@ -140,7 +141,34 @@ def build_order_status_cohort(start_date, end_date):
 def dashboard_callback(request, context):
     today = timezone.localdate()
     start_date = today - timedelta(days=6)
-    revenue = Order.objects.filter(status=1).aggregate(total=Sum("total_price"))["total"] or 0
+    # Tính doanh thu từ các đơn hàng thành công hoặc đang xử lý (loại trừ Hủy và Hoàn tiền)
+    revenue = Order.objects.exclude(status__in=[Order.Status.CANCELLED, Order.Status.REFUNDED]).aggregate(total=Sum("total_price"))["total"] or 0
+
+    # Dữ liệu biểu đồ doanh thu 30 ngày qua
+    thirty_days_ago = today - timedelta(days=29)
+    revenue_history = (
+        Order.objects.filter(
+            created_at__date__gte=thirty_days_ago,
+            status__in=[Order.Status.CONFIRMED, Order.Status.SHIPPING, Order.Status.DELIVERED]
+        )
+        .values("created_at__date")
+        .annotate(total=Sum("total_price"))
+        .order_by("created_at__date")
+    )
+    
+    rev_map = {item["created_at__date"]: float(item["total"]) for item in revenue_history}
+    chart_days = [thirty_days_ago + timedelta(days=i) for i in range(30)]
+    
+    revenue_chart_data = {
+        "labels": [day.strftime("%d/%m") for day in chart_days],
+        "datasets": [{
+            "label": "Doanh thu",
+            "data": [rev_map.get(day, 0) for day in chart_days],
+            "borderColor": "#2fab68",
+            "backgroundColor": "rgba(47, 171, 104, 0.1)",
+            "fill": True,
+        }]
+    }
 
     context.update(
         {
@@ -151,6 +179,7 @@ def dashboard_callback(request, context):
             "low_stock": Product.objects.filter(stock__lt=10).count(),
             "new_contacts": Contact.objects.filter(is_reply=False).count(),
             "cohort_data": build_order_status_cohort(start_date, today),
+            "revenue_chart_data": json.dumps(revenue_chart_data),
         }
     )
     return context
