@@ -134,6 +134,39 @@ namespace dotnet_service.Controllers
             }
         }
 
+        // PUT: api/review/{id}  - Sửa đánh giá (chỉ sửa của mình)
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> EditReview(long id, [FromBody] ReviewRequest req)
+        {
+            try
+            {
+                long userId = GetUserIdFromToken();
+                if (userId == 0) return Unauthorized();
+
+                var review = await db.ApiReviews.FindAsync(id);
+                if (review == null) return NotFound(new { message = "Không tìm thấy đánh giá." });
+                if (review.UserId != userId) return Forbid();
+
+                if (req.Rating < 1 || req.Rating > 5)
+                    return BadRequest(new { message = "Rating phải từ 1 đến 5." });
+
+                if (string.IsNullOrWhiteSpace(req.Comment))
+                    return BadRequest(new { message = "Nội dung bình luận không được để trống." });
+
+                review.Rating = req.Rating;
+                review.Comment = req.Comment.Trim();
+
+                await db.SaveChangesAsync();
+
+                return Ok(new { message = "Đã cập nhật đánh giá." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // DELETE: api/review/{id}  - Xóa đánh giá (chỉ xóa của mình)
         [HttpDelete("{id}")]
         [Authorize]
