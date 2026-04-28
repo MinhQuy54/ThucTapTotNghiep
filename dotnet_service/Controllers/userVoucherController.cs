@@ -1,4 +1,4 @@
-﻿using dotnet_service.Data;
+using dotnet_service.Data;
 using dotnet_service.MyModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,23 +28,34 @@ namespace dotnet_service.Controllers
 
                 var now = DateTime.Now;
 
-                var kq = db.ApiUservouchers
-                    .Where(x => x.UserId == userId && (x.UsedAt == null || x.UsedAt <= DateTime.MinValue))
-                    .Select(x => new UserVoucher
-                    {
-                        Id = x.Voucher.Id,
-                        Code = x.Voucher.Code,
-                        DiscountType = x.Voucher.DiscountType,
-                        DiscountValue = x.Voucher.DiscountValue,
-                        MinOrderValue = x.Voucher.MinOrderValue,
-                        MaxDiscount = x.Voucher.MaxDiscount,
-                        EndDate = x.Voucher.EndDate,
-                        UserVoucherId = x.Id
-                    })
-                    .AsEnumerable()
+                // 1. Lấy danh sách ID các voucher mà user này ĐÃ dùng
+                var usedVoucherIds = db.ApiUservouchers
+                    .Where(x => x.UserId == userId && x.UsedAt != null && x.UsedAt > DateTime.MinValue)
+                    .Select(x => x.VoucherId)
                     .ToList();
 
-                return Ok(kq);
+                // 2. Lấy tất cả các voucher đang hoạt động, còn số lượng, trong hạn sử dụng 
+                //    và user này CHƯA dùng (hoặc chưa có bản ghi dùng)
+                var availableVouchers = db.ApiVouchers
+                    .Where(v => v.IsActive 
+                             && v.Quantity > 0 
+                             && v.StartDate <= now 
+                             && v.EndDate >= now
+                             && !usedVoucherIds.Contains(v.Id))
+                    .Select(v => new UserVoucher
+                    {
+                        Id = v.Id,
+                        Code = v.Code,
+                        DiscountType = v.DiscountType,
+                        DiscountValue = v.DiscountValue,
+                        MinOrderValue = v.MinOrderValue,
+                        MaxDiscount = v.MaxDiscount,
+                        EndDate = v.EndDate,
+                        UserVoucherId = 0 // Đây là voucher chung chưa gán
+                    })
+                    .ToList();
+
+                return Ok(availableVouchers);
             }
             catch (Exception ex)
             {

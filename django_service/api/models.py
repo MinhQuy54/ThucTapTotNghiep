@@ -1,13 +1,10 @@
-from ast import arg
-from curses import OK
-from email import message
-
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from requests import delete
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 # --- 1. Roles & Permissions ---
@@ -122,6 +119,7 @@ class Product(models.Model):
     stock = models.IntegerField(default=0)
     status = models.IntegerField(default=1)
     unit = models.CharField(max_length=50)
+    weight_gram = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -155,6 +153,61 @@ class Order(models.Model):
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+        
+        if not is_new:
+            old_instance = Order.objects.get(pk=self.pk)
+            old_status = old_instance.status
+        
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            staff_users = User.objects.filter(
+                Q(role__name='Staff') | Q(is_superuser=True) | Q(is_staff=True)
+            ).distinct() 
+            
+            for su in staff_users:
+                Notification.objects.create(
+                    user=su,
+                    type="ORDER",
+                    message=f"Có đơn hàng mới #{self.id} từ {self.user.email}. Vui lòng xác nhận đơn hàng",
+                    is_read=False
+                )
+            
+            OrderStatusHistory.objects.create(order=self, status=self.status, note="Đơn hàng được tạo")
+
+        # 2. Xử lý khi thay đổi trạng thái
+        elif old_status != self.status:
+            # Lưu lịch sử thay đổi
+            OrderStatusHistory.objects.create(
+                order=self, 
+                status=self.status, 
+                note=f"Trạng thái thay đổi từ {old_status} sang {self.status}"
+            )
+
+            # Nếu chuyển sang Đã xác nhận (2) và trước đó chưa xác nhận (1)
+            if self.status == self.Status.CONFIRMED and old_status == self.Status.PENDING:
+                for item in self.items.all():
+                    item.product.stock -= item.quantity
+                    item.product.save()
+
+            # --- LOGIC HOÀN KHO ---
+            # Nếu đơn hàng bị Hủy (5) và trước đó đã được xác nhận (2,3,4)
+            if self.status == self.Status.CANCELLED and old_status in [self.Status.CONFIRMED, self.Status.SHIPPING, self.Status.DELIVERED]:
+                for item in self.items.all():
+                    item.product.stock += item.quantity
+                    item.product.save()
+
+            # --- THÔNG BÁO CHO KHÁCH HÀNG ---
+            Notification.objects.create(
+                user=self.user,
+                type="ORDER_STATUS",
+                message=f"Đơn hàng #{self.id} của bạn đã chuyển sang trạng thái: {self.get_status_display()}",
+                is_read=False
+            )
+        
     def __str__(self):
         return f"Order #{self.id} - {self.user.email} - {self.get_status_display()}"
 
@@ -238,6 +291,34 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            self.broadcast_notification()
+
+    def broadcast_notification(self):
+        channel_layer = get_channel_layer()
+        group_name = "staff_notifications" if self.user.is_staff else f"user_notifications_{self.user.id}"
+        
+        # Payload để gửi qua WebSocket
+        data = {
+            "id": self.id,
+            "type": self.type,
+            "message": self.message,
+            "is_read": self.is_read,
+            "created_at": self.created_at.strftime("%H:%M %d-%m-%Y")
+        }
+        # model => django channels layer (ko the dung await)
+        # channel_layer.group_send: tao ra 1 cong viec dang cho thuc hien
+        async_to_sync(channel_layer.group_send)( 
+            group_name,
+            {
+                "type": "send_notification",
+                "content": data
+            }
+        )
+
     def __str__(self):
         return f"{self.user.username} - {self.type}"
 
@@ -294,6 +375,10 @@ class Supplier(models.Model):
 
 
 class EntryForm(models.Model):
+    STATUS_CHOICES = [
+        ("draft", "DRAFT"),
+        ("done", "DONE"),
+    ]
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     created_user = models.ForeignKey(
         User, 
@@ -301,7 +386,7 @@ class EntryForm(models.Model):
         limit_choices_to={'groups__name': 'Staff'},
         related_name='created_entry_forms'
     )
-    status = models.CharField(max_length=50, default="Draft")
+    status = models.CharField(max_length=50, default="draft",choices=STATUS_CHOICES)
     note = models.TextField(blank=True, null=True)
     date = models.DateField()
 
@@ -310,34 +395,40 @@ class EntryForm(models.Model):
     
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+        old_status = None
 
-        if self.pk:
-            old = EntryForm.objects.get(pk=self.pk)
-        else: old = None
+        if not is_new:
+            try:
+                old_status = EntryForm.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+            except Exception:
+                old_status = None
+
         super().save(*args, **kwargs)
+
+        current_status = (self.status or "").lower()
+        old_status_norm = (old_status or "").lower()
 
         if is_new:
             admins = User.objects.filter(is_superuser=True)
-
             for admin in admins:
                 Notification.objects.create(
                     user=admin,
                     type="ENTRY_FORM",
                     message=f"Phiếu nhập #{self.id} từ {self.supplier.name} vừa được tạo bởi {self.created_user}."
                 )
-        if old and old.status != 'None' and self.status == 'Done':
+
+        if old_status_norm != 'done' and current_status == 'done':
             for detail in self.details.all():
                 detail.product.stock += detail.quantity
                 detail.product.save()
 
-            if self.created_user_id:
-                    Notification.objects.create(
+            if self.created_user:
+                Notification.objects.create(
                     user=self.created_user,
                     type="ENTRY_FORM_DONE",
                     message=f"Phiếu nhập #{self.id} đã được xác nhận hoàn tất."
                 )
-
-        if old and old.status == "Done" and self.status != "Done":
+        if old_status_norm == 'done' and current_status != 'done':
             for detail in self.details.all():
                 detail.product.stock -= detail.quantity
                 detail.product.save()

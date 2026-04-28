@@ -203,6 +203,15 @@ def get_notification_meta(notification_type):
 
 def build_notification_payload(notification):
     meta = get_notification_meta(notification.type)
+    link = f'{reverse("admin:api_notification_changelist")}?highlight={notification.pk}'
+    
+    # Nếu là thông báo đơn hàng, cố gắng trích xuất ID để dẫn thẳng tới đơn hàng
+    if notification.type == "ORDER":
+        import re
+        match = re.search(r'#(\d+)', notification.message)
+        if match:
+            order_id = match.group(1)
+            link = reverse("admin:api_order_change", args=[order_id])
 
     return {
         "id": notification.pk,
@@ -212,14 +221,38 @@ def build_notification_payload(notification):
         "icon_class": meta["icon_class"],
         "created_at": notification.created_at,
         "is_read": notification.is_read,
-        "link": f'{reverse("admin:api_notification_changelist")}?highlight={notification.pk}',
+        "link": link,
     }
 
 
 def global_callback(request):
-    if not request.user.is_authenticated or not request.user.has_perm("api.view_notification"):
+    if not request.user.is_authenticated or not request.user.is_staff:
         return {}
 
+    # --- TỰ ĐỘNG PHÁT HIỆN ĐƠN HÀNG MỚI (Dành cho trường hợp đặt từ .NET) ---
+    # Tìm các đơn hàng mới trong vòng 1 giờ qua chưa có thông báo nào cho user này
+    from django.utils import timezone
+    from datetime import timedelta
+    from .models import Order, Notification
+    
+    one_hour_ago = timezone.now() - timedelta(hours=1)
+    new_orders = Order.objects.filter(created_at__gte=one_hour_ago)
+    
+    for order in new_orders:
+        # Kiểm tra xem user này đã có thông báo cho đơn hàng này chưa
+        # (Dựa trên message chứa ID đơn hàng để định danh tạm thời)
+        msg_marker = f"#{order.id}"
+        exists = Notification.objects.filter(user=request.user, message__contains=msg_marker).exists()
+        
+        if not exists:
+            Notification.objects.create(
+                user=request.user,
+                type="ORDER",
+                message=f"Có đơn hàng mới {msg_marker} từ {order.user.email}. Vui lòng xác nhận đơn hàng",
+                is_read=False
+            )
+
+    # --- LẤY DANH SÁCH THÔNG BÁO ---
     notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
     unread_count = notifications.filter(is_read=False).count()
 

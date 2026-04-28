@@ -8,16 +8,21 @@ services:
       - ./django_service/.env
     environment:
       REDIS_URL: redis://redis:6379/1
+      RABBITMQ_HOST: rabbitmq
     volumes:
       - ./django_service:/app
+    command: >
+      sh -c "sleep 5 && python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - mysql_db
       - redis
+      - rabbitmq
     networks:
       - veggie_net
 
   rag_api:
-    build: 
+    build:
       context: ./chatbot
       dockerfile: Dockerfile
     env_file:
@@ -85,6 +90,18 @@ services:
     restart: always
     volumes:
       - redis_data:/data
+    networks:
+      - veggie_net
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=veggie_user
+      - RABBITMQ_DEFAULT_PASS=veggie_password
+    env_file:
+      - ./django_service/.env
     networks:
       - veggie_net
 

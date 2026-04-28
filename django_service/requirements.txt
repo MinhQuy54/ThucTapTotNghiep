@@ -21,3 +21,6 @@ django-unfold==0.88.0
 django-redis==6.0.0
 django-allauth==65.15.1
 cryptography==44.0.1
+channels==4.3.2
+daphne==4.2.1
+channels_rabbitmq==4.0.1

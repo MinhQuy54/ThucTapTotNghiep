@@ -1,5 +1,20 @@
 document.addEventListener("DOMContentLoaded", loadDetailOrder);
 
+function setKvText(id, value) {
+    const row = document.getElementById(id);
+    const valueEl = row ? row.querySelector(".order-value") : null;
+    if (!valueEl) return;
+    const normalized = value === null || value === undefined || value === "" ? "---" : value;
+    valueEl.textContent = normalized;
+}
+
+function setKvHtml(id, html) {
+    const row = document.getElementById(id);
+    const valueEl = row ? row.querySelector(".order-value") : null;
+    if (!valueEl) return;
+    valueEl.innerHTML = html ?? "";
+}
+
 function renderStatus(status) {
     switch (status) {
         case 1:
@@ -49,12 +64,11 @@ async function loadDetailOrder() {
         const data = await res.json();
 
         document.getElementById('id-order').innerText = data.id;
-        document.getElementById('date-order').innerHTML = `<span class="info-label">Ngày đặt:</span> ${new Date(data.created_at).toLocaleDateString('vi-VN')}`;
-        document.getElementById('status-order').innerHTML =
-            `<span class="info-label">Trạng thái:</span> ${renderStatus(data.status)}`;
+        setKvText('date-order', new Date(data.created_at).toLocaleDateString('vi-VN'));
+        setKvHtml('status-order', renderStatus(data.status));
 
         const price = parseFloat(data.total_price);
-        document.getElementById('price-order').innerHTML = `<span class="info-label">Tổng tiền:</span> <span class="fw-bold text-dark">${price.toLocaleString('vi-VN')} VNĐ</span>`;
+        setKvHtml('price-order', `<span class="fw-bold text-dark">${price.toLocaleString('vi-VN')} VNĐ</span>`);
 
         const orderTable = document.getElementById('order-table');
         orderTable.innerHTML = '';
@@ -73,10 +87,10 @@ async function loadDetailOrder() {
 
         if (data.shipping_address) {
             const addr = data.shipping_address;
-            document.getElementById('username-order').innerHTML = `<span class="info-label">Người nhận:</span> ${addr.full_name}`;
-            document.getElementById('address-order').innerHTML = `<span class="info-label">Địa chỉ:</span> ${addr.address || ""}`;
-            document.getElementById('city-order').innerHTML = `<span class="info-label">Khu vực:</span> ${addr.city || ""}`;
-            document.getElementById('phone-order').innerHTML = `<span class="info-label">Số điện thoại:</span> ${addr.phone}`;
+            setKvText('username-order', addr.full_name || "");
+            setKvText('address-order', addr.address || "");
+            setKvText('city-order', addr.city || "");
+            setKvText('phone-order', addr.phone || "");
         }
 
         const reviewTable = document.getElementById('product-name-order');
