@@ -15,22 +15,176 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/antd/4.24.13/antd.min.js"></script>
     <link rel="stylesheet" href="./css/style.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .custom-tab-item {
+            color: #555 !important;
+            border-radius: 0 !important;
+            border-bottom: 1px solid #eee !important;
+            padding: 15px 20px !important;
+            text-align: left;
+            transition: 0.3s;
+            background: #fff;
+        }
+
+        .custom-tab-item.active {
+            background-color: #212529 !important;
+            color: #fff !important;
+        }
+
+        .custom-tab-item:hover:not(.active) {
+            background-color: #f8f9fa;
+            color: #84b800 !important;
+        }
+
+        /* Thẻ thông báo vàng kem */
+        .alert-custom {
+            background-color: #fdf8ef !important;
+            border: none !important;
+            color: #444;
+            font-size: 0.95rem;
+        }
+
+        /* Form Controls */
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 0;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+        }
+
+        .form-control:focus {
+            border-color: #84b800;
+            box-shadow: none;
+        }
+
+        /* Buttons */
+        .btn-save {
+            background-color: #212529;
+            color: white;
+            border-radius: 0;
+            padding: 10px 30px;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            border: none;
+        }
+
+        .btn-save:hover {
+            background-color: #84b800;
+            color: white;
+        }
+
+        .min-vh-50 {
+            min-height: 450px;
+        }
+
+        .modal-content {
+            border-radius: 0;
+            border: none;
+        }
+
+        /* Badge trạng thái */
+        .badge-waiting {
+            background-color: #ffc107;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .badge-payment {
+            background-color: #0d6efd;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Table styling */
+        .order-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .order-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+        }
+
+        .order-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .product-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 10px;
+            border: 1px solid #eee;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            width: 150px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .btn-review {
+            background-color: transparent;
+            border: 1px solid #ddd;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+
+        .btn-review:hover {
+            background-color: #f8f9fa;
+            border-color: #84b800;
+            color: #84b800;
+        }
+    </style>
 </head>
 
-<body class="page-soft orderdetail-page">
+<body>
 
     <div id="header"></div>
 
     <main>
-        <section class="veggie-hero"
-            style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('img/Vegetable_Background.jpg') center/cover; height: 450px;">
-            <div class="text-center px-3">
+        <section class="about-header position-relative d-flex align-items-center justify-content-center text-white"
+            style="background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('img/backgroud-veggie.jpg') center/cover; height: 450px;">
+            <div class="text-center">
                 <h6 class="text-success fw-bold text-uppercase" style="letter-spacing: 2px;">Chào Mừng Đến Với Của Hàng
                 </h6>
                 <h1 class="display-3 fw-bold text-white">Chi Tiết Đơn Hàng</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb justify-content-center mb-0">
-                        <li class="breadcrumb-item"><a href="index.html">Trang Chủ</a></li>
+                        <li class="breadcrumb-item"><a href="index.html" class="text-white text-decoration-none">Trang
+                                Chủ</a></li>
                         <li class="breadcrumb-item active text-success" aria-current="page">Chi Tiết Đơn Hàng</li>
                     </ol>
                 </nav>
@@ -38,105 +192,65 @@
         </section>
 
         <section class="container my-5 py-4">
-            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-                <div>
-                    <h3 class="fw-bold mb-1">Đơn hàng #<span id="id-order">---</span></h3>
-                    <div class="text-muted">Theo dõi trạng thái, sản phẩm và giao hàng.</div>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <a class="btn btn-light" href="account.html?tab=orders">
-                        <i class="fa-solid fa-arrow-left me-2"></i>Đơn hàng
-                    </a>
-                    <button id="cancel-order-btn" class="btn btn-outline-danger">
-                        <i class="fa-solid fa-ban me-2"></i> Hủy đơn
-                    </button>
+            <div class="mb-5">
+                <h3 class="fw-bold">Chi tiết đơn hàng #<span id="id-order">4</span>
+                </h3>
+                <p id="date-order"><span class="info-label">Ngày đặt:</span>5/4/2004</p>
+                <p id="status-order"><span class="info-label">Trạng thái:</span> <span class="badge-waiting">Chờ xác
+                        nhận</span></p>
+                <p id="payment-order"><span class="info-label">Phương thức thanh toán:</span> <span
+                        class="badge-payment">Thanh toán khi
+                        nhận hàng</span></p>
+                <p id="price-order"><span class="info-label">Tổng tiền:</span> <span class="fw-bold text-dark">473.642
+                        VNĐ</span></p>
+            </div>
+
+            <h4 class="section-title">Sản phẩm trong đơn hàng</h4>
+            <div class="table-responsive">
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="order-table">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-5">
+                <h4 class="section-title">Thông tin giao hàng</h4>
+                <div class="ps-2">
+                    <p id="username-order"><span class="info-label">Người nhận:</span> Ngo Minh Quy</p>
+                    <p id="address-order"><span class="info-label">Địa chỉ:</span> Binh Tan</p>
+                    <p id="city-order"><span class="info-label">Thành phố:</span> Ho Chi Minh</p>
+                    <p id="phone-order"><span class="info-label">Số điện thoại:</span> 0123456789</p>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-lg-8">
-                    <div class="order-card overflow-hidden">
-                        <div class="p-3 border-bottom">
-                            <h5 class="mb-0 fw-bold">Sản phẩm trong đơn</h5>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 68px;">Ảnh</th>
-                                        <th>Sản phẩm</th>
-                                        <th style="width: 140px;">Giá</th>
-                                        <th style="width: 110px;">Số lượng</th>
-                                        <th style="width: 160px;">Thành tiền</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="order-table"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="order-card overflow-hidden mt-4">
-                        <div class="p-3 border-bottom d-flex align-items-center justify-content-between gap-3">
-                            <h5 class="mb-0 fw-bold">Đánh giá sản phẩm</h5>
-                            <span class="text-muted small">Chỉ khả dụng khi đã giao</span>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Sản phẩm</th>
-                                        <th style="width: 140px;">Đánh giá</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-name-order"></tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div class="mt-5 mb-5">
+                <h4 class="section-title">Đánh giá sản phẩm</h4>
+                <div class="table-responsive">
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Đánh giá</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-name-order"></tbody>
+                    </table>
                 </div>
+            </div>
 
-                <div class="col-lg-4">
-                    <div class="order-card p-4">
-                        <h5 class="fw-bold mb-3">Thông tin đơn hàng</h5>
-                        <div class="order-kv" id="date-order">
-                            <span class="info-label">Ngày đặt:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                        <div class="order-kv" id="status-order">
-                            <span class="info-label">Trạng thái:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                        <div class="order-kv" id="payment-order">
-                            <span class="info-label">Thanh toán:</span>
-                            <span class="order-value">
-                                <span class="badge-payment">Thanh toán khi nhận hàng</span>
-                            </span>
-                        </div>
-                        <div class="order-kv" id="price-order">
-                            <span class="info-label">Tổng tiền:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                    </div>
-
-                    <div class="order-card p-4 mt-4">
-                        <h5 class="fw-bold mb-3">Thông tin giao hàng</h5>
-                        <div class="order-kv" id="username-order">
-                            <span class="info-label">Người nhận:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                        <div class="order-kv" id="phone-order">
-                            <span class="info-label">Số điện thoại:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                        <div class="order-kv" id="city-order">
-                            <span class="info-label">Khu vực:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                        <div class="order-kv" id="address-order">
-                            <span class="info-label">Địa chỉ:</span>
-                            <span class="order-value">---</span>
-                        </div>
-                    </div>
-                </div>
+            <div>
+                <button id="cancel-order-btn" class="btn btn-danger">
+                    Hủy đơn hàng
+                </button>
             </div>
         </section>
     </main>
