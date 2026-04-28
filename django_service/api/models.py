@@ -2,7 +2,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from asgiref.sync import async_to_sync
@@ -192,15 +192,13 @@ class Order(models.Model):
             # Nếu chuyển sang Đã xác nhận (2) và trước đó chưa xác nhận (1)
             if self.status == self.Status.CONFIRMED and old_status == self.Status.PENDING:
                 for item in self.items.all():
-                    item.product.stock -= item.quantity
-                    item.product.save()
+                    Product.objects.filter(pk=item.product.pk).update(stock=F('stock') - item.quantity)
 
             # --- LOGIC HOÀN KHO ---
             # Nếu đơn hàng bị Hủy (5) và trước đó đã được xác nhận (2,3,4)
             if self.status == self.Status.CANCELLED and old_status in [self.Status.CONFIRMED, self.Status.SHIPPING, self.Status.DELIVERED]:
                 for item in self.items.all():
-                    item.product.stock += item.quantity
-                    item.product.save()
+                    Product.objects.filter(pk=item.product.pk).update(stock=F('stock') + item.quantity)
 
             # --- THÔNG BÁO CHO KHÁCH HÀNG ---
             Notification.objects.create(
@@ -456,8 +454,7 @@ class EntryForm(models.Model):
 
         if old_status_norm != 'done' and current_status == 'done':
             for detail in self.details.all():
-                detail.product.stock += detail.quantity
-                detail.product.save()
+                Product.objects.filter(pk=detail.product.pk).update(stock=F('stock') + detail.quantity)
 
             if self.created_user:
                 Notification.objects.create(
@@ -467,8 +464,7 @@ class EntryForm(models.Model):
                 )
         if old_status_norm == 'done' and current_status != 'done':
             for detail in self.details.all():
-                detail.product.stock -= detail.quantity
-                detail.product.save()
+                Product.objects.filter(pk=detail.product.pk).update(stock=F('stock') - detail.quantity)
 
 
 class EntryFormDetail(models.Model):

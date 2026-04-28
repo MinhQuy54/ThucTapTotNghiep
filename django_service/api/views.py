@@ -6,6 +6,7 @@ from django.http import Http404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 import uuid, time
@@ -55,6 +56,9 @@ def google_oauth_success(request):
 
 
 class LoginView(APIView):
+    throttle_scope = 'auth'
+    throttle_classes = [ScopedRateThrottle]
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
 
@@ -91,6 +95,9 @@ class LoginView(APIView):
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    throttle_scope = 'auth'
+    throttle_classes = [ScopedRateThrottle]
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         role = Role.objects.filter(name='Customer').first()
@@ -109,7 +116,7 @@ class RegisterView(APIView):
         
         activation_token = str(uuid.uuid4())
 
-        activation_link = f'http://localhost:8080/api/activate/{activation_token}/'
+        activation_link = f'{settings.FRONTEND_URL}/api/activate/{activation_token}/'
 
         send_mail(
             subject="Kích hoạt tài khoản Veggie",
@@ -142,7 +149,7 @@ class ActivateAccountView(APIView):
 
         if not user:
             return redirect(
-                "http://localhost:8080/login.html?activated=error"
+                f"{settings.FRONTEND_URL}/login.html?activated=error"
             )
 
         user.is_active = True
@@ -150,7 +157,7 @@ class ActivateAccountView(APIView):
         user.save()
 
         return redirect(
-            "http://localhost:8080/login.html?activated=success"
+            f"{settings.FRONTEND_URL}/login.html?activated=success"
         )
 
 class RequestResetPasswordView(APIView):
@@ -171,7 +178,7 @@ class RequestResetPasswordView(APIView):
         user.reset_token_created = int(time.time())
         user.save()
 
-        reset_link = f"http://localhost:8080/resetpass.html?token={token}"
+        reset_link = f"{settings.FRONTEND_URL}/resetpass.html?token={token}"
 
         send_mail(
             subject="Reset mật khẩu Veggie",
@@ -333,12 +340,14 @@ class OrderDetailView(APIView):
 
             if order.status not in [1,2]:
                 return Response({"error": "Không thể hủy đơn"}, status=400)
-            for item in order.items.all():
-                product = item.product
-                product.stock += item.quantity
-                product.save()
-            order.status = 5
-            order.save()
+            from django.db import transaction # dùng để đảm bảo tính toàn vẹn của dữ liệu khi có nhiều request
+            from django.db.models import F # dùng để cập nhật số lượng tồn kho không bị race condition
+            
+            with transaction.atomic():
+                for i in order.items.all():
+                    Product.objects.filter(pk=i.product.pk).update(stock=F('stock') + i.quantity)
+                order.status = 5
+                order.save()
             return Response({"message": "Đã hủy đơn"})
         except Order.DoesNotExist:
             return Response({"error": "Không tìm thấy đơn"}, status=404)
