@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -623,6 +623,14 @@ namespace dotnet_service.Data
                     .HasColumnName("updated_at");
 
                 entity.Property(e => e.WeightGram).HasColumnName("weight_gram");
+
+                entity.Property(e => e.AverageRating)
+                    .HasPrecision(3, 2)
+                    .HasColumnName("average_rating");
+
+                entity.Property(e => e.ReviewCount).HasColumnName("review_count");
+
+                entity.Property(e => e.SoldCount).HasColumnName("sold_count");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.ApiProducts)

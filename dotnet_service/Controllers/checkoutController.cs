@@ -31,6 +31,24 @@ namespace dotnet_service.Controllers
             return long.TryParse(claim.Value, out long id) ? id : 0;
         }
 
+        private async Task UpdateProductSoldCount(long orderId)
+        {
+            var orderItems = await db.ApiOrderitems.Where(oi => oi.OrderId == orderId).ToListAsync();
+            foreach (var item in orderItems)
+            {
+                var product = await db.ApiProducts.FindAsync(item.ProductId);
+                if (product != null)
+                {
+                    var count = await db.ApiOrderitems
+                        .Where(oi => oi.ProductId == product.Id && oi.Order.Status >= 1 && oi.Order.Status != 5)
+                        .SumAsync(oi => oi.Quantity);
+                    product.SoldCount = count;
+                    db.ApiProducts.Update(product);
+                }
+            }
+            await db.SaveChangesAsync();
+        }
+
         [HttpPost("create-order")]
         public async Task<IActionResult> CreateOrder([FromBody] CheckoutRequest request)
         {
@@ -71,31 +89,29 @@ namespace dotnet_service.Controllers
                 // Calculate total
                 decimal subtotal = cartItems.Sum(c => c.Quantity * c.Product.Price);
                 decimal discount = 0;
-                ApiVoucher? voucherToMark = null;
+                ApiUservoucher? userVoucherToMark = null;
 
                 // Áp dụng voucher nếu có
                 if (!string.IsNullOrEmpty(request.VoucherCode))
                 {
                     var now = DateTime.Now;
-                    
-                    // 1. Kiểm tra xem user đã dùng voucher này chưa
-                    var hasUsed = await db.ApiUservouchers.AnyAsync(uv => 
-                        uv.UserId == userId && uv.Voucher.Code == request.VoucherCode && uv.UsedAt != null && uv.UsedAt > DateTime.MinValue);
-                    
-                    if (hasUsed)
-                        return BadRequest(new { error = "Bạn đã sử dụng voucher này rồi." });
+                    var userVoucher = await db.ApiUservouchers
+                        .Include(uv => uv.Voucher)
+                        .Where(uv => uv.UserId == userId
+                            && uv.Voucher.Code == request.VoucherCode
+                            && (uv.UsedAt == null || uv.UsedAt <= DateTime.MinValue)
+                            && uv.Voucher.EndDate >= now)
+                        .FirstOrDefaultAsync();
 
-                    // 2. Kiểm tra tính hợp lệ của voucher trong bảng ApiVouchers
-                    var voucher = await db.ApiVouchers.FirstOrDefaultAsync(v => 
-                        v.Code == request.VoucherCode && v.IsActive && v.Quantity > 0 && v.StartDate <= now && v.EndDate >= now);
+                    if (userVoucher == null)
+                        return BadRequest(new { error = "Voucher không hợp lệ hoặc đã được sử dụng." });
 
-                    if (voucher == null)
-                        return BadRequest(new { error = "Voucher không hợp lệ, đã hết hạn hoặc hết số lượng." });
+                    var voucher = userVoucher.Voucher;
 
                     if (subtotal < voucher.MinOrderValue)
                         return BadRequest(new { error = $"Đơn hàng phải tối thiểu {voucher.MinOrderValue.ToString("N0")}đ để sử dụng voucher này." });
 
-                    if (voucher.DiscountType == "percentage" || voucher.DiscountType == "percent")
+                    if (voucher.DiscountType == "percentage")
                     {
                         discount = subtotal * voucher.DiscountValue / 100;
                         if (voucher.MaxDiscount.HasValue && discount > voucher.MaxDiscount.Value)
@@ -106,7 +122,7 @@ namespace dotnet_service.Controllers
                         discount = voucher.DiscountValue;
                     }
 
-                    voucherToMark = voucher;
+                    userVoucherToMark = userVoucher;
                 }
 
                 decimal totalAmount = subtotal + request.ShippingFee - discount;
@@ -128,6 +144,11 @@ namespace dotnet_service.Controllers
                 // Add order items
                 foreach (var item in cartItems)
                 {
+                    if (item.Product.Stock < item.Quantity)
+                    {
+                        return BadRequest(new { error = $"Sản phẩm '{item.Product.Name}' chỉ còn {item.Product.Stock} sản phẩm trong kho." });
+                    }
+
                     var orderItem = new ApiOrderitem
                     {
                         OrderId = order.Id,
@@ -136,20 +157,17 @@ namespace dotnet_service.Controllers
                         Price = item.Product.Price
                     };
                     await db.ApiOrderitems.AddAsync(orderItem);
+
+                    // Trừ số lượng tồn kho
+                    item.Product.Stock -= item.Quantity;
+                    db.ApiProducts.Update(item.Product);
                 }
 
                 // Đánh dấu voucher đã dùng
-                if (voucherToMark != null)
+                if (userVoucherToMark != null)
                 {
-                    voucherToMark.Quantity -= 1;
-                    db.ApiVouchers.Update(voucherToMark);
-
-                    var uv = new ApiUservoucher {
-                        UserId = userId,
-                        VoucherId = voucherToMark.Id,
-                        UsedAt = DateTime.Now
-                    };
-                    await db.ApiUservouchers.AddAsync(uv);
+                    userVoucherToMark.UsedAt = DateTime.Now;
+                    db.ApiUservouchers.Update(userVoucherToMark);
                 }
 
                 // Clear cart
@@ -200,6 +218,7 @@ namespace dotnet_service.Controllers
                 }
                 else // COD
                 {
+                    await UpdateProductSoldCount(order.Id);
                     return Ok(new
                     {
                         orderId = order.Id,
@@ -245,10 +264,24 @@ namespace dotnet_service.Controllers
                             {
                                 order.Status = 1; 
                                 await db.SaveChangesAsync();
+                                await UpdateProductSoldCount(orderId);
                                 return Redirect($"http://localhost:8080/success.html?orderId={orderId}");
                             }
                             else
                             {
+                                order.Status = 5; // Cập nhật trạng thái hủy
+                                var orderItems = await db.ApiOrderitems.Where(oi => oi.OrderId == orderId).ToListAsync();
+                                foreach (var item in orderItems)
+                                {
+                                    var product = await db.ApiProducts.FindAsync(item.ProductId);
+                                    if (product != null)
+                                    {
+                                        product.Stock += item.Quantity;
+                                        db.ApiProducts.Update(product);
+                                    }
+                                }
+                                await db.SaveChangesAsync();
+
                                 return Redirect($"http://localhost:8080/checkout.html?error=payment_failed_{resultCode}");
                             }
                         }

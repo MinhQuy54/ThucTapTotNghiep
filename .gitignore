@@ -17,3 +17,5 @@ chatbot/env/
 django_service/env/
 .venv/
 venv/
+
+dotnet_service/.vs/

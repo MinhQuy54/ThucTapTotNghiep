@@ -1,4 +1,4 @@
-﻿namespace dotnet_service.MyModels
+namespace dotnet_service.MyModels
 {
     public class CProduct
     {
@@ -13,5 +13,7 @@
         public long CategoryId { get; set; }
         public string CategoryName { get; set; } = null!;
         public int Sold { get; set; } // Số lượng bán
+        public decimal AverageRating { get; set; }
+        public int ReviewCount { get; set; }
     }
 }

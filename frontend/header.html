@@ -65,6 +65,14 @@
     </div>
 
     <div class="offcanvas-footer p-4 border-top">
+        <div class="d-flex justify-content-between mb-1 align-items-center">
+            <span class="text-muted" style="font-size: 0.85rem;">Tổng khối lượng:</span>
+            <span id="mini-cart-weight" class="fw-semibold text-dark" style="font-size: 0.85rem;">0 g</span>
+        </div>
+        <div class="d-flex justify-content-between mb-3 align-items-center">
+            <span class="fw-bold text-uppercase" style="font-size: 0.9rem;">Tạm tính:</span>
+            <span id="mini-cart-subtotal" class="fw-bold fs-5" style="color: #84b800;">0 đ</span>
+        </div>
         <div class="row g-2 mb-3">
             <div class="col-6"><a href="cart.html"
                     class="btn btn-veggie-mini-cart w-100 py-3 fw-bold small text-uppercase">View Cart</a></div>
@@ -87,21 +95,3 @@
         </div>
     </div>
 </div>
-
-<template id="mini-cart-template">
-    <div class="cart-item d-flex align-items-center py-3 border-bottom position-relative">
-        <button class="remove-item-btn" data-id="">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="item-img border rounded">
-            <img src="" alt="product" class="img-fluid mini-cart-img">
-        </div>
-        <div class="item-info ms-3">
-            <h6 class="fw-bold text-dark mini-cart-name"></h6>
-            <span class="text-muted">
-                <span class="mini-cart-quantity"></span> x
-                <span class="fw-semibold mini-cart-price"></span>
-            </span>
-        </div>
-    </div>
-</template>

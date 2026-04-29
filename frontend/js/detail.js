@@ -266,6 +266,12 @@ function applyFilters(page = 1) {
     currentPage = page;
     let apiUrl = `/api/product?Page=${currentPage}&PageSize=9`;
     if (currentCategoryId) apiUrl += `&categoryid=${currentCategoryId}`;
+    
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect && sortSelect.value) {
+        apiUrl += `&Ordering=${sortSelect.value}`;
+    }
+    
     loadProducts(apiUrl);
 }
 

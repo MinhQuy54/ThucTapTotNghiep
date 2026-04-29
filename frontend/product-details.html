@@ -166,7 +166,8 @@
 
                 <!-- Form viết đánh giá -->
                 <div id="review-form-container" class="bg-light p-4 rounded-3 mb-4 border" style="display:none;">
-                    <h6 class="fw-bold mb-3">Viết đánh giá của bạn</h6>
+                    <h6 class="fw-bold mb-3" id="review-form-title">Viết đánh giá của bạn</h6>
+                    <input type="hidden" id="editing-review-id" value="">
                     <div class="mb-3">
                         <label class="form-label fw-semibold small">Xếp hạng <span class="text-danger">*</span></label>
                         <div id="star-picker" class="fs-3 text-warning d-flex gap-1">
@@ -184,15 +185,30 @@
                             placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
                     </div>
                     <div id="review-form-msg" class="small mb-2"></div>
-                    <button id="btn-submit-review" class="btn btn-success px-4 fw-bold">
-                        <i class="fa-solid fa-paper-plane me-1"></i>Gửi đánh giá
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button id="btn-submit-review" class="btn btn-success px-4 fw-bold">
+                            <i class="fa-solid fa-paper-plane me-1"></i>Gửi đánh giá
+                        </button>
+                        <button id="btn-cancel-edit" class="btn btn-secondary px-4 fw-bold" style="display:none;">
+                            Hủy
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Nút login nếu chưa đăng nhập -->
                 <div id="review-login-prompt" class="alert alert-info mb-4" style="display:none;">
                     <i class="fa-solid fa-circle-info me-2"></i>
                     <a href="login.html" class="fw-bold text-decoration-none">Đăng nhập</a> để viết đánh giá.
+                </div>
+
+                <!-- Lọc bình luận -->
+                <div class="d-flex align-items-center gap-2 mb-4 overflow-auto pb-2" id="review-filters" style="display:none !important;">
+                    <button class="btn btn-sm btn-success rounded-pill px-3 filter-btn" data-rating="0">Tất cả</button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" data-rating="5">5 Sao (<span id="count-5">0</span>)</button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" data-rating="4">4 Sao (<span id="count-4">0</span>)</button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" data-rating="3">3 Sao (<span id="count-3">0</span>)</button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" data-rating="2">2 Sao (<span id="count-2">0</span>)</button>
+                    <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" data-rating="1">1 Sao (<span id="count-1">0</span>)</button>
                 </div>
 
                 <!-- Danh sách bình luận -->

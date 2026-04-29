@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace dotnet_service.Models
@@ -25,6 +25,9 @@ namespace dotnet_service.Models
         public int Stock { get; set; }
         public int Status { get; set; }
         public string Unit { get; set; } = null!;
+        public decimal AverageRating { get; set; }
+        public int ReviewCount { get; set; }
+        public int SoldCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public long CategoryId { get; set; }

@@ -1,4 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+        if (errorParam.startsWith('payment_failed')) {
+            const code = errorParam.split('_').pop();
+            alert(`Thanh toán thất bại (Mã lỗi Momo: ${code}). Giao dịch của bạn đã bị hủy và tồn kho đã được hoàn lại.`);
+        } else {
+            alert(`Lỗi thanh toán: ${errorParam}`);
+        }
+    }
+
     const token = localStorage.getItem("access_token");
 
     if (document.getElementById("btn-place-order")) {
@@ -327,8 +338,7 @@ async function loadVouchersForCheckout() {
             const count = v.count;
 
             const eligible = subTotal >= minOrder;
-            const isPercent = (type === 'percentage' || type === 'percent');
-            const promoText = isPercent
+            const promoText = type === 'percentage'
                 ? `Giảm ${val}%${maxDisc > 0 ? ` (tối đa ${maxDisc.toLocaleString('vi-VN')}đ)` : ''}`
                 : `Giảm ${val.toLocaleString('vi-VN')}đ`;
             const badge = count > 1 ? `<span class="badge bg-danger ms-1" style="font-size:0.7rem">x${count}</span>` : '';
@@ -424,8 +434,7 @@ async function applyVoucher() {
         const val = parseFloat(voucher.discountValue || voucher.DiscountValue || 0);
         const maxDisc = parseFloat(voucher.maxDiscount || voucher.MaxDiscount || 0);
         let discount = 0;
-        const isPercent = (type === 'percentage' || type === 'percent');
-        if (isPercent) {
+        if (type === 'percentage') {
             discount = subTotal * val / 100;
             if (maxDisc > 0 && discount > maxDisc) discount = maxDisc;
         } else {

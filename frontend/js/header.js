@@ -166,8 +166,7 @@ function updateHoverMenu() {
                         const maxVal = v.maxDiscount || v.MaxDiscount;
                         const count = v.count;
 
-                        const isPercent = (type === 'percentage' || type === 'percent');
-                        let textPromo = isPercent
+                        let textPromo = type === 'percentage'
                             ? `Giảm ${val}% (Tối đa ${(maxVal).toLocaleString('vi-VN')}đ)`
                             : `Giảm ${(val).toLocaleString('vi-VN')}đ`;
 

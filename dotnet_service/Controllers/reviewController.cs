@@ -19,6 +19,22 @@ namespace dotnet_service.Controllers
             return long.TryParse(claim.Value, out long id) ? id : 0;
         }
 
+        private async Task UpdateProductRating(long productId)
+        {
+            var product = await db.ApiProducts
+                .Include(p => p.ApiReviews)
+                .FirstOrDefaultAsync(p => p.Id == productId);
+            if (product != null)
+            {
+                product.ReviewCount = product.ApiReviews.Count;
+                product.AverageRating = product.ApiReviews.Count > 0 
+                    ? (decimal)product.ApiReviews.Average(r => r.Rating) 
+                    : 0;
+                db.ApiProducts.Update(product);
+                await db.SaveChangesAsync();
+            }
+        }
+
         // GET: api/review/{productId}  - Lấy danh sách đánh giá của sản phẩm
         [HttpGet("{productId}")]
         [AllowAnonymous]
@@ -107,6 +123,8 @@ namespace dotnet_service.Controllers
                 db.ApiReviews.Add(review);
                 await db.SaveChangesAsync();
 
+                await UpdateProductRating(review.ProductId);
+
                 // Load user info để trả về
                 var user = await db.ApiUsers.FindAsync(userId);
 
@@ -134,6 +152,41 @@ namespace dotnet_service.Controllers
             }
         }
 
+        // PUT: api/review/{id}  - Sửa đánh giá (chỉ sửa của mình)
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> EditReview(long id, [FromBody] ReviewRequest req)
+        {
+            try
+            {
+                long userId = GetUserIdFromToken();
+                if (userId == 0) return Unauthorized();
+
+                var review = await db.ApiReviews.FindAsync(id);
+                if (review == null) return NotFound(new { message = "Không tìm thấy đánh giá." });
+                if (review.UserId != userId) return Forbid();
+
+                if (req.Rating < 1 || req.Rating > 5)
+                    return BadRequest(new { message = "Rating phải từ 1 đến 5." });
+
+                if (string.IsNullOrWhiteSpace(req.Comment))
+                    return BadRequest(new { message = "Nội dung bình luận không được để trống." });
+
+                review.Rating = req.Rating;
+                review.Comment = req.Comment.Trim();
+
+                await db.SaveChangesAsync();
+                
+                await UpdateProductRating(review.ProductId);
+
+                return Ok(new { message = "Đã cập nhật đánh giá." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         // DELETE: api/review/{id}  - Xóa đánh giá (chỉ xóa của mình)
         [HttpDelete("{id}")]
         [Authorize]
@@ -150,6 +203,8 @@ namespace dotnet_service.Controllers
 
                 db.ApiReviews.Remove(review);
                 await db.SaveChangesAsync();
+
+                await UpdateProductRating(review.ProductId);
 
                 return Ok(new { message = "Đã xóa đánh giá." });
             }

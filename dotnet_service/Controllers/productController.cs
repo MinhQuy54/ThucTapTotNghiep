@@ -1,4 +1,4 @@
-﻿using dotnet_service.Data;
+using dotnet_service.Data;
 using dotnet_service.Models;
 using dotnet_service.MyModels;
 using Microsoft.AspNetCore.Http;
@@ -50,7 +50,9 @@ namespace dotnet_service.Controllers
                 {
                     "price" => query.OrderBy(p => p.Price),
                     "-price" => query.OrderByDescending(p => p.Price),
-                    _ => query.OrderByDescending(p => p.Id) // Cái này là mặc định sắp xếp giảm chưa phải best selling
+                    "-sold_count" => query.OrderByDescending(p => p.SoldCount),
+                    "-average_rating" => query.OrderByDescending(p => p.AverageRating),
+                    _ => query.OrderByDescending(p => p.Id)
                 };
 
                 var products = await query
@@ -67,6 +69,8 @@ namespace dotnet_service.Controllers
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name,
+                        AverageRating = p.AverageRating,
+                        ReviewCount = p.ReviewCount,
                         // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
                         Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })
@@ -109,6 +113,8 @@ namespace dotnet_service.Controllers
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name,
+                        AverageRating = p.AverageRating,
+                        ReviewCount = p.ReviewCount,
                         // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
                         Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })
