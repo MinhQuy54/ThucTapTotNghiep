@@ -69,6 +69,8 @@ namespace dotnet_service.Controllers
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name,
+                        AverageRating = p.AverageRating,
+                        ReviewCount = p.ReviewCount,
                         // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
                         Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })
@@ -111,6 +113,8 @@ namespace dotnet_service.Controllers
                         WeightGram = p.WeightGram,
                         CategoryId = p.CategoryId,
                         CategoryName = p.Category.Name,
+                        AverageRating = p.AverageRating,
+                        ReviewCount = p.ReviewCount,
                         // Chỉ tính số lượng bán từ đơn hàng đã thanh toán (status >= 1) và không bị hủy (status != 5)
                         Sold = p.ApiOrderitems.Where(oi => oi.Order.Status >= 1 && oi.Order.Status != 5).Sum(oi => oi.Quantity)
                     })

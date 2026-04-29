@@ -269,6 +269,19 @@ namespace dotnet_service.Controllers
                             }
                             else
                             {
+                                order.Status = 5; // Cập nhật trạng thái hủy
+                                var orderItems = await db.ApiOrderitems.Where(oi => oi.OrderId == orderId).ToListAsync();
+                                foreach (var item in orderItems)
+                                {
+                                    var product = await db.ApiProducts.FindAsync(item.ProductId);
+                                    if (product != null)
+                                    {
+                                        product.Stock += item.Quantity;
+                                        db.ApiProducts.Update(product);
+                                    }
+                                }
+                                await db.SaveChangesAsync();
+
                                 return Redirect($"http://localhost:8080/checkout.html?error=payment_failed_{resultCode}");
                             }
                         }
