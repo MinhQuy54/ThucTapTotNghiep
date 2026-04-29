@@ -139,28 +139,7 @@ def dashboard_callback(request, context):
     # Tính doanh thu từ các đơn hàng thành công hoặc đang xử lý (loại trừ Hủy và Hoàn tiền)
     revenue = Order.objects.exclude(status__in=[Order.Status.CANCELLED, Order.Status.REFUNDED]).aggregate(total=Sum("total_price"))["total"] or 0
 
-    # Dữ liệu biểu đồ trạng thái đơn hàng (Pie chart)
-    order_status_stats = (
-        Order.objects.values("status")
-        .annotate(count=Count("id"))
-    )
-    status_labels = dict(Order.Status.choices)
-    
-    order_status_chart_data = {
-        "labels": [status_labels.get(item["status"], item["status"]) for item in order_status_stats],
-        "datasets": [{
-            "data": [item["count"] for item in order_status_stats],
-            "backgroundColor": [
-                "#fbbf24", # PENDING - amber-400
-                "#60a5fa", # CONFIRMED - blue-400
-                "#818cf8", # SHIPPING - indigo-400
-                "#34d399", # DELIVERED - emerald-400
-                "#f87171", # CANCELLED - red-400
-                "#94a3b8", # REFUNDED - slate-400
-            ],
-            "borderWidth": 0,
-        }]
-    }
+
 
     # Dữ liệu biểu đồ hiệu suất (Bar chart - đơn hàng 7 ngày qua)
     seven_days_ago = today - timedelta(days=6)
@@ -193,7 +172,6 @@ def dashboard_callback(request, context):
             "low_stock": Product.objects.filter(stock__lt=10).count(),
             "new_contacts": Contact.objects.filter(is_reply=False).count(),
             "cohort_data": build_order_status_cohort(start_date, today),
-            "order_status_chart_data": json.dumps(order_status_chart_data),
             "performance_chart_data": json.dumps(performance_chart_data),
         }
     )
