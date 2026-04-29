@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'channels',
+    'drf_spectacular',
 ]
 
 ASGI_APPLICATION ='django_service.asgi.application'
@@ -186,7 +187,24 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    # Rate limiting for API endpoints
+    'DEFAULT_THROTTLE_CLASSES' : [ 
+        'rest_framework.throttling.AnonRateThrottle', # giới hạn cho user chưa đăng nhập
+        'rest_framework.throttling.UserRateThrottle'  # giới hạn cho user đã đăng nhập
+    ],
+    'DEFAULT_THROTTLE_RATES' : {
+        'anon' : '100/day',    # giới hạn 100 request/ngày cho user chưa đăng nhập
+        'user' : '1000/day',   # giới hạn 1000 request/ngày cho user đã đăng nhập
+        'auth' : '10/minute',  # giới hạn 10 request/phút cho user đăng nhập/đăng ký
+    },
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Veggie Store API',
+    'DESCRIPTION': 'Tài liệu API cho hệ thống Veggie Store',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 UNFOLD = {

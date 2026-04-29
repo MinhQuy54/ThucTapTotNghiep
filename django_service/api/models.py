@@ -1,23 +1,20 @@
-from ast import arg
-from curses import OK
-from email import message
-
+from django.core.mail import send_mail
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Q, F
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from requests import delete
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
-
-# --- 1. Roles & Permissions ---
 class Role(models.Model):
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
-
 
 class Permission(models.Model):
     code = models.CharField(max_length=100, unique=True, null=True, blank=True)  
@@ -27,7 +24,6 @@ class Permission(models.Model):
     def __str__(self):
         return self.name
 
-
 class RolePermission(models.Model):
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     permission = models.ForeignKey(Permission, on_delete=models.CASCADE)
@@ -35,8 +31,6 @@ class RolePermission(models.Model):
     def __str__(self):
         return f"{self.role.name} - {self.permission.name}"
 
-
-# --- 2. User & Reward Points ---
 class User(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
@@ -52,7 +46,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.email})"
-
 
 class PointHistory(models.Model):
     class ActionType(models.TextChoices):
@@ -70,8 +63,6 @@ class PointHistory(models.Model):
     def __str__(self):
         return f"{self.user.username} | {self.points} pts | {self.get_action_type_display()}"
 
-
-# --- 3. Shipping Address ---
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=200)
@@ -99,8 +90,6 @@ class ShippingAddress(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.city}"
 
-
-# --- 4. Category & Product ---
 class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
@@ -111,7 +100,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class Product(models.Model):
     name = models.CharField(max_length=400)
@@ -132,7 +120,6 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.name} (Stock: {self.stock})"
 
-
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='products/')
@@ -141,8 +128,6 @@ class ProductImage(models.Model):
     def __str__(self):
         return f"Image of {self.product.name}"
 
-
-# --- 5. Order & Payment ---
 class Order(models.Model):
     class Status(models.IntegerChoices):
         PENDING = 1, "Chờ xác nhận"
@@ -159,9 +144,71 @@ class Order(models.Model):
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        old_status = None
+        
+        if not is_new:
+            old_instance = Order.objects.get(pk=self.pk)
+            old_status = old_instance.status
+        
+        super().save(*args, **kwargs)
+        
+        if is_new:
+            staff_users = User.objects.filter(
+                Q(role__name='Staff') | Q(is_superuser=True) | Q(is_staff=True)
+            ).distinct() 
+            
+            for su in staff_users:
+                Notification.objects.create(
+                    user=su,
+                    type="ORDER",
+                    message=f"Có đơn hàng mới #{self.id} từ {self.user.email}. Vui lòng xác nhận đơn hàng",
+                    is_read=False
+                )
+            
+            OrderStatusHistory.objects.create(order=self, status=self.status, note="Đơn hàng được tạo")
+
+        elif old_status != self.status:
+            OrderStatusHistory.objects.create(
+                order=self, 
+                status=self.status, 
+                note=f"Trạng thái thay đổi từ {old_status} sang {self.status}"
+            )
+
+            if self.status == self.Status.CONFIRMED and old_status == self.Status.PENDING:
+                for item in self.items.all():
+                    Product.objects.filter(pk=item.product.pk).update(stock=F('stock') - item.quantity)
+
+            if self.status == self.Status.CANCELLED and old_status in [self.Status.CONFIRMED, self.Status.SHIPPING, self.Status.DELIVERED]:
+                for item in self.items.all():
+                    Product.objects.filter(pk=item.product.pk).update(stock=F('stock') + item.quantity)
+
+            Notification.objects.create(
+                user=self.user,
+                type="ORDER_STATUS",
+                message=f"Đơn hàng #{self.id} của bạn đã chuyển sang trạng thái: {self.get_status_display()}",
+                is_read=False
+            )
+            
+            if self.status == self.Status.DELIVERED:
+                try:
+                    subject = f"Đơn hàng #{self.id} đã được giao thành công!"
+                    message = (
+                        f"Xin chào {self.user.username or self.user.email},\n\n"
+                        f"Đơn hàng #{self.id} của bạn đã được giao thành công.\n"
+                        "Cảm ơn bạn đã tin tưởng và mua sắm tại Veggie Shop!\n\n"
+                        "Trân trọng,\n"
+                        "Đội ngũ Veggie Shop."
+                    )
+                    from_email = settings.DEFAULT_FROM_EMAIL or settings.EMAIL_HOST_USER
+                    recipient_list = [self.user.email]
+                    send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+                except Exception as e:
+                    print(f"Error sending email: {e}")
+             
     def __str__(self):
         return f"Order #{self.id} - {self.user.email} - {self.get_status_display()}"
-
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
@@ -172,7 +219,6 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.product.name} x{self.quantity} (Order #{self.order.id})"
 
-
 class OrderStatusHistory(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     status = models.IntegerField()
@@ -181,7 +227,6 @@ class OrderStatusHistory(models.Model):
 
     def __str__(self):
         return f"Order #{self.order.id} - Status {self.status}"
-
 
 class Payment(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -195,8 +240,6 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment Order #{self.order.id} - {self.amount}"
 
-
-# --- 6. Cart, Review, Wishlist & Notifications ---
 class Cart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
     status = models.CharField(max_length=50, default="active")
@@ -205,7 +248,6 @@ class Cart(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.status}"
 
-
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -213,7 +255,6 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"Cart {self.cart.id} - {self.product.name} x{self.quantity}"
-
 
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -225,7 +266,6 @@ class Review(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.product.name} ({self.rating}⭐)"
 
-
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -235,7 +275,6 @@ class Wishlist(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"
 
-
 class Notification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     type = models.CharField(max_length=100)
@@ -243,9 +282,34 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            self.broadcast_notification()
+
+    def broadcast_notification(self):
+        channel_layer = get_channel_layer()
+        group_name = "staff_notifications" if self.user.is_staff else f"user_notifications_{self.user.id}"
+        
+        data = {
+            "id": self.id,
+            "type": self.type,
+            "message": self.message,
+            "is_read": self.is_read,
+            "created_at": self.created_at.strftime("%H:%M %d-%m-%Y")
+        }
+        print(f"DEBUG: Broadcasting notification to group {group_name}: {self.message}")
+        async_to_sync(channel_layer.group_send)( 
+            group_name,
+            {
+                "type": "send_notification",
+                "content": data
+            }
+        )
+
     def __str__(self):
         return f"{self.user.username} - {self.type}"
-
 
 class Contact(models.Model):
     full_name = models.CharField(max_length=200)
@@ -256,11 +320,26 @@ class Contact(models.Model):
     is_reply = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            staff_users = User.objects.filter(
+                Q(role__name='Staff') |Q(is_superuser=True) | Q(is_staff=True)
+            ).distinct()
+
+            for su in staff_users:
+                Notification.objects.create(
+                    user=su,
+                    type='CONTACT',
+                    message=f"Có liên hệ mới từ {self.full_name} ({self.email})",
+                    is_read=False
+
+                )
+
     def __str__(self):
         return f"{self.full_name} - {self.email}"
 
-
-# --- 7. Vouchers ---
 class Voucher(models.Model):
     class DiscountType(models.TextChoices):
         PERCENT = 'percent', 'Phần trăm'
@@ -279,7 +358,6 @@ class Voucher(models.Model):
     def __str__(self):
         return self.code
 
-
 class UserVoucher(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     voucher = models.ForeignKey(Voucher, on_delete=models.CASCADE)
@@ -288,15 +366,12 @@ class UserVoucher(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.voucher}"
 
-
-# --- 8. Inventory & Suppliers ---
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=11)
 
     def __str__(self):
         return f"{self.name} - {self.phone}"
-
 
 class EntryForm(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
@@ -332,8 +407,7 @@ class EntryForm(models.Model):
                 )
         if old and old.status != 'None' and self.status == 'Done':
             for detail in self.details.all():
-                detail.product.stock += detail.quantity
-                detail.product.save()
+                Product.objects.filter(pk=detail.product.pk).update(stock=F('stock') + detail.quantity)
 
             if self.created_user_id:
                     Notification.objects.create(
@@ -344,9 +418,7 @@ class EntryForm(models.Model):
 
         if old and old.status == "Done" and self.status != "Done":
             for detail in self.details.all():
-                detail.product.stock -= detail.quantity
-                detail.product.save()
-
+                Product.objects.filter(pk=detail.product.pk).update(stock=F('stock') - detail.quantity)
 
 class EntryFormDetail(models.Model):
     entry_form = models.ForeignKey(EntryForm, on_delete=models.CASCADE, related_name='details')
@@ -362,8 +434,6 @@ class EntryFormDetail(models.Model):
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)
-
-
 
 class CancelForm(models.Model):
     class ReasonChoices(models.TextChoices):

@@ -1,9 +1,5 @@
+import json
 from datetime import timedelta
-from locale import normalize
-from re import search
-from tkinter import Entry
-from unittest.mock import Base
-from urllib import response
 
 from django import forms
 from django.conf import settings
@@ -67,15 +63,15 @@ def render_badge(label, tone="neutral"):
 
 def cohort_color(percent):
     if percent >= 85:
-        return "bg-primary-800 text-white"
-    if percent >= 70:
-        return "bg-primary-700 text-white"
-    if percent >= 55:
         return "bg-primary-600 text-white"
-    if percent >= 40:
+    if percent >= 70:
         return "bg-primary-500 text-white"
-    if percent >= 25:
+    if percent >= 55:
+        return "bg-primary-400 text-white"
+    if percent >= 40:
         return "bg-primary-300 text-primary-950"
+    if percent >= 20:
+        return "bg-primary-200 text-primary-900"
     if percent > 0:
         return "bg-primary-100 text-primary-900"
     return None
@@ -140,7 +136,32 @@ def build_order_status_cohort(start_date, end_date):
 def dashboard_callback(request, context):
     today = timezone.localdate()
     start_date = today - timedelta(days=6)
-    revenue = Order.objects.filter(status=1).aggregate(total=Sum("total_price"))["total"] or 0
+    # Tính doanh thu từ các đơn hàng thành công hoặc đang xử lý (loại trừ Hủy và Hoàn tiền)
+    revenue = Order.objects.exclude(status__in=[Order.Status.CANCELLED, Order.Status.REFUNDED]).aggregate(total=Sum("total_price"))["total"] or 0
+
+
+
+    # Dữ liệu biểu đồ hiệu suất (Bar chart - đơn hàng 7 ngày qua)
+    seven_days_ago = today - timedelta(days=6)
+    order_history_counts = (
+        Order.objects.filter(created_at__date__gte=seven_days_ago)
+        .values("created_at__date")
+        .annotate(count=Count("id"))
+        .order_by("created_at__date")
+    )
+    order_map = {item["created_at__date"]: item["count"] for item in order_history_counts}
+    seven_days = [seven_days_ago + timedelta(days=i) for i in range(7)]
+    
+    performance_chart_data = {
+        "labels": [day.strftime("%A") for day in seven_days], # Full weekday name
+        "datasets": [{
+            "label": "Đơn hàng mới",
+            "data": [order_map.get(day, 0) for day in seven_days],
+            "backgroundColor": "#2fab68", # Site primary color
+            "borderRadius": 12,
+            "borderSkipped": False,
+        }]
+    }
 
     context.update(
         {
@@ -151,6 +172,7 @@ def dashboard_callback(request, context):
             "low_stock": Product.objects.filter(stock__lt=10).count(),
             "new_contacts": Contact.objects.filter(is_reply=False).count(),
             "cohort_data": build_order_status_cohort(start_date, today),
+            "performance_chart_data": json.dumps(performance_chart_data),
         }
     )
     return context

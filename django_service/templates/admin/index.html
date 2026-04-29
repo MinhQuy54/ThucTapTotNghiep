@@ -281,6 +281,21 @@
         </section>
     </div>
 
+    <div class="dashboard-panels" style="margin-top: 24px;">
+        <section class="dashboard-panel">
+            <div class="dashboard-panel-head">
+                <h2>Hiệu suất đơn hàng 7 ngày qua</h2>
+                <p>Số lượng đơn hàng phát sinh mỗi ngày trong tuần.</p>
+            </div>
+            <div class="chart-shell" style="min-height: 300px;">
+                {% include "unfold/components/chart/bar.html" with data=performance_chart_data %}
+            </div>
+        </section>
+
+
+    </div>
+
+
     <div class="dashboard-main">
         <div>
             {% include "unfold/helpers/app_list_default.html" %}

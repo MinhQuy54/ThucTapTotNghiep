@@ -81,6 +81,7 @@ graph TD
 3. **Truy cập ứng dụng:**
    - **Frontend:** [http://localhost:8080](http://localhost:8080)
    - **Django Admin:** [http://localhost:8080/admin](http://localhost:8080/admin)
+   - **Swagger (Django):** [http://localhost:8080/api/docs/](http://localhost:8080/api/docs/)
    - **Swagger (.NET):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 
 ## 📂 Cấu Trúc Thư Mục
@@ -94,11 +95,18 @@ graph TD
 └── docker-compose.yml   # Cấu hình orchestration cho toàn bộ hệ thống
 ```
 
-## ✨ Tính Năng Chính
+## Tính Năng Chính
 - **Mua sắm:** Xem sản phẩm, phân loại, giỏ hàng, thanh toán Momo.
 - **Vận chuyển:** Tích hợp API Giao Hàng Nhanh (GHN).
 - **Tư vấn thông minh:** Chatbot hỗ trợ giải đáp thắc mắc về sản phẩm dựa trên dữ liệu có sẵn (RAG).
-- **Quản lý:** Dashboard Admin (Django) để quản lý đơn hàng, người dùng.
+- **Quản lý:** Dashboard Admin (Django Unfold) để quản lý đơn hàng, người dùng với các biểu đồ trực quan.
 - **Đăng nhập:** Hỗ trợ đăng nhập bằng Google.
+- **Tài liệu API:** Tích hợp Swagger và Redoc cho cả Django và .NET.
+
+## Bảo mật và Hiệu năng (Django)
+- **Rate Limiting:** Giới hạn tốc độ request cho các API nhạy cảm (Đăng nhập, Đăng ký) để chống Brute-force.
+- **Race Condition Handling:** Sử dụng F expressions và Atomic transactions để đảm bảo độ chính xác của tồn kho khi có nhiều người đặt hàng cùng lúc.
+- **Environment Driven:** Cấu hình linh hoạt qua file .env, không hardcode địa chỉ URL.
+- **Real-time Notifications:** Hệ thống thông báo thời gian thực qua WebSocket (Django Channels).
 
 ---

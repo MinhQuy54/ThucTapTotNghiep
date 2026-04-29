@@ -56,7 +56,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         time_threshold = now() - timedelta(hours=1)
         recent_orders = Order.objects.filter(
-            create_at__gte=time_threshold,
+            created_at__gte=time_threshold,
             status=1
         )
 
