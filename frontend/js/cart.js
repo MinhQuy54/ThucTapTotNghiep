@@ -256,31 +256,59 @@ async function loadMiniCart() {
         }
     } catch (e) {}
 
+    const subtotalEl = document.getElementById("mini-cart-subtotal");
+    const weightEl = document.getElementById("mini-cart-weight");
+
     if (data.length === 0) {
-        container.innerHTML = '<li class="text-center py-3">Giỏ hàng trống</li>';
+        container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fa-solid fa-cart-shopping fs-1 mb-3" style="color: #eee;"></i><p class="m-0 small">Giỏ hàng trống</p></div>';
+        if (subtotalEl) subtotalEl.innerText = "0 đ";
+        if (weightEl) weightEl.innerText = "0 g";
         return;
     }
 
     container.innerHTML = "";
+    let subtotal = 0;
+    let totalWeight = 0;
+
     data.forEach(item => {
         const product = item.product;
         const price = parseFloat(product.price) || 0;
+        const weightGram = parseFloat(product.weightgram) || parseFloat(product.weightGram) || parseFloat(product.WeightGram) || 0;
+        const itemWeight = weightGram * parseInt(item.quantity);
+        
+        subtotal += price * item.quantity;
+        totalWeight += itemWeight;
         const img = product.images?.[0]?.image || 'img/bag-filled.png';
         
-        const li = document.createElement("li");
-        li.className = "d-flex align-items-center mb-3 p-2 border-bottom";
-        li.innerHTML = `
-            <img src="${img.startsWith('http') ? img : (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : '') + img}" style="width: 50px; height: 50px; object-fit: cover;" class="me-3">
-            <div class="flex-grow-1">
-                <h6 class="mb-0 small fw-bold">${product.name}</h6>
-                <small class="text-muted">${item.quantity} x ${price.toLocaleString('vi-VN')} đ</small>
+        const div = document.createElement("div");
+        div.className = "d-flex align-items-center mb-3 p-2 bg-white rounded shadow-sm border position-relative";
+        div.style.transition = "all 0.2s ease";
+        div.onmouseover = () => div.style.borderColor = "#84b800";
+        div.onmouseout = () => div.style.borderColor = "#dee2e6";
+        div.innerHTML = `
+            <img src="${img.startsWith('http') ? img : (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : '') + img}" style="width: 65px; height: 65px; object-fit: cover;" class="me-3 rounded border">
+            <div class="flex-grow-1 pe-4">
+                <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${product.name}</h6>
+                <div class="text-muted" style="font-size: 0.85rem;">
+                    <span class="fw-semibold text-secondary">${item.quantity}</span> 
+                    <span class="mx-1 text-muted">x</span> 
+                    <span class="fw-bold" style="color: #84b800;">${price.toLocaleString('vi-VN')} đ</span>
+                    ${weightGram > 0 ? `<span class="ms-2 badge bg-light text-secondary border">${weightGram}g/sp</span>` : ''}
+                </div>
             </div>
-            <button class="btn btn-sm text-danger remove-item-btn" data-id="${token ? item.id : (item.id || product.id)}">
-                <i class="fa-solid fa-xmark"></i>
+            <button class="btn btn-sm btn-light text-danger remove-item-btn position-absolute top-0 end-0 m-1 rounded-circle p-0 d-flex align-items-center justify-content-center" data-id="${token ? item.id : (item.id || product.id)}" style="width: 26px; height: 26px; border: 1px solid #eee;">
+                <i class="fa-solid fa-xmark" style="font-size: 13px;"></i>
             </button>
         `;
-        container.appendChild(li);
+        container.appendChild(div);
     });
+
+    if (subtotalEl) {
+        subtotalEl.innerText = subtotal.toLocaleString('vi-VN') + " đ";
+    }
+    if (weightEl) {
+        weightEl.innerText = (totalWeight >= 1000 ? (totalWeight / 1000).toFixed(1) + " kg" : totalWeight + " g");
+    }
 }
 
 async function loadAddresses() {

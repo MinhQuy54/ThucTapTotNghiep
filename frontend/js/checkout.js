@@ -1,4 +1,15 @@
 document.addEventListener("DOMContentLoaded", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const errorParam = urlParams.get('error');
+    if (errorParam) {
+        if (errorParam.startsWith('payment_failed')) {
+            const code = errorParam.split('_').pop();
+            alert(`Thanh toán thất bại (Mã lỗi Momo: ${code}). Giao dịch của bạn đã bị hủy và tồn kho đã được hoàn lại.`);
+        } else {
+            alert(`Lỗi thanh toán: ${errorParam}`);
+        }
+    }
+
     const token = localStorage.getItem("access_token");
 
     if (document.getElementById("btn-place-order")) {
