@@ -353,7 +353,7 @@
 
         try {
             const isEdit = editingId !== '';
-            const url = isEdit ? `/api/review/${editingId}` : '/api/review';
+            const url = isEdit ? `/api/review/${editingId}` : `/api/v2/reviews/${productId}/`;
             const method = isEdit ? 'PUT' : 'POST';
 
             const payload = {

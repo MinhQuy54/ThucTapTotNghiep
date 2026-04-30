@@ -264,7 +264,24 @@ class Review(models.Model):
     reply_content = models.TextField(blank=True, null=True)
     replied_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            # Lấy danh sách ID nhân viên duy nhất để tránh lặp thông báo
+            staff_ids = User.objects.filter(
+                Q(role__name='Staff') | Q(is_superuser=True) | Q(is_staff=True)
+            ).values_list('id', flat=True).distinct()
+            
+            for s_id in set(staff_ids):
+                Notification.objects.create(
+                    user_id=s_id,
+                    type='REVIEW',
+                    message=f"Có đánh giá mới từ {self.user.username} ({self.user.email})",
+                    is_read=False
+                )
+        
     def __str__(self):
         return f"{self.user.username} - {self.product.name} ({self.rating}⭐)"
 
@@ -292,7 +309,8 @@ class Notification(models.Model):
 
     def broadcast_notification(self):
         channel_layer = get_channel_layer()
-        group_name = "staff_notifications" if self.user.is_staff else f"user_notifications_{self.user.id}"
+        # Luôn gửi vào group riêng của user để tránh lặp thông báo khi có nhiều staff
+        group_name = f"user_notifications_{self.user.id}"
         
         data = {
             "id": self.id,
@@ -326,17 +344,17 @@ class Contact(models.Model):
         is_new = self.pk is None
         super().save(*args, **kwargs)
         if is_new:
-            staff_users = User.objects.filter(
-                Q(role__name='Staff') |Q(is_superuser=True) | Q(is_staff=True)
-            ).distinct()
+            # Lấy danh sách ID nhân viên duy nhất
+            staff_ids = User.objects.filter(
+                Q(role__name='Staff') | Q(is_superuser=True) | Q(is_staff=True)
+            ).values_list('id', flat=True).distinct()
 
-            for su in staff_users:
+            for s_id in set(staff_ids):
                 Notification.objects.create(
-                    user=su,
+                    user_id=s_id,
                     type='CONTACT',
                     message=f"Có liên hệ mới từ {self.full_name} ({self.email})",
                     is_read=False
-
                 )
 
     def __str__(self):

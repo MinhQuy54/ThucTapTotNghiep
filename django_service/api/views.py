@@ -500,9 +500,19 @@ class GetWardsView(GHNProxyBase):
         return response
 
 class ReviewListView(APIView):
-    permission_classes = [AllowAny]
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request, product_id):
         reviews = Review.objects.filter(product_id=product_id).order_by("-created_at")
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
+
+    def post(self, request, product_id):
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user, product_id=product_id)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

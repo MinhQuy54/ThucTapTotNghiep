@@ -401,11 +401,6 @@ class ReviewAdmin(BaseAdmin):
     @admin.display(description="Phản hồi")
     def reply_status(self, obj):
         return render_badge("Đã phản hồi" if obj.reply_content else "Chờ phản hồi", "success" if obj.reply_content else "warning")
-
-    def save_model(self, request, obj, form, change):
-        if change and "reply_content" in form.changed_data and obj.reply_content:
-            obj.replied_at = timezone.now()
-        super().save_model(request, obj, form, change)
     
 
 

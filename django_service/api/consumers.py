@@ -9,22 +9,24 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         self.user = self.scope.get('user')
         print(f"DEBUG: WebSocket connect attempt by user: {self.user}")
 
-        if self.user and self.user.is_authenticated and self.user.is_staff:
-            self.group_name = "staff_notifications"
-            print("DEBUG: User is staff, joining staff_notifications")
-        elif self.user and self.user.is_authenticated:
-            self.group_name = f"user_notifications_{self.user.id}"
-            print(f"DEBUG: User is authenticated, joining {self.group_name}")
+        if self.user and self.user.is_authenticated:
+            # Tất cả user đều gia nhập group riêng của mình
+            self.personal_group = f"user_notifications_{self.user.id}"
+            await self.channel_layer.group_add(self.personal_group, self.channel_name)
+
+            # Nếu là staff, gia nhập thêm group chung của staff (cho các thông báo hệ thống khác)
+            if self.user.is_staff:
+                self.staff_group = "staff_notifications"
+                await self.channel_layer.group_add(self.staff_group, self.channel_name)
+                print(f"DEBUG: Staff {self.user.id} joined personal and staff groups")
+            else:
+                print(f"DEBUG: User {self.user.id} joined personal group")
+            
+            await self.accept()
         else:
             print("DEBUG: User is NOT authenticated, closing connection")
             await self.close()
             return
-        
-        await self.channel_layer.group_add(
-            self.group_name,
-            self.channel_name
-        )
-        await self.accept()
 
         # Nếu là staff, bật Radar quét đơn hàng ngầm mỗi 5 giây
         if self.user.is_staff:
@@ -36,11 +38,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         if hasattr(self, 'poll_task'):
             self.poll_task.cancel()
             
-        if hasattr(self, 'group_name'):
-            await self.channel_layer.group_discard(
-                self.group_name,
-                self.channel_name
-            )
+        if hasattr(self, 'personal_group'):
+            await self.channel_layer.group_discard(self.personal_group, self.channel_name)
+        
+        if hasattr(self, 'staff_group'):
+            await self.channel_layer.group_discard(self.staff_group, self.channel_name)
 
     async def poll_for_new_orders(self):
         import asyncio

@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (content.type === "CONTACT") {
                     icon = "contact_mail";
                     iconClass = "bg-amber-100 text-amber-700";
+                } else if (content.type === "REVIEW") {
+                    icon = "rate_review";
+                    iconClass = "bg-emerald-100 text-emerald-700";
                 }
 
                 // ID của thông báo mới từ server
