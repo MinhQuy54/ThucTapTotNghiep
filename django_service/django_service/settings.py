@@ -272,6 +272,12 @@ UNFOLD = {
                     "link": reverse_lazy("admin:api_contact_changelist"),
                     "permission": lambda request: request.user.has_perm("api.view_contact"),
                 },
+                {
+                    "title": "Bình luận",
+                    "icon": "comment",
+                    "link": reverse_lazy("admin:api_review_changelist"),
+                    "permission": lambda request: request.user.has_perm("api.view_review"),
+                },
             ],
         },
 

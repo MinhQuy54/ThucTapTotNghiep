@@ -103,10 +103,7 @@ async function loadDetailOrder() {
                 tr.innerHTML = `
             <td>${item.product.name}</td>
             <td>
-                <button class="btn-review"
-                    onclick="reviewProduct(${item.product.id}, ${data.id})">
-                    Đánh giá
-                </button>
+               <a href=/product-details.html?id=${item.product.id} class="btn btn-review text-decoration-none text-dark" >Đánh giá</a>
             </td>`;
                 reviewTable.appendChild(tr);
             });

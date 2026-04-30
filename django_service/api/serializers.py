@@ -137,3 +137,13 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ["full_name", "phone_number", "email", "message"]
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    class Meta:
+        model = Review
+        fields = [
+            "id", "user", "product", "rating", "comment", 
+            "reply_content", "replied_at", "created_at"
+        ]

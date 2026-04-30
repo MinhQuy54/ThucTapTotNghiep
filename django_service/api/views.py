@@ -498,3 +498,11 @@ class GetWardsView(GHNProxyBase):
             data = response.data
             cache.set(cache_key, data, timeout=86400)
         return response
+
+class ReviewListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, product_id):
+        reviews = Review.objects.filter(product_id=product_id).order_by("-created_at")
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response(serializer.data)

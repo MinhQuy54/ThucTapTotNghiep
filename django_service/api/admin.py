@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin as UnfoldModelAdmin
 
-from .models import CancelForm, Category, Contact, EntryForm, EntryFormDetail, Order, OrderItem, Permission, Product, ProductImage, Role, RolePermission, Supplier, User, UserVoucher, Voucher, Notification
+from .models import CancelForm, Category, Contact, EntryForm, EntryFormDetail, Order, OrderItem, Permission, Product, ProductImage, Review, Role, RolePermission, Supplier, User, UserVoucher, Voucher, Notification
 
 
 BADGE_STYLES = {
@@ -251,29 +251,6 @@ def global_callback(request):
     if not request.user.is_authenticated or not request.user.is_staff:
         return {}
 
-    # --- TỰ ĐỘNG PHÁT HIỆN ĐƠN HÀNG MỚI (Dành cho trường hợp đặt từ .NET) ---
-    # Tìm các đơn hàng mới trong vòng 1 giờ qua chưa có thông báo nào cho user này
-    from django.utils import timezone
-    from datetime import timedelta
-    from .models import Order, Notification
-    
-    one_hour_ago = timezone.now() - timedelta(hours=1)
-    new_orders = Order.objects.filter(created_at__gte=one_hour_ago)
-    
-    for order in new_orders:
-        # Kiểm tra xem user này đã có thông báo cho đơn hàng này chưa
-        # (Dựa trên message chứa ID đơn hàng để định danh tạm thời)
-        msg_marker = f"#{order.id}"
-        exists = Notification.objects.filter(user=request.user, message__contains=msg_marker).exists()
-        
-        if not exists:
-            Notification.objects.create(
-                user=request.user,
-                type="ORDER",
-                message=f"Có đơn hàng mới {msg_marker} từ {order.user.email}. Vui lòng xác nhận đơn hàng",
-                is_read=False
-            )
-
     # --- LẤY DANH SÁCH THÔNG BÁO ---
     notifications = Notification.objects.filter(user=request.user).order_by("-created_at")
     unread_count = notifications.filter(is_read=False).count()
@@ -374,9 +351,9 @@ class VoucherAdmin(BaseAdmin):
     list_filter = ("start_date", "end_date")
 
 @admin.register(UserVoucher)
-class VoucherAdmin(BaseAdmin):
+class UserVoucherAdmin(BaseAdmin):
     list_display = ("user", "voucher", "used_at")
-    # search_fields = ("voucher")
+    # search_fields = ("voucher",)
 
 @admin.register(Supplier)
 class SupplierAdmin(BaseAdmin):
@@ -412,6 +389,24 @@ class CategoryAdmin(BaseAdmin):
     search_fields = ("name", "slug")
     ordering = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+
+@admin.register(Review)
+class ReviewAdmin(BaseAdmin):
+    list_display = ("user", "product", "rating", "reply_status", "created_at")
+    search_fields = ("user__username", "product__name", "comment", "reply_content")
+    list_filter = ("rating", "created_at")
+    ordering = ("-created_at",)
+    readonly_fields = ("replied_at",)
+
+    @admin.display(description="Phản hồi")
+    def reply_status(self, obj):
+        return render_badge("Đã phản hồi" if obj.reply_content else "Chờ phản hồi", "success" if obj.reply_content else "warning")
+
+    def save_model(self, request, obj, form, change):
+        if change and "reply_content" in form.changed_data and obj.reply_content:
+            obj.replied_at = timezone.now()
+        super().save_model(request, obj, form, change)
+    
 
 
 @admin.register(Product)

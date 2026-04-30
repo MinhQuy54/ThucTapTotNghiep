@@ -42,12 +42,16 @@
         if (!reviewList) return;
 
         try {
-            const res = await fetch(`/api/review/${productId}`);
-            const data = await res.json();
+            const res = await fetch(`/api/v2/reviews/${productId}/`);
+            const reviews = await res.json();
 
-            renderSummary(data.avgRating || 0, data.total || 0);
+            // Tính toán summary từ dữ liệu Django
+            const total = reviews.length;
+            const avgRating = total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
 
-            allReviews = data.data || [];
+            renderSummary(avgRating, total);
+
+            allReviews = reviews || [];
             updateFilterCounts(allReviews);
 
             const filterContainer = document.getElementById('review-filters');
@@ -70,7 +74,7 @@
     function updateFilterCounts(reviews) {
         let counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
         reviews.forEach(r => counts[r.rating] = (counts[r.rating] || 0) + 1);
-        for(let i=1; i<=5; i++) {
+        for (let i = 1; i <= 5; i++) {
             const el = document.getElementById(`count-${i}`);
             if (el) el.textContent = counts[i];
         }
@@ -104,7 +108,7 @@
                 ? (r.user.avatar.startsWith('/media') ? r.user.avatar : `/media/${r.user.avatar}`)
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user?.username || 'U')}&background=78a206&color=fff&size=40`;
             const isOwner = currentUserId && String(r.user?.id) === String(currentUserId);
-            
+
             const escapedComment = escapeHtml(r.comment).replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
             return `
@@ -125,6 +129,16 @@
                         </div>
                     </div>
                     <p class="mb-0 mt-2 text-dark" style="line-height:1.6;">${escapeHtml(r.comment)}</p>
+                    
+                    ${r.reply_content ? `
+                    <div class="staff-reply mt-3 p-3 bg-light rounded-3 border-start border-primary border-4">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-primary">Phản hồi từ Nhân Viên</span>
+                            <span class="text-muted small">${new Date(r.replied_at).toLocaleDateString('vi-VN')}</span>
+                        </div>
+                        <p class="mb-0 text-dark small" style="font-style: italic;">${escapeHtml(r.reply_content)}</p>
+                    </div>
+                    ` : ''}
                 </div>`;
         }).join('');
     }
@@ -169,7 +183,7 @@
             star.addEventListener('click', () => {
                 const val = star.dataset.val;
                 document.getElementById('selected-rating').value = val;
-                
+
                 stars.forEach(s => {
                     const sv = parseInt(s.dataset.val);
                     s.className = sv <= val
@@ -184,7 +198,7 @@
         if (btnSubmit) {
             btnSubmit.addEventListener('click', submitReview);
         }
-        
+
         const btnCancel = document.getElementById('btn-cancel-edit');
         if (btnCancel) {
             btnCancel.addEventListener('click', cancelEdit);
@@ -207,12 +221,12 @@
         });
     }
 
-    window.editReview = function(reviewId, rating, comment) {
+    window.editReview = function (reviewId, rating, comment) {
         // Remove line breaks if stored as <br> (already handled by escapeHtml reversal if needed)
         // But comment here is passed directly. Replace escaped newlines back.
         document.getElementById('editing-review-id').value = reviewId;
         document.getElementById('review-form-title').textContent = 'Sửa đánh giá của bạn';
-        
+
         // Cập nhật rating
         document.getElementById('selected-rating').value = rating;
         const stars = document.querySelectorAll('.star-pick');
@@ -242,7 +256,7 @@
         const stars = document.querySelectorAll('.star-pick');
         stars.forEach(s => s.className = 'fa-regular fa-star star-pick text-warning');
         document.getElementById('review-comment').value = '';
-        
+
         document.getElementById('btn-submit-review').innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i>Gửi đánh giá';
         document.getElementById('btn-cancel-edit').style.display = 'none';
         document.getElementById('review-form-msg').innerHTML = '';
@@ -265,14 +279,14 @@
                 for (const order of validOrders) {
                     try {
                         const detailRes = await fetchWithAuth(`/api/order/detail/${order.id}/`);
-                        
+
                         if (!detailRes.ok) {
                             continue;
                         }
-                        
+
                         const orderDetail = await detailRes.json();
                         const itemsArray = orderDetail.order_items || orderDetail.items || orderDetail.orderItems;
-                        
+
                         if (!itemsArray) {
                             continue;
                         }
@@ -291,11 +305,11 @@
                     }
                 }
             }
-            
+
             // Xử lý hiển thị Form
             const formContainer = document.getElementById('review-form-container');
             const notPurchasedMsg = document.getElementById('review-not-purchased');
-            
+
             if (!hasPurchased) {
                 if (formContainer) formContainer.style.display = 'none';
                 if (notPurchasedMsg) {
@@ -341,11 +355,11 @@
             const isEdit = editingId !== '';
             const url = isEdit ? `/api/review/${editingId}` : '/api/review';
             const method = isEdit ? 'PUT' : 'POST';
-            
-            const payload = { 
-                productId: parseInt(productId), 
-                rating, 
-                comment 
+
+            const payload = {
+                productId: parseInt(productId),
+                rating,
+                comment
             };
 
             const res = await fetchWithAuth(url, {

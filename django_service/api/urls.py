@@ -20,4 +20,5 @@ urlpatterns = [
     path('ghn/provinces/', GetProvincesView.as_view()),
     path('ghn/districts/', GetDistrictsView.as_view()),
     path('ghn/wards/', GetWardsView.as_view()),
+    path('v2/reviews/<int:product_id>/', ReviewListView.as_view()),
 ]
