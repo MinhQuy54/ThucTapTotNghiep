@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
+    if (!document.getElementById("notification-bell-icon")) {
+        return;
+    }
+
     const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
     const wsUrl = protocol + window.location.host + "/ws/notifications/";
 

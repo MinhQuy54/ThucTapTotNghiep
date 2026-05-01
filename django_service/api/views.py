@@ -516,3 +516,24 @@ class ReviewListView(APIView):
             serializer.save(user=request.user, product_id=product_id)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class NotificationList(APIView):
+    permission_classes=[IsAuthenticated]
+    def get(self, request):
+        notfication = Notification.objects.filter(user=request.user)
+        serializer = NotificationSerializer(notfication, many=True)
+        return Response(serializer.data, status=200)
+
+class NotificationDetail(APIView):
+    permission_classes = [IsAuthenticated]
+    def get_obj(self, request, pk):
+        try:
+            return Notification.objects.get(pk=pk, user=request.user)
+        except Notification.DoesNotExist:
+            raise Http404()
+    
+    def delete(self, request, pk):
+        notification = self.get_obj(request, pk=pk)
+        notification.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -21,4 +21,6 @@ urlpatterns = [
     path('ghn/districts/', GetDistrictsView.as_view()),
     path('ghn/wards/', GetWardsView.as_view()),
     path('v2/reviews/<int:product_id>/', ReviewListView.as_view()),
+    path('notification/', NotificationList.as_view()),
+    path('notification/<int:pk>/', NotificationDetail.as_view())
 ]
