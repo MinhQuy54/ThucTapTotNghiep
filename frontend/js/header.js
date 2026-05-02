@@ -257,7 +257,13 @@ function initNotifications() {
     }
 }
 
+
 async function fetchNotifications() {
+    if (typeof fetchWithAuth !== "function") {
+        console.warn("fetchWithAuth chưa được load, bỏ qua tải thông báo.");
+        return;
+    }
+
     try {
         const res = await fetchWithAuth('/api/notification/');
         if (!res.ok) throw new Error("Lấy thông báo thất bại");
@@ -287,7 +293,7 @@ function renderNotifications(notifications) {
     notifications.forEach(n => {
         const icon = n.type.toLowerCase().includes('order') ? 'local_shipping' : (n.type.toLowerCase().includes('review') ? 'chat_bubble' : 'notifications');
         const typeClass = n.type.toLowerCase().includes('order') ? 'order' : (n.type.toLowerCase().includes('review') ? 'review' : 'promo');
-        
+
         html += `
             <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" onclick="handleNotificationClick(${n.id}, ${n.is_read})">
                 <div class="notification-icon-wrapper ${typeClass}">
@@ -341,7 +347,10 @@ async function markAsRead(id) {
 
 async function deleteNotification(event, id) {
     event.stopPropagation();
-    if (!confirm("Bạn có chắc chắn muốn xóa thông báo này?")) return;
+    closeNotificationDropdown();
+
+    const confirmed = await confirmDeleteNotification();
+    if (!confirmed) return;
 
     try {
         const res = await fetchWithAuth(`/api/notification/${id}/`, {
@@ -355,6 +364,31 @@ async function deleteNotification(event, id) {
     }
 }
 
+function closeNotificationDropdown() {
+    const dropdown = document.getElementById("notification-dropdown");
+    if (dropdown) {
+        dropdown.classList.remove("active");
+    }
+}
+
+function confirmDeleteNotification() {
+    if (typeof antd !== "undefined" && antd.Modal && typeof antd.Modal.confirm === "function") {
+        return new Promise((resolve) => {
+            antd.Modal.confirm({
+                title: "Xóa thông báo?",
+                content: "Thông báo này sẽ bị xóa khỏi danh sách của bạn.",
+                okText: "Xóa",
+                cancelText: "Hủy",
+                okButtonProps: { danger: true },
+                onOk: () => resolve(true),
+                onCancel: () => resolve(false)
+            });
+        });
+    }
+
+    return Promise.resolve(window.confirm("Bạn có chắc chắn muốn xóa thông báo này?"));
+}
+// Open WebSocket
 function setupNotificationWebSocket(accessToken) {
     if (!accessToken) return;
 
@@ -375,11 +409,10 @@ function setupNotificationWebSocket(accessToken) {
 
     const socket = new WebSocket(`${wsUrl}?token=${encodeURIComponent(accessToken)}`);
     notificationSocket = socket;
-
-    socket.onmessage = function(e) {
+    socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         console.log("Real-time notification:", data);
-        
+
         // Show browser notification or update UI
         if (typeof antd !== 'undefined') {
             antd.notification.info({
@@ -388,16 +421,16 @@ function setupNotificationWebSocket(accessToken) {
                 placement: 'topRight'
             });
         }
-        
+
         // Refresh the list
         fetchNotifications();
     };
 
-    socket.onerror = function(error) {
+    socket.onerror = function (error) {
         console.error("Notification socket error:", error);
     };
 
-    socket.onclose = function(e) {
+    socket.onclose = function (e) {
         if (notificationSocket === socket) {
             notificationSocket = null;
         }
@@ -405,8 +438,19 @@ function setupNotificationWebSocket(accessToken) {
         if (!localStorage.getItem("access_token")) return;
 
         console.warn(`Notification socket closed (${e.code}${e.reason ? `: ${e.reason}` : ""}). Reconnecting in 5s...`);
-        notificationReconnectTimer = setTimeout(() => {
-            setupNotificationWebSocket(localStorage.getItem("access_token"));
+        notificationReconnectTimer = setTimeout(async () => {
+            let accessToken = localStorage.getItem("access_token");
+
+            if (typeof refreshAccessToken === "function") {
+                try {
+                    accessToken = await refreshAccessToken();
+                } catch (error) {
+                    console.error("Không thể refresh token cho WebSocket:", error);
+                    return;
+                }
+            }
+
+            setupNotificationWebSocket(accessToken);
         }, 5000);
     };
 }
